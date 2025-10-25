@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Cliente - Acompanhamento de Propostas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="/imagens/icones/iconecabc.png">
+  <style>
+    /* =========================================================
+       SafeViana • Dashboard Styles (sv-dashboard-css-20250922)
+       – Mantém a aparência padrão da Sidebar, Topbar e componentes
+       ========================================================= */
+
+    /* ===== Tokens / Design System ===== */
+    :root{
+      --sv-green:#2e7d32;
+      --sv-green-dark:#1e6028;
+      --sv-accent:#10b981;
+      --sv-border:#e5e7eb;
+      --sv-light:#f9fafb;
+      --sv-text:#111827;
+      --sv-shadow:0 10px 30px rgba(0,0,0,.08);
+      --sv-gradient:linear-gradient(135deg,#2e7d32 0%,#10b981 100%);
+    }
+
+    *{ box-sizing:border-box }
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;
+      background:var(--sv-light);
+      color:var(--sv-text);
+    }
+
+    /* ===== LAYOUT (sidebar/topbar) ===== */
+    .container{ display:flex; min-height:100vh }
+
+    .sidebar{
+      width:200px;
+      background:#fff;
+      border-right:1px solid var(--sv-border);
+      padding:20px 10px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:fixed; inset:0 auto 0 0;
+      z-index:1000; box-shadow:var(--sv-shadow);
+      transition:width .3s;
+    }
+    .sidebar.collapsed{ width:60px; padding:20px 6px }
+
+    .logo{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; color:#111827; margin-bottom:18px;
+      white-space:nowrap; width:100%;
+    }
+    .logo i{
+      font-size:1.35rem; color:var(--sv-green);
+      display:grid; place-items:center; width:40px; height:40px;
+      border-radius:12px; background:#f3f7f4; margin:0;
+    }
+    .sidebar.collapsed .logo{ justify-content:center; gap:0; padding-inline:0 }
+    .sidebar.collapsed .logo span{ display:none }
+    .sidebar.collapsed .logo i{ margin-inline:auto }
+
+    .sidebar nav ul{ list-style:none; margin:0; padding:0 }
+    .sidebar nav li{ margin:10px 0 }
+    .sidebar nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px;
+      text-decoration:none; color:#374151; font-weight:600; transition:.2s;
+    }
+    .sidebar nav a i{ width:20px; text-align:center }
+    .sidebar nav a:hover{ background:var(--sv-green); color:#fff }
+    .sidebar nav a.active{
+      background:linear-gradient(135deg,#2e7d32 0%,#2e7d32 60%,#10b981 100%);
+      color:#fff; box-shadow:0 6px 16px rgba(46,125,50,.25);
+    }
+    .sidebar.collapsed nav a{ justify-content:center }
+    .sidebar.collapsed nav a span{ display:none }
+
+    .admin-title{ font-size:.78rem; color:#6b7280; margin:10px 8px }
+    .sidebar.collapsed .admin-title{ display:none }
+
+    .bottom-section ul{ list-style:none; margin:6px 0 0; padding:0 }
+    .bottom-section li{
+      display:flex; align-items:center; gap:8px;
+      padding:8px; border-radius:10px; cursor:pointer;
+    }
+    .bottom-section li:hover{ background:var(--sv-green); color:#fff }
+    .logout-btn{
+      width:100%; margin-top:8px; padding:10px; border:0; border-radius:12px; cursor:pointer;
+      background:var(--sv-gradient); color:#fff; font-weight:700;
+      box-shadow:0 8px 20px rgba(16,185,129,.35);
+    }
+    .sidebar.collapsed .bottom-section li span,
+    .sidebar.collapsed .logout-btn span{ display:none }
+
+    .main{ flex:1; display:flex; flex-direction:column; margin-left:200px }
+
+    .topbar{
+      position:fixed; left:200px; right:0; top:0; z-index:900;
+      background:#fff; border-bottom:1px solid var(--sv-border);
+      padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:var(--sv-shadow);
+    }
+    .hamburger{ border:0; background:transparent; font-size:1.4rem; cursor:pointer; margin-right:8px }
+    .topbar h2{ font-size:1.25rem; margin:0 }
+    .topbar h2 span{ color:var(--sv-green) }
+    .topbar input{
+      padding:8px 12px; border:1px solid var(--sv-border); border-radius:10px; width:230px;
+    }
+
+    .user-info{ display:flex; align-items:center; gap:8px; font-weight:600 }
+    .profile-avatar{
+      width:36px; height:36px; border-radius:50%; overflow:hidden;
+      border:2px solid var(--sv-green); display:flex; align-items:center; justify-content:center; background:#fff;
+    }
+    .profile-avatar img{ width:100%; height:100%; object-fit:cover; display:block }
+    .profile-avatar .initials{
+      text-transform:uppercase; color:var(--sv-green); font-weight:800; font-size:.9rem; letter-spacing:.5px;
+    }
+
+    .content{ padding:22px; margin-top:72px }
+
+    /* ===== HERO ===== */
+    .hero{
+      position:relative; overflow:hidden; border-radius:16px; padding:22px;
+      background:var(--sv-gradient); color:#fff; box-shadow:var(--sv-shadow);
+    }
+    .hero h1{ margin:0 0 6px; font-size:clamp(1.1rem,1.6vw,1.4rem) }
+    .hero p{ margin:0; opacity:.95 }
+    .hero .badges{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap }
+    .chip{
+      background:rgba(255,255,255,.14); backdrop-filter:blur(6px);
+      padding:6px 10px; border-radius:999px; font-size:.8rem; border:1px solid rgba(255,255,255,.25);
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title{
+      font-size:1.05rem; margin:18px 0 10px; display:flex; align-items:center; gap:8px; color:#222;
+    }
+    .section-title i{
+      color:#fff; background:var(--sv-green); width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+    }
+
+    /* ===== PROPOSTAS SECTION ===== */
+    .propostas-section {
+      background: #fff;
+      border: 1px solid var(--sv-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--sv-shadow);
+    }
+
+    .propostas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .propostas-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--sv-light);
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(46,125,50,0.15);
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--sv-green);
+      margin: 5px 0;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .filters-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-input {
+      padding: 10px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-select {
+      padding: 10px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: #fff;
+      min-width: 150px;
+    }
+
+    .propostas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .proposta-card {
+      background: #fff;
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .proposta-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(46,125,50,0.15);
+    }
+
+    .proposta-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--sv-gradient);
+    }
+
+    .proposta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .proposta-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--sv-text);
+      margin: 0;
+    }
+
+    .proposta-number {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+
+    .proposta-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-pendente {
+      background: rgba(245,158,11,0.1);
+      color: #f59e0b;
+    }
+
+    .status-analise {
+      background: rgba(59,130,246,0.1);
+      color: #3b82f6;
+    }
+
+    .status-aprovada {
+      background: rgba(46,125,50,0.1);
+      color: var(--sv-green);
+    }
+
+    .status-rejeitada {
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+    }
+
+    .status-aguardando {
+      background: rgba(156,163,175,0.1);
+      color: #6b7280;
+    }
+
+    .proposta-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--sv-text);
+    }
+
+    .proposta-progress {
+      margin-bottom: 15px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--sv-gradient);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .proposta-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--sv-text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-decoration: none;
+    }
+
+    .action-btn.primary {
+      background: var(--sv-green);
+      color: #fff;
+      border-color: var(--sv-green);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .action-btn.primary:hover {
+      background: var(--sv-green-dark);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      color: #d1d5db;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    /* ===== MODAL ===== */
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(17,24,39,.55); z-index:1200; padding:18px;
+    }
+    .modal.open{ display:flex }
+
+    .modal-card{
+      width:min(720px, 96vw);
+      background:#fff; border-radius:16px; border:1px solid var(--sv-border);
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+      max-height:90vh;
+    }
+
+    .modal-header{
+      padding:14px 16px; background:var(--sv-gradient); color:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      position:sticky; top:0; z-index:1;
+    }
+    .modal-body{ padding:16px; overflow:auto }
+    .grid2{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px }
+    .modal-body label{ font-weight:700; font-size:.9rem }
+    .modal-body input,.modal-body select{
+      width:100%; padding:10px; border:1px solid var(--sv-border); border-radius:10px; font-size:.95rem;
+    }
+    .modal-footer{
+      padding:14px 16px; display:flex; gap:10px; justify-content:flex-end;
+      border-top:1px solid var(--sv-border); background:#fafafa;
+      position:sticky; bottom:0; z-index:1;
+    }
+    .btn{ border:0; border-radius:12px; padding:10px 14px; font-weight:800; cursor:pointer }
+    .btn.primary{ background:var(--sv-gradient); color:#fff }
+    .btn.secondary{ background:#f3f4f6; color:#111827; border:1px solid var(--sv-border) }
+    .btn.link{ background:transparent; color:var(--sv-green); padding:8px }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px){
+      .main{ margin-left:60px }
+      .topbar{ left:60px }
+    }
+    @media (max-width: 640px){
+      .topbar input{ display:none }
+      .grid2{ grid-template-columns:1fr }
+      .modal-card{ max-height:92vh }
+      .propostas-grid{ grid-template-columns:1fr }
+      .propostas-stats{ flex-direction:column }
+      .filters-section{ flex-direction:column }
+      .filter-input, .filter-select{ min-width:100% }
+    }
+
+    /* Link com classe .btn não deve sublinhar */
+a.btn,
+a.btn:visited,
+a.btn:hover,
+a.btn:focus,
+a.btn:active {
+  text-decoration: none !important;
+  border-bottom: 0 !important; /* se houver regra global usando borda */
+  outline: none;
+}
+
+/* Deixa o link com "cara" de botão */
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/* ===== Modal de Detalhes da Proposta ===== */
+.modal-proposta {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  padding: 24px 32px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  position: relative;
+  animation: fadeIn .25s ease;
+}
+
+.close-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 28px;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.close-btn:hover { color: #2e7d32; }
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px 18px;
+  margin-top: 15px;
+}
+
+.modal-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.modal-item strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+  /* Hover claro só para o item Suporte */
+  .bottom-section li.support-item:hover {
+    background: #f3f4f6 !important;   /* cinza/branco */
+    color: var(--sv-green) !important; /* texto/ícone verdes */
+  }
+  .bottom-section li.support-item:hover .support-link { 
+    color: var(--sv-green) !important; 
+  }
+  .bottom-section li.support-item:hover .support-link i {
+    color: var(--sv-green) !important;
+  }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="logo">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Área do Cliente</span>
+      </div>
+
+      <nav>
+  <ul>
+    <li>
+      <a href="{{ url_for('area_cliente') }}" class="{% if ACTIVE_MENU == 'dashboard' %}active{% endif %}">
+        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('dadosclientes') }}" class="{% if ACTIVE_MENU == 'meus_dados' %}active{% endif %}">
+        <i class="fa-solid fa-user"></i> <span>Meus Dados</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cotacoes_clientes') }}" class="{% if ACTIVE_MENU == 'cotacoes' %}active{% endif %}">
+        <i class="fa-solid fa-file-signature"></i> <span>Solicitar Cotações</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('acompanhamento_ap_cliente') }}" class="{% if ACTIVE_MENU == 'apolices' %}active{% endif %}">
+        <i class="fa-solid fa-file-contract"></i> <span>Minhas Apólices</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cliente_propostas_html') }}" class="{% if ACTIVE_MENU == 'propostas' %}active{% endif %}">
+        <i class="fa-solid fa-clipboard-list"></i> <span>Minhas Propostas</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('sinistros_segurado') }}" class="{% if ACTIVE_MENU == 'sinistros' %}active{% endif %}">
+        <i class="fa-solid fa-car-crash"></i> <span>Meus Sinistros</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+    </div>
+    <div class="bottom-section">
+      <p class="admin-title"><span>ADMINISTRAÇÃO</span></p>
+      <ul>
+  <li class="support-item">
+    <a class="support-link"
+       href="https://wa.me/5518988076390?text=Ol%C3%A1!%20Preciso%20de%20suporte."
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;width:100%;
+              padding:8px;border-radius:8px;">
+      <i class="fa-solid fa-circle-question"></i>
+      <span>Suporte</span>
+    </a>
+  </li>
+</ul>
+
+      <button class="logout-btn" onclick="window.location.href='{{ url_for('home') }}'">
+  <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
+</button>
+
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+      </div>
+      <input type="text" placeholder="Buscar apólices...">
+
+      <div class="user-info">
+  <div class="profile-avatar">
+  {% if foto_url %}
+    <img src="{{ foto_url }}" alt="{{ user.nome }}">
+  {% else %}
+    <span class="initials">{{ iniciais }}</span>
+  {% endif %}
+</div>
+<span>{{ user.nome }}</span>
+
+</div>
+
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <div class="content">
+      <!-- Seção de Boas-Vindas -->
+      <div class="hero">
+  <h1>Acompanhamento de Propostas</h1>
+  <p>Acompanhe o status de todas as suas propostas de seguro em um só lugar.</p>
+  <div class="badges">
+    <span class="chip">{{ andamento }} Propostas em Andamento</span>
+    <span class="chip">{{ aguardando }} Aguardando Documentação</span>
+    <span class="chip">R$ {{ "%.2f"|format(kpis.valor_total) }} em Valores Propostos</span>
+  </div>
+</div>
+
+
+      <!-- Seção de Estatísticas -->
+      <div class="propostas-section">
+        <div class="propostas-header">
+          <h2 class="section-title"><i class="fa-solid fa-clipboard-list"></i> Minhas Propostas</h2>
+          
+        </div>
+
+        <div class="propostas-stats">
+  <div class="stat-card">
+    <i class="fa-solid fa-clipboard-list" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+    <div class="stat-value">{{ kpis.total }}</div>
+    <div class="stat-label">Total de Propostas</div>
+  </div>
+  <div class="stat-card">
+    <i class="fa-solid fa-hourglass-half" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+    <div class="stat-value">{{ kpis.analise }}</div>
+    <div class="stat-label">Em Análise</div>
+  </div>
+  <div class="stat-card">
+    <i class="fa-solid fa-check-circle" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+    <div class="stat-value">{{ kpis.aprovadas }}</div>
+    <div class="stat-label">Aprovadas</div>
+  </div>
+  <div class="stat-card">
+    <i class="fa-solid fa-file-signature" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+    <div class="stat-value">{{ kpis.taxa }}</div>
+    <div class="stat-label">Taxa de Aprovação</div>
+  </div>
+</div>
+
+
+
+        <!-- Filtros -->
+        <div class="filters-section">
+          <input type="text" class="filter-input" placeholder="Buscar por proposta, tipo ou seguradora...">
+          <select class="filter-select" id="statusFilter">
+            <option value="">Todos os Status</option>
+            <option value="pendente">Pendente</option>
+            <option value="analise">Em Análise</option>
+            <option value="aprovada">Aprovada</option>
+            <option value="rejeitada">Rejeitada</option>
+            <option value="aguardando">Aguardando Documentação</option>
+          </select>
+          <select class="filter-select" id="typeFilter">
+            <option value="">Todos os Tipos</option>
+            <option value="auto">Auto</option>
+            <option value="residencial">Residencial</option>
+            <option value="vida">Vida</option>
+            <option value="empresarial">Empresarial</option>
+          </select>
+          <button class="btn secondary"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        </div>
+
+        <!-- Grid de Propostas -->
+       <div class="propostas-grid">
+  {% if propostas %}
+  {% for p in propostas %}
+      <div class="proposta-card" data-status="{{ p.status|lower }}" data-type="{{ p.tipo|lower }}">
+        <div class="proposta-header">
+          <div>
+            <h3 class="proposta-title">{{ p.tipo }}</h3>
+            <div class="proposta-number">{{ p.numero_proposta }}</div>
+          </div>
+          <span class="proposta-status status-{{ p.status|lower|replace(' ', '-') }}">
+            {{ p.status }}
+          </span>
+        </div>
+
+        <div class="proposta-details">
+          <div class="detail-item">
+            <span class="detail-label">Data de Solicitação</span>
+            <span class="detail-value">{{ p.criado_em|datebr }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Valor Proposto</span>
+            <span class="detail-value">{{ p.valor_total|brl }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Seguradora</span>
+            <span class="detail-value">{{ p.seguradora }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prazo Estimado</span>
+            <span class="detail-value">
+              {% if p.prazo_estimado %}{{ p.prazo_estimado }} dias úteis{% else %}-{% endif %}
+            </span>
+          </div>
+        </div>
+
+        <div class="proposta-progress">
+          <div class="progress-label">
+            <span>Progresso da Análise</span>
+            <span>{{ p.probabilidade or 0 }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ p.probabilidade or 0 }}%"></div>
+          </div>
+        </div>
+
+        <div class="proposta-actions">
+          <a href="#" class="action-btn primary btn-detalhes" data-ps-id="{{ p.id }}">
+  <i class="fa-solid fa-eye"></i> Detalhes
+</a>
+
+          <a href="#"
+   class="action-btn btn-pdf-card"
+   onclick="baixarProposta('{{ p.id }}')">
+   <i class="fa-solid fa-file-pdf"></i> PDF
+</a>
+
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="fa-solid fa-file-circle-exclamation"></i>
+      <h3>Nenhuma proposta encontrada</h3>
+      <p>Não existem propostas registradas para o seu CPF.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Modal de Detalhes da Proposta (simplificado para o cliente) -->
+<div id="modalDetalhesProposta" class="modal-proposta">
+  <div class="modal-content">
+    <span class="close-btn" id="fecharModal">&times;</span>
+    <h2>Detalhes da Proposta</h2>
+
+    <div class="modal-grid">
+      <div class="modal-item"><strong>Número da Proposta:</strong> <span id="det-numero"></span></div>
+      <div class="modal-item"><strong>Tipo de Seguro:</strong> <span id="det-tipo"></span></div>
+      <div class="modal-item"><strong>Seguradora:</strong> <span id="det-seguradora"></span></div>
+      <div class="modal-item"><strong>Valor Proposto:</strong> <span id="det-valor"></span></div>
+      <div class="modal-item"><strong>Status:</strong> <span id="det-status"></span></div>
+      <div class="modal-item"><strong>Prazo Estimado:</strong> <span id="det-prazo"></span></div>
+      <div class="modal-item"><strong>Probabilidade de Aprovação:</strong> <span id="det-probabilidade"></span></div>
+      <div class="modal-item"><strong>Validade da Proposta:</strong> <span id="det-validade"></span></div>
+    </div>
+
+    <a id="btnGerarPdfModal"
+   class="action-btn"
+   href="#"
+   onclick="baixarProposta(selectedPsId)">
+   <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+</a>
+
+
+  </div>
+</div>
+
+        <!-- Estado vazio (para demonstração) -->
+        <!-- <div class="empty-state">
+          <i class="fa-solid fa-file-circle-exclamation"></i>
+          <h3>Nenhuma proposta encontrada</h3>
+          <p>Você ainda não possui propostas ou os filtros aplicados não retornaram resultados.</p>
+          <button class="btn primary" style="margin-top: 15px;"><i class="fa-solid fa-plus"></i> Nova Proposta</button>
+        </div> -->
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Toggle sidebar
+  const toggleBtn = document.getElementById('toggleSidebar');
+  const sidebar = document.querySelector('.sidebar');
+  const main = document.querySelector('.main');
+  const topbar = document.querySelector('.topbar');
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    if (sidebar.classList.contains('collapsed')) {
+      main.style.marginLeft = '60px';
+      topbar.style.left = '60px';
+    } else {
+      main.style.marginLeft = '200px';
+      topbar.style.left = '200px';
+    }
+  });
+
+  // Filtro de propostas
+  const statusFilter = document.getElementById('statusFilter');
+  const typeFilter = document.getElementById('typeFilter');
+  const propostaCards = document.querySelectorAll('.proposta-card');
+
+  function filterPropostas() {
+    const statusValue = statusFilter.value;
+    const typeValue = typeFilter.value;
+
+    propostaCards.forEach(card => {
+      const cardStatus = card.getAttribute('data-status');
+      const cardType = card.getAttribute('data-type');
+
+      const statusMatch = !statusValue || cardStatus === statusValue;
+      const typeMatch = !typeValue || cardType === typeValue;
+
+      if (statusMatch && typeMatch) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  statusFilter.addEventListener('change', filterPropostas);
+  typeFilter.addEventListener('change', filterPropostas);
+
+  // Busca por texto
+  const searchInput = document.querySelector('.filter-input');
+  
+  searchInput.addEventListener('input', function() {
+    const searchText = this.value.toLowerCase();
+    
+    propostaCards.forEach(card => {
+      const title = card.querySelector('.proposta-title').textContent.toLowerCase();
+      const number = card.querySelector('.proposta-number').textContent.toLowerCase();
+      
+      if (title.includes(searchText) || number.includes(searchText)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+<script>
+  // Abrir modal com informações reais da proposta
+  document.querySelectorAll('.action-btn.primary').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const card = btn.closest('.proposta-card');
+      const numero = card.querySelector('.proposta-number')?.textContent.trim();
+
+      // Busca no array JSON de propostas (renderizado no template)
+      const proposta = {{ propostas|tojson }}.find(p => p.numero_proposta === numero);
+
+      if (!proposta) {
+        alert("Erro ao carregar detalhes da proposta.");
+        return;
+      }
+
+      // Preenche o modal com os dados principais
+      document.getElementById('det-numero').textContent = proposta.numero_proposta || '-';
+      document.getElementById('det-tipo').textContent = proposta.tipo || '-';
+      document.getElementById('det-seguradora').textContent = proposta.seguradora || '-';
+      document.getElementById('det-valor').textContent = proposta.valor_total ? `R$ ${parseFloat(proposta.valor_total).toFixed(2)}` : '-';
+      document.getElementById('det-status').textContent = proposta.status || '-';
+      document.getElementById('det-prazo').textContent = proposta.prazo_estimado ? `${proposta.prazo_estimado} dias úteis` : '-';
+      document.getElementById('det-probabilidade').textContent = proposta.probabilidade ? `${proposta.probabilidade}%` : '-';
+      document.getElementById('det-validade').textContent = formatarData(proposta.validade);
+
+      // Exibe o modal
+      document.getElementById('modalDetalhesProposta').style.display = 'flex';
+    });
+  });
+
+  // Fechar o modal
+  document.getElementById('fecharModal').addEventListener('click', () => {
+    document.getElementById('modalDetalhesProposta').style.display = 'none';
+  });
+
+  // Fechar clicando fora
+  window.addEventListener('click', (e) => {
+    const modal = document.getElementById('modalDetalhesProposta');
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  // Função para formatar datas (PT-BR)
+  function formatarData(data) {
+    if (!data) return '-';
+    const d = new Date(data);
+    return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  }
+</script>
+
+<script>
+
+  let selectedPsId = null;
+
+  // Abre modal “Detalhes” com dados da proposta e prepara o link de PDF do modal
+  document.querySelectorAll('.btn-detalhes').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const card   = btn.closest('.proposta-card');
+      const numero = (card.querySelector('.proposta-number')?.textContent || '').trim();
+      const psId   = btn.dataset.psId;
+      selectedPsId = psId;
+
+      const propostasData = {{ propostas|tojson }};
+      const p = propostasData.find(x => String(x.numero_proposta) === numero);
+      if (!p) { alert('Erro ao carregar detalhes.'); return; }
+
+      // Preenche campos (você já tinha essa lógica; mantive resumida)
+      document.getElementById('det-numero').textContent       = p.numero_proposta || '-';
+      document.getElementById('det-tipo').textContent         = p.tipo || '-';
+      document.getElementById('det-seguradora').textContent   = p.seguradora || '-';
+      document.getElementById('det-valor').textContent        = p.valor_total ? `R$ ${parseFloat(p.valor_total).toFixed(2)}` : '-';
+      document.getElementById('det-status').textContent       = p.status || '-';
+      document.getElementById('det-prazo').textContent        = p.prazo_estimado ? `${p.prazo_estimado} dias úteis` : '-';
+      document.getElementById('det-probabilidade').textContent= p.probabilidade ? `${p.probabilidade}%` : '-';
+      document.getElementById('det-validade').textContent     = formatarData(p.validade);
+
+      // Configura link “Gerar PDF” do modal
+      const aPdf = document.getElementById('btnGerarPdfModal');
+      if (aPdf) {
+        aPdf.href = `${PDF_ROUTE_BASE}?ps_id=${encodeURIComponent(selectedPsId)}`;
+      }
+
+      document.getElementById('modalDetalhesProposta').style.display = 'flex';
+    });
+  });
+
+  // Botão “PDF” no card: abre direto a rota usando o data-ps-id
+  document.querySelectorAll('.btn-pdf-card').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const psId = a.dataset.psId;
+      if (!psId) return;
+      window.open(`${PDF_ROUTE_BASE}?ps_id=${encodeURIComponent(psId)}`, '_blank');
+    });
+  });
+
+  // Utilitário de data (mantém sua função existente se já tiver)
+  function formatarData(data) {
+    if (!data) return '-';
+    const d = new Date(data);
+    return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  }
+</script>
+
+
+<script>
+function baixarProposta(id, event) {
+  if (event) event.preventDefault(); // impede o redirecionamento do <a>
+
+  fetch(`/cliente/proposta/pdf?ps_id=${id}`)
+    .then(async res => {
+      const contentType = res.headers.get("Content-Type") || "";
+
+      // Se for JSON → erro retornado pelo Flask
+      if (contentType.includes("application/json")) {
+        const data = await res.json();
+        alert("❌ " + (data.message || "Nenhum arquivo disponível para esta proposta."));
+        return;
+      }
+
+      // Se sucesso (arquivo encontrado)
+      if (res.ok) {
+        return res.blob().then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          const filename = res.headers.get("Content-Disposition")
+            ?.split("filename=")[1]?.replace(/['"]/g, "") || "proposta.pdf";
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          alert("✅ PDF baixado com sucesso!");
+        });
+      }
+
+      // Se não houver PDF
+      alert("❌ Nenhum arquivo disponível para esta proposta.");
+    })
+    .catch(err => {
+      console.error("Erro:", err);
+      alert("❌ Erro de conexão ao baixar a proposta.");
+    });
+}
+</script>
+
+
+
+</body>
+</html>

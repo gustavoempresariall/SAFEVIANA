@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redefinir senha | SafeViana</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;font-family:'Poppins',sans-serif}
+    .box{width:100%;max-width:448px;background:#fff;border-radius:16px;padding:28px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+    .btn{background:linear-gradient(90deg,#10b981,#059669);color:#fff}
+    .btn:hover{background:linear-gradient(90deg,#059669,#047857)}
+    input{background:#f9fafb;border:1px solid #e5e7eb}
+    input:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.2)}
+    a{color:#059669}
+    a:hover{color:#047857}
+  </style>
+</head>
+<body>
+  <main class="box">
+    <a href="corretor_login.html" class="text-sm inline-flex items-center mb-3">
+      <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Voltar ao login
+    </a>
+
+    <h1 class="text-2xl font-semibold mb-1">Definir nova senha</h1>
+    <p class="text-gray-500 text-sm mb-6">Crie uma nova senha para sua conta.</p>
+
+    {% if error %}
+      <div class="mb-4 text-sm text-red-600">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Nova senha</label>
+        <input type="password" name="senha" minlength="6" required placeholder="••••••••"
+               class="w-full px-4 py-2.5 rounded-lg">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Confirmar senha</label>
+        <input type="password" name="confirmar_senha" minlength="6" required placeholder="••••••••"
+               class="w-full px-4 py-2.5 rounded-lg">
+      </div>
+      <button class="btn w-full px-4 py-2.5 rounded-lg font-medium">Salvar nova senha</button>
+    </form>
+  </main>
+</body>
+</html>

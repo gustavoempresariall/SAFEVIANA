@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Cliente - Cadastro</title>
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+    body { background:#FFFFFF; min-height:100vh; display:flex; justify-content:center; align-items:center; font-family:'Poppins',sans-serif; }
+    .login-container{ background:rgba(255,255,255,.98); padding:1.5rem; border-radius:.75rem; box-shadow:0 6px 16px rgba(0,0,0,.08); width:100%; max-width:600px; animation:fadeIn .4s ease-out forwards; position:relative; }
+    @keyframes fadeIn{ from{ transform:translateY(10px); opacity:0 } to{ transform:translateY(0); opacity:1 } }
+    .btn-green{ background:linear-gradient(90deg,#10b981,#059669); transition:all .2s ease; }
+    .btn-green:hover{ background:linear-gradient(90deg,#059669,#047857); box-shadow:0 4px 10px rgba(0,0,0,.15) }
+    .btn-google{ border:none!important; background:#fff; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px }
+    .btn-google:hover{ background:#f9fafb; box-shadow:0 2px 6px rgba(0,0,0,.1) }
+    input,select{ transition:all .2s ease; background:#f9fafb; border:1px solid #e5e7eb }
+    input:focus,select:focus{ outline:none; border-color:#10b981; box-shadow:0 0 0 2px rgba(16,185,129,.2); background:#fff }
+    .toggle-password{ cursor:pointer; position:absolute; right:.75rem; top:50%; transform:translateY(-50%); color:#9ca3af; transition:color .2s }
+    .toggle-password:hover{ color:#10b981 }
+    .divider{ display:flex; align-items:center; text-align:center; margin:1rem 0; color:#6b7280; font-size:.75rem }
+    .divider::before,.divider::after{ content:''; flex:1; border-bottom:1px solid #e5e7eb }
+    .divider:not(:empty)::before{ margin-right:.75em } .divider:not(:empty)::after{ margin-left:.75em }
+    .hint-error{ margin-top:.35rem }
+  </style>
+</head>
+<body>
+  <div class="login-container opacity-0">
+    <!-- Botão de voltar -->
+    <a href="{{ url_for('cliente_login') }}" class="back-button font-medium text-xs text-green-600 hover:text-green-700 absolute top-3 left-3 flex items-center">
+      <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Voltar
+    </a>
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-4">
+      <img src="imagens/icones/iconecabc.png" alt="Logo" class="logo h-12 w-12">
+    </div>
+
+    <!-- Título -->
+    <h2 class="text-xl font-semibold text-center text-gray-900 mb-2">Cadastro do Cliente</h2>
+    <p class="text-center text-gray-500 mb-4 text-sm">Crie sua conta para acompanhar suas apólices e solicitações</p>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-3 space-y-1">
+          {% for category, message in messages %}
+            <div class="px-3 py-2 text-xs rounded
+                        {% if category == 'danger' %} bg-red-50 text-red-700 border border-red-200
+                        {% elif category == 'success' %} bg-green-50 text-green-700 border border-green-200
+                        {% else %} bg-gray-50 text-gray-700 border border-gray-200 {% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Formulário -->
+    <form method="POST" action="{{ url_for('cliente_cadastro') }}" class="grid grid-cols-2 gap-3" id="cadastro-form" novalidate>
+      <div>
+        <label for="nome" class="block text-xs font-medium text-gray-700">Nome Completo</label>
+        <input type="text" id="nome" name="nome" required class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm" placeholder="Nome completo">
+      </div>
+
+      <div>
+        <label for="email" class="block text-xs font-medium text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm" placeholder="Email">
+      </div>
+
+      <div>
+        <label for="telefone" class="block text-xs font-medium text-gray-700">Telefone</label>
+        <input type="text" id="telefone" name="telefone" class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm" placeholder="(XX) XXXXX-XXXX">
+      </div>
+
+      <div>
+        <label for="cpf" class="block text-xs font-medium text-gray-700">CPF</label>
+        <input type="text" id="cpf" name="cpf" class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm" placeholder="CPF">
+      </div>
+
+      <!-- Senha -->
+      <div class="col-span-2">
+        <label for="senha" class="block text-xs font-medium text-gray-700">Senha</label>
+        <div class="relative">
+          <input type="password" id="senha" name="senha" required class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm" placeholder="Senha">
+          <svg onclick="togglePassword()" id="toggleSenha" xmlns="http://www.w3.org/2000/svg" class="toggle-password h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path id="eyePath1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path id="eyePath2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Confirmar Senha -->
+      <div class="col-span-2">
+        <label for="confirmar_senha" class="block text-xs font-medium text-gray-700">Confirmar Senha</label>
+        <div class="relative">
+          <input type="password" id="confirmar_senha" name="confirmar_senha" required class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm" placeholder="Confirme sua senha">
+          <svg onclick="toggleConfirmPassword()" id="toggleConfirmSenha" xmlns="http://www.w3.org/2000/svg" class="toggle-password h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path id="eye2Path1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path id="eye2Path2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </div>
+        <p id="senhaMismatch" class="hint-error text-xs text-red-600 hidden">As senhas não conferem.</p>
+      </div>
+
+      <div>
+        <label for="genero" class="block text-xs font-medium text-gray-700">Gênero</label>
+        <select id="genero" name="genero" class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm">
+          <option value="" disabled selected>Selecione</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Outro">Outro</option>
+          <option value="Prefiro não informar">Prefiro não informar</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="tipo" class="block text-xs font-medium text-gray-700">Tipo de Usuário</label>
+        <select id="tipo" name="tipo" required class="w-full px-3 py-2 border rounded-lg shadow-sm text-sm">
+          <option value="Segurado" selected>Segurado</option>
+        </select>
+      </div>
+
+      <!-- Botão Cadastrar -->
+      <div class="col-span-2">
+        <button id="btnCadastrar" type="submit" class="btn-green w-full py-2 px-3 text-white font-medium rounded-lg shadow-sm flex items-center justify-center text-sm">
+          <span>Cadastrar</span>
+          <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Divisor -->
+      <div class="divider col-span-2">ou</div>
+
+      <!-- Botão Google -->
+      <div class="col-span-2">
+        <div id="g_id_onload"
+             data-client_id="478141025582-het74gka9apbbpfaj6mtsijd433kp6fp.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false"></div>
+        <div class="g_id_signin btn-google w-full py-2 px-3 text-gray-700 font-medium rounded-lg shadow-sm text-sm"
+             data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left"
+             aria-label="Cadastrar com a conta do Google"></div>
+      </div>
+    </form>
+
+    <!-- Opção de login -->
+    <div class="account-option text-center mt-2 text-xs">
+      <span class="text-gray-500">Já tem conta?</span>
+      <a href="{{ url_for('cliente_login') }}" class="font-medium text-green-600 hover:text-green-700">Faça login</a>
+    </div>
+  </div>
+
+  <script>
+    // Toggle senha
+    function togglePassword() {
+      const input = document.getElementById("senha");
+      const eyePath2 = document.getElementById("eyePath2");
+      if (input.type === "password") {
+        input.type = "text";
+        eyePath2.setAttribute("d","M17.94 17.94A10.94 10.94 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.94 10.94 0 012.12-3.36M6.1 6.1L3 3m18 18l-3.1-3.1");
+      } else {
+        input.type = "password";
+        eyePath2.setAttribute("d","M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z");
+      }
+    }
+
+    // Toggle confirmar senha
+    function toggleConfirmPassword() {
+      const input = document.getElementById("confirmar_senha");
+      const eyePath2 = document.getElementById("eye2Path2");
+      if (input.type === "password") {
+        input.type = "text";
+        eyePath2.setAttribute("d","M17.94 17.94A10.94 10.94 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.94 10.94 0 012.12-3.36M6.1 6.1L3 3m18 18l-3.1-3.1");
+      } else {
+        input.type = "password";
+        eyePath2.setAttribute("d","M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z");
+      }
+    }
+
+    // Senhas iguais
+    (function(){
+      const senha = document.getElementById('senha');
+      const confirmar = document.getElementById('confirmar_senha');
+      const msg = document.getElementById('senhaMismatch');
+      const btn = document.getElementById('btnCadastrar');
+      function validate(){
+        const ok = confirmar.value.length > 0 && senha.value === confirmar.value;
+        msg.classList.toggle('hidden', ok || confirmar.value === '');
+        btn.disabled = !ok;
+        btn.classList.toggle('opacity-60', !ok);
+        btn.classList.toggle('cursor-not-allowed', !ok);
+      }
+      senha.addEventListener('input', validate);
+      confirmar.addEventListener('input', validate);
+    })();
+
+    // Google signup → rota cliente
+    async function handleCredentialResponse(response) {
+      const idToken = response.credential;
+      try {
+        const r = await fetch('/auth/google-cliente', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: idToken }),
+          credentials: 'include'
+        });
+        const data = await r.json();
+        if (data.success) {
+          window.location.href = data.redirect || '/area_cliente';
+        } else {
+          alert(data.error || 'Falha ao cadastrar com o Google.');
+        }
+      } catch (err) {
+        console.error('Erro:', err);
+        alert('Erro ao tentar cadastrar com o Google.');
+      }
+    }
+
+    // Mostrar container
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelector('.login-container')?.classList.remove('opacity-0');
+    });
+  </script>
+</body>
+</html>

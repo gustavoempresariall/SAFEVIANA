@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana</title>
+  <link rel="stylesheet" href="css/areacr.css" />
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+    /* (mantém só o topo que você já usa) */
+    .topbar .user-info,
+    .topbar-right .user-info { display:flex!important; flex-direction:row!important; align-items:center!important; gap:8px; }
+    .topbar .user-info .small-avatar,
+    .topbar .user-info .profile-avatar {
+      width:36px; height:36px; flex:0 0 36px; border-radius:50%; overflow:hidden; background:#1e7a34; color:#fff;
+      font-weight:700; font-size:14px; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .topbar .user-info .small-avatar img,
+    .topbar .user-info .profile-avatar img { width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; }
+    .topbar .user-info .user-name { white-space:nowrap; line-height:1; display:inline-block; font-weight:600; color:#111827; }
+
+    /* Encolher o card */
+.form-container .card{
+  max-width: 960px !important;  /* antes 1100px */
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+}
+
+/* Deixar o conteúdo mais compacto */
+.form-container .card-header{ padding: 14px 18px; }
+.form-container .card-header h3{ font-size: 1.25rem; margin: 0 0 6px; }
+.form-container .card-header p{ margin: 0; }
+
+.form-container .form{
+  padding: 16px 18px;
+  gap: 12px 16px;                   /* menos espaço entre campos */
+  grid-template-columns: repeat(2, minmax(240px,1fr));
+}
+
+.form-container .form input,
+.form-container .form select,
+.form-container .form textarea{
+  padding: 10px 12px;               /* campos levemente menores */
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Responsivo */
+@media (max-width: 980px){
+  .form-container .card{ max-width: 100% !important; }
+  .form-container .form{
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 12px;
+  }
+}
+
+/* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left"><h2>Area<span> Corretor</span></h2></div>
+      <nav>
+        <ul>
+          <li><a href="area_corretor"><span class="icon"></span> Dashboard</a></li>
+          <li><a href="visu_clientes_corretor.html"><span class="icon"></span> Clientes</a></li>
+          <li><a href="relatorio_corretor.html"><span class="icon"></span> Cotações</a></li>
+          <li><a href="apolices_corretor.html"><span class="icon"></span> Apólices</a></li>
+          <li><a href="propostas_corretor.html"><span class="icon"></span> Propostas</a></li>
+          <li><a href="sinistros_corretor.html"><span class="icon"></span> Sinistros</a></li>
+          <li><a href="calendario_corretor.html"><span class="icon"></span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+          
+          <div class="user-info" id="userInfo">
+  {% set nome = corretor_nome 
+                or session.get('corretor_nome') 
+                or (session.get('user') and session['user'].get('nome')) 
+                or '' %}
+  {% set foto = corretor_foto or session.get('corretor_foto') %}
+
+  {# remove espaços, pega as 2 primeiras letras e sobe pra maiúsculas #}
+  {% set iniciais = ((nome|trim|replace(' ', ''))[:2])|upper %}
+
+  <div class="profile-avatar small-avatar" title="Meu Perfil">
+    {% if foto %}
+      <img src="{{ url_for('static', filename=foto|replace('static/','')) }}" alt="Foto de Perfil">
+    {% else %}
+      <span class="avatar-initials">{{ iniciais }}</span>
+    {% endif %}
+  </div>
+
+  <span class="user-name">{{ nome }}</span>
+</div>
+
+
+      </header>
+
+      <section class="form-container">
+        <div class="card" style="max-width:1100px; margin:0 auto;">
+          <div class="card-header">
+            <h3>Adicionar Cliente (Segurado)</h3>
+            <p>Preencha os dados abaixo para cadastrar um novo cliente.</p>
+          </div>
+
+          <form class="form" action="/adicionar_cliente" method="POST" novalidate>
+            <!-- tipo / nome -->
+            <div class="form-group">
+              <label for="tipoPessoa">Tipo de Pessoa</label>
+              <select id="tipoPessoa" name="tipoPessoa" required>
+                <option value="">Selecione</option>
+                <option value="fisica">Pessoa Física</option>
+                <option value="juridica">Pessoa Jurídica</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nome">Nome Completo / Razão Social</label>
+              <input type="text" id="nome" name="nome" placeholder="Digite o nome ou razão social" required autocomplete="name">
+            </div>
+
+            <!-- cpf / email -->
+            <div class="form-group">
+              <label for="cpfcnpj">CPF / CNPJ</label>
+              <input type="text" id="cpfcnpj" name="cpfcnpj" inputmode="numeric"
+                     placeholder="000.000.000-00 ou 00.000.000/0000-00" required>
+              <small class="hint">Digite só números; a pontuação aparece automaticamente.</small>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="Digite o email" required autocomplete="email">
+            </div>
+
+            <!-- telefone / fantasia -->
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input type="text" id="telefone" name="telefone" inputmode="numeric" placeholder="(00) 00000-0000" required autocomplete="tel">
+            </div>
+            <div class="form-group">
+              <label for="empresa">Nome Fantasia (se houver)</label>
+              <input type="text" id="empresa" name="empresa" placeholder="Nome da empresa" autocomplete="organization">
+            </div>
+
+            <!-- RG / CEP -->
+            <div class="form-group">
+              <label for="rginsc">RG / Inscrição Estadual</label>
+              <input type="text" id="rginsc" name="rginsc" inputmode="numeric" placeholder="00.000.000-0">
+            </div>
+            <div class="form-group">
+              <label for="cep">CEP</label>
+              <input type="text" id="cep" name="cep" inputmode="numeric" placeholder="00000-000" autocomplete="postal-code">
+            </div>
+
+            <!-- endereço / número -->
+            <div class="form-group">
+              <label for="endereco">Endereço</label>
+              <input type="text" id="endereco" name="endereco" placeholder="Rua, Avenida..." autocomplete="address-line1">
+            </div>
+            <div class="form-group">
+              <label for="numero">Número</label>
+              <input type="text" id="numero" name="numero" placeholder="Número da residência" inputmode="numeric" autocomplete="address-line2">
+            </div>
+
+            <!-- bairro / cidade -->
+            <div class="form-group">
+              <label for="bairro">Bairro</label>
+              <input type="text" id="bairro" name="bairro" placeholder="Digite o bairro" autocomplete="address-level3">
+            </div>
+            <div class="form-group">
+              <label for="cidade">Cidade</label>
+              <input type="text" id="cidade" name="cidade" placeholder="Digite a cidade" autocomplete="address-level2">
+            </div>
+
+            <!-- estado / tipo seguro -->
+            <div class="form-group">
+              <label for="estado">Estado</label>
+              <select id="estado" name="estado" autocomplete="address-level1">
+                <option value="">Selecione o estado</option>
+                <option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapá</option>
+                <option value="AM">Amazonas</option><option value="BA">Bahia</option><option value="CE">Ceará</option>
+                <option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option>
+                <option value="MA">Maranhão</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option>
+                <option value="MG">Minas Gerais</option><option value="PA">Pará</option><option value="PB">Paraíba</option>
+                <option value="PR">Paraná</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option>
+                <option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RS">Rio Grande do Sul</option>
+                <option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="SC">Santa Catarina</option>
+                <option value="SP">São Paulo</option><option value="SE">Sergipe</option><option value="TO">Tocantins</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tipoSeguro">Tipo de Seguro</label>
+              <select id="tipoSeguro" name="tipoSeguro" required>
+                <option value="">Selecione</option>
+                <option value="auto">Auto</option>
+                <option value="residencial">Residencial</option>
+                <option value="vida">Vida</option>
+                <option value="empresarial">Empresarial</option>
+              </select>
+            </div>
+
+            <!-- Campos extras: AUTO -->
+            <div id="camposAuto" class="form-group" style="display:none; grid-column:1 / -1;">
+              <div style="display:grid; grid-template-columns:repeat(2,minmax(220px,1fr)); gap:14px 18px;">
+                <div class="form-group">
+                  <label for="placa">Placa</label>
+                  <input type="text" id="placa" name="placa" placeholder="ABC-1234" maxlength="8" autocapitalize="characters">
+                </div>
+                <div class="form-group">
+                  <label for="chassi">Chassi</label>
+                  <input type="text" id="chassi" name="chassi" placeholder="Número do chassi" autocapitalize="characters">
+                </div>
+                <div class="form-group">
+                  <label for="renavam">Renavam</label>
+                  <input type="text" id="renavam" name="renavam" placeholder="Número do Renavam" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                  <label for="cor">Cor do Veículo</label>
+                  <input type="text" id="cor" name="cor" placeholder="Cor do veículo">
+                </div>
+                <div class="form-group" style="grid-column:1 / -1;">
+                  <label for="ano">Ano/Modelo</label>
+                  <input type="text" id="ano" name="ano" placeholder="Ex: 2019/2020">
+                </div>
+              </div>
+            </div>
+
+            <!-- Observações (full) -->
+            <div class="form-group" style="grid-column:1 / -1;">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="3" placeholder="Observações adicionais..."></textarea>
+            </div>
+
+            <!-- Ações -->
+            <div class="form-buttons" style="grid-column:1 / -1;">
+              
+              <a href="visu_clientes_corretor.html" class="btn-cancelar">Cancelar</a>
+              <button type="submit" class="btn-salvar">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('collapsed');
+    });
+
+    // ====== Máscaras leves (sem mudar seu CSS) ======
+    const onlyDigits = v => (v || '').replace(/\D+/g, '');
+
+    function formatCpfCnpj(v){
+      const d = onlyDigits(v).slice(0,14);
+      if (d.length <= 11){
+        return d
+          .replace(/^(\d{3})(\d)/,'$1.$2')
+          .replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3')
+          .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4');
+      }
+      return d
+        .replace(/^(\d{2})(\d)/,'$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3')
+        .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3/$4')
+        .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/,'$1.$2.$3/$4-$5');
+    }
+    function formatPhone(v){
+      const d = onlyDigits(v).slice(0,11);
+      if (d.length <= 10){
+        return d.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2');
+      }
+      return d.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');
+    }
+    function formatRG(v){
+      const d = onlyDigits(v).slice(0,9);
+      return d
+        .replace(/^(\d{2})(\d)/,'$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3')
+        .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4');
+    }
+    function formatCEP(v){
+      const d = onlyDigits(v).slice(0,8);
+      return d.replace(/^(\d{5})(\d)/,'$1-$2');
+    }
+    function formatPlaca(v){
+      v = (v || '').toUpperCase().replace(/[^A-Z0-9-]/g,'');
+      // mantém padrão ABC-1234; se digitar sem hífen, insere após 3 chars
+      const semHifen = v.replace('-', '');
+      if (semHifen.length > 3 && !v.includes('-')){
+        return semHifen.slice(0,3) + '-' + semHifen.slice(3,7);
+      }
+      return v.slice(0,8);
+    }
+
+    const $cpf = document.getElementById('cpfcnpj');
+    const $tel = document.getElementById('telefone');
+    const $rg  = document.getElementById('rginsc');
+    const $cep = document.getElementById('cep');
+    const $placa = document.getElementById('placa');
+    const $tipo = document.getElementById('tipoSeguro');
+    const $camposAuto = document.getElementById('camposAuto');
+
+    if ($cpf){ $cpf.addEventListener('input', e => e.target.value = formatCpfCnpj(e.target.value)); }
+    if ($tel){ $tel.addEventListener('input', e => e.target.value = formatPhone(e.target.value)); }
+    if ($rg) { $rg.addEventListener('input',  e => e.target.value = formatRG(e.target.value)); }
+    if ($cep){ $cep.addEventListener('input', e => e.target.value = formatCEP(e.target.value)); }
+    if ($placa){ $placa.addEventListener('input', e => e.target.value = formatPlaca(e.target.value)); }
+
+    function toggleAuto(){
+      const isAuto = $tipo && $tipo.value === 'auto';
+      if ($camposAuto) $camposAuto.style.display = isAuto ? 'block' : 'none';
+    }
+    if ($tipo){
+      $tipo.addEventListener('change', toggleAuto);
+      toggleAuto(); // estado inicial
+    }
+  </script>
+</body>
+</html>

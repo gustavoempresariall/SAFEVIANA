@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link inválido | SafeViana</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;font-family:'Poppins',sans-serif}
+    .box{width:100%;max-width:448px;background:#fff;border-radius:16px;padding:28px;box-shadow:0 8px 24px rgba(0,0,0,.08);text-align:center}
+    a{color:#059669}
+    a:hover{color:#047857}
+  </style>
+</head>
+<body>
+  <main class="box">
+    <h1 class="text-2xl font-semibold mb-2">Link inválido ou expirado</h1>
+    <p class="text-gray-600">Solicite novamente a redefinição de senha.</p>
+    <!-- token_invalido.html -->
+<a href="{{ url_for('recuperar_senha') }}" class="inline-block mt-6">Solicitar novo link</a>
+
+  </main>
+</body>
+</html>

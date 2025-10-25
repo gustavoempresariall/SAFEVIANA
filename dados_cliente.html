@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meus Dados - Área do Cliente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+  /* =========================
+     SafeViana • Dashboard Base
+     ========================= */
+  :root{
+    --sv-green:#2e7d32; --sv-green-dark:#1e6028; --sv-accent:#10b981;
+    --sv-border:#e5e7eb; --sv-light:#f9fafb; --sv-text:#111827;
+    --sv-shadow:0 10px 30px rgba(0,0,0,.08);
+    --sv-gradient:linear-gradient(135deg,#2e7d32 0%,#10b981 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--sv-light);color:var(--sv-text);line-height:1.45;overflow:hidden}
+
+ /* ===== LAYOUT (sidebar/topbar) ===== */
+    .container{ display:flex; min-height:100vh }
+
+    .sidebar{
+      width:200px;
+      background:#fff;
+      border-right:1px solid var(--sv-border);
+      padding:20px 10px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:fixed; inset:0 auto 0 0;
+      z-index:1000; box-shadow:var(--sv-shadow);
+      transition:width .3s;
+    }
+    .sidebar.collapsed{ width:60px; padding:20px 6px }
+
+    .logo{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; color:#111827; margin-bottom:18px;
+      white-space:nowrap; width:100%;
+    }
+    .logo i{
+      font-size:1.35rem; color:var(--sv-green);
+      display:grid; place-items:center; width:40px; height:40px;
+      border-radius:12px; background:#f3f7f4; margin:0;
+    }
+    .sidebar.collapsed .logo{ justify-content:center; gap:0; padding-inline:0 }
+    .sidebar.collapsed .logo span{ display:none }
+    .sidebar.collapsed .logo i{ margin-inline:auto }
+
+    .sidebar nav ul{ list-style:none; margin:0; padding:0 }
+    .sidebar nav li{ margin:10px 0 }
+    .sidebar nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px;
+      text-decoration:none; color:#374151; font-weight:600; transition:.2s;
+    }
+    .sidebar nav a i{ width:20px; text-align:center }
+    .sidebar nav a:hover{ background:var(--sv-green); color:#fff }
+    .sidebar nav a.active{
+      background:linear-gradient(135deg,#2e7d32 0%,#2e7d32 60%,#10b981 100%);
+      color:#fff; box-shadow:0 6px 16px rgba(46,125,50,.25);
+    }
+    .sidebar.collapsed nav a{ justify-content:center }
+    .sidebar.collapsed nav a span{ display:none }
+
+    .admin-title{ font-size:.78rem; color:#6b7280; margin:10px 8px }
+    .sidebar.collapsed .admin-title{ display:none }
+
+    .bottom-section ul{ list-style:none; margin:6px 0 0; padding:0 }
+    .bottom-section li{
+      display:flex; align-items:center; gap:8px;
+      padding:8px; border-radius:10px; cursor:pointer;
+    }
+    .bottom-section li:hover{ background:var(--sv-green); color:#fff }
+    .logout-btn{
+      width:100%; margin-top:8px; padding:10px; border:0; border-radius:12px; cursor:pointer;
+      background:var(--sv-gradient); color:#fff; font-weight:700;
+      box-shadow:0 8px 20px rgba(16,185,129,.35);
+    }
+    .sidebar.collapsed .bottom-section li span,
+    .sidebar.collapsed .logout-btn span{ display:none }
+
+    .main{ flex:1; display:flex; flex-direction:column; margin-left:200px }
+
+    .topbar{
+      position:fixed; left:200px; right:0; top:0; z-index:900;
+      background:#fff; border-bottom:1px solid var(--sv-border);
+      padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:var(--sv-shadow);
+    }
+    .hamburger{ border:0; background:transparent; font-size:1.4rem; cursor:pointer; margin-right:8px }
+    .topbar h2{ font-size:1.25rem; margin:0 }
+    .topbar h2 span{ color:var(--sv-green) }
+    .topbar input{
+      padding:8px 12px; border:1px solid var(--sv-border); border-radius:10px; width:230px;
+    }
+
+    .user-info{ display:flex; align-items:center; gap:8px; font-weight:600 }
+    .profile-avatar{
+      width:36px; height:36px; border-radius:50%; overflow:hidden;
+      border:2px solid var(--sv-green); display:flex; align-items:center; justify-content:center; background:#fff;
+    }
+    .profile-avatar img{ width:100%; height:100%; object-fit:cover; display:block }
+    .profile-avatar .initials{
+      text-transform:uppercase; color:var(--sv-green); font-weight:800; font-size:.9rem; letter-spacing:.5px;
+    }
+
+    .content{ padding:22px; margin-top:72px }
+
+  .user-info{display:flex;align-items:center;gap:8px;font-weight:600}
+  .user-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--sv-green)}
+
+  /* ===== FIX: centralizar ícone do topo quando colapsa ===== */
+  .sidebar .logo{width:100%}
+  .sidebar .logo i{
+    display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#f3f7f4;margin:0
+  }
+  .sidebar.collapsed .logo{justify-content:center;gap:0;padding-inline:0}
+  .sidebar.collapsed .logo i{margin-inline:auto}
+  .sidebar.collapsed nav ul li a{justify-content:center;padding:12px;border-radius:14px}
+
+  /* ===== Conteúdo “Meus Dados” ===== */
+  .content{flex:1;overflow-y:auto;padding:30px;max-width:1280px;margin:0 auto;width:100%}
+
+  /* Profile card */
+  .profile-card{
+    background:#fff;border:1px solid var(--sv-border);border-radius:16px;padding:24px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);margin-bottom:24px;text-align:center;max-width:400px;
+    margin-left:auto;margin-right:auto;transition:transform .2s
+  }
+  .profile-card:hover{transform:translateY(-4px)}
+  .profile-pic{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--sv-green);margin:0 auto 16px}
+  .profile-info h3{font-size:1.25rem;font-weight:600;margin-bottom:8px}
+  .profile-info p{font-size:.875rem;color:#6b7280;margin:4px 0}
+  .account-status{
+    display:inline-block;padding:6px 14px;border-radius:9999px;font-size:.75rem;font-weight:600;margin-top:8px;
+    background:#e8f5e9;color:var(--sv-green);text-transform:uppercase;letter-spacing:.05em
+  }
+  .profile-actions{display:flex;justify-content:center;gap:12px;margin-top:16px}
+  .profile-actions button{
+    padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.875rem;
+    display:flex;align-items:center;gap:6px;transition:.2s
+  }
+  .btn-upload{background:var(--sv-green);color:#fff}
+  .btn-upload:hover{background:var(--sv-green-dark)}
+  .btn-remove{background:#e53935;color:#fff}
+  .btn-remove:hover{background:#c62828}
+
+  /* Grids e cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:24px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .card{
+    background:#fff;border:1px solid var(--sv-border);border-radius:16px;padding:24px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);transition:transform .2s
+  }
+  .card:hover{transform:translateY(-4px)}
+  .card h3{margin-bottom:16px;color:var(--sv-green);font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:8px}
+  .field label{font-weight:600;color:#6b7280;display:block;margin-bottom:6px;font-size:.875rem}
+  .field input{width:100%;padding:10px;border:1px solid var(--sv-border);border-radius:8px;font-size:.875rem;background:#f9fafb}
+
+  /* Botão principal */
+  .btn-primary{
+    margin-top:12px;padding:10px 18px;border:none;border-radius:8px;background:var(--sv-green);color:#fff;font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s
+  }
+  .btn-primary:hover{background:var(--sv-green-dark);transform:translateY(-2px)}
+
+  /* Modal */
+  .modal{display:none;position:fixed;z-index:1100;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
+  .modal-content{background:#fff;padding:24px;border-radius:12px;width:90%;max-width:500px}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .modal-header h3{margin:0}
+  .close-modal{cursor:pointer;font-size:1.25rem;color:#6b7280}
+
+  /* Tema “aura” para cards */
+  .card--themed{position:relative;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7faf9 100%)}
+  .card--themed::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(600px 600px at -10% -20%,rgba(46,125,50,.10),transparent 50%),
+    radial-gradient(500px 500px at 110% 120%,rgba(46,125,50,.08),transparent 50%);pointer-events:none}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9999px;font-size:.75rem;font-weight:700}
+  .chip--primary{background:#e8f5e9;color:var(--sv-green)}
+  .chip--muted{background:#f3f4f6;color:#374151}
+
+  /* Segurança */
+  .card--security{position:relative;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f7faf9 100%)}
+  .card--security::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(600px 600px at -10% -20%,rgba(46,125,50,.12),transparent 50%),
+    radial-gradient(500px 500px at 110% 120%,rgba(46,125,50,.10),transparent 50%);pointer-events:none}
+  .password-display{
+    display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px dashed var(--sv-border);
+    background:#f9fafb;border-radius:12px;margin-bottom:10px
+  }
+  .pwd-dots span{display:inline-block;width:8px;height:8px;background:#9ca3af;border-radius:50%;margin-right:6px;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .btn-ghost{background:#fff;border:1px solid var(--sv-border);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;color:#374151;transition:.2s}
+  .btn-ghost:hover{border-color:var(--sv-green);color:var(--sv-green)}
+  .card-hint{font-size:.82rem;color:#6b7280;margin-bottom:8px}
+
+  /* Preferências (switches) */
+  .pref-grid{display:flex;gap:14px;align-items:stretch;flex-wrap:nowrap}
+  .pref-item{
+    cursor:pointer;flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;border:1px solid var(--sv-border);background:#f9fafb;border-radius:14px;transition:.2s
+  }
+  .pref-item:hover{box-shadow:0 4px 10px rgba(0,0,0,.06);transform:translateY(-2px)}
+  .pref-left{display:flex;align-items:center;gap:12px}
+  .pref-left i{color:var(--sv-green)}
+  .pref-text strong{display:block}
+  .pref-desc{font-size:.8rem;color:#6b7280;margin-top:2px}
+  .toggle{display:inline-block;width:46px;height:26px}
+  .toggle input{display:none}
+  .toggle .slider{display:block;width:100%;height:100%;background:#d1d5db;border-radius:9999px;position:relative;transition:.2s}
+  .toggle .slider::after{
+    content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%;
+    transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)
+  }
+  .toggle input:checked + .slider{background:var(--sv-green)}
+  .toggle input:checked + .slider::after{transform:translateX(20px)}
+  @media (max-width:1024px){.pref-grid{flex-wrap:wrap}.pref-item{flex:1 1 calc(50% - 14px)}}
+  @media (max-width:640px){.pref-item{flex:1 1 100%}}
+
+  /* Modal de confirmação — botão "Cancelar" */
+  #confirmModal .btn-remove{
+    padding:10px 18px;border:none;border-radius:8px;background:#e53935;color:#fff;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;margin-left:8px;transition:background .2s, transform .2s, filter .2s;
+  }
+  #confirmModal .btn-remove:hover{background:#c62828;transform:translateY(-2px)}
+  #confirmModal .btn-remove:active{filter:brightness(.95);transform:translateY(0)}
+  #confirmModal .btn-remove:focus-visible{outline:3px solid rgba(229,57,53,.35);outline-offset:2px}
+
+  /* ===== Responsivo ===== */
+  @media (max-width: 900px){
+    .main-content{margin-left:60px}
+    .topbar{left:60px}
+  }
+  @media (max-width: 640px){
+    .topbar input{display:none}
+    .grid2{grid-template-columns:1fr}
+  }
+  /* ===== layout base corrigido ===== */
+.container{display:flex;min-height:100vh}
+
+/* sidebar fixa */
+.sidebar{
+  width:200px;background:#fff;border-right:1px solid var(--sv-border);
+  padding:20px 10px;display:flex;flex-direction:column;justify-content:space-between;
+  position:fixed;inset:0 auto 0 0;z-index:1000;box-shadow:var(--sv-shadow);
+  transition:width .3s ease;
+}
+.sidebar.collapsed{width:60px}
+
+/* conteúdo e header consideram a sidebar */
+.main-content{
+  margin-left:200px;               /* <- empurra o conteúdo */
+  flex:1;display:flex;flex-direction:column;height:100vh;transition:margin-left .3s ease;
+}
+
+/* header fixo e alinhado */
+.topbar{
+  position:fixed;                  /* <- fica colado no topo */
+  top:0;
+  left:200px;                      /* <- alinha com a sidebar aberta */
+  right:0;
+  height:64px;
+  background:#fff;
+  border-bottom:1px solid var(--sv-border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  z-index:900;
+  box-shadow:var(--sv-shadow);
+}
+
+/* quando colapsa, ajusta tudo junto */
+.sidebar.collapsed ~ .main-content{ margin-left:60px; }
+.sidebar.collapsed ~ .main-content .topbar{ left:60px; }
+
+/* (opcional) estética interna do header */
+.hamburger{border:0;background:transparent;font-size:1.4rem;cursor:pointer;margin-right:8px}
+.topbar h2{margin:0;font-size:1.25rem}
+.topbar h2 span{color:var(--sv-green)}
+.topbar input{padding:8px 12px;border:1px solid var(--sv-border);border-radius:10px;width:230px}
+.user-info{display:flex;align-items:center;gap:8px;font-weight:600}
+.user-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--sv-green)}
+
+/* centralização do ícone da logo no topo da sidebar quando colapsa */
+.sidebar .logo{display:flex;align-items:center;gap:10px;margin-bottom:18px;white-space:nowrap}
+.sidebar .logo i{font-size:1.35rem;color:var(--sv-green)}
+.sidebar.collapsed .logo{justify-content:center;gap:0}
+.sidebar.collapsed .logo span{display:none}
+
+/* ---- evita quebra de linha no nome SafeViana e no header ---- */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap: nowrap;          /* <- não deixa itens irem pra segunda linha */
+}
+
+.topbar .brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex: 0 0 auto;             /* <- não encolhe a ponto de quebrar */
+  min-width: fit-content;     /* <- garante largura mínima pro título */
+}
+
+.topbar h2{
+  margin:0;
+  font-size:1.25rem;
+  line-height:1;              /* <- alinhamento mais “apertado” */
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+  white-space: nowrap;        /* <- o truque principal */
+}
+
+.hamburger{
+  margin-right:12px;          /* só pra respiro visual */
+}
+
+.user-info{ flex: 0 0 auto; } /* não deixa o bloco do usuário puxar espaço do título */
+
+
+  /* Hover claro só para o item Suporte */
+  .bottom-section li.support-item:hover {
+    background: #f3f4f6 !important;   /* cinza/branco */
+    color: var(--sv-green) !important; /* texto/ícone verdes */
+  }
+  .bottom-section li.support-item:hover .support-link { 
+    color: var(--sv-green) !important; 
+  }
+  .bottom-section li.support-item:hover .support-link i {
+    color: var(--sv-green) !important;
+  }
+</style>
+
+</head>
+<body>
+<div class="container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="logo"><i class="fa-solid fa-user-shield"></i><span>Área do Cliente</span></div>
+       <nav>
+  <ul>
+    <li>
+      <a href="{{ url_for('area_cliente') }}" class="{% if ACTIVE_MENU == 'dashboard' %}active{% endif %}">
+        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('dadosclientes') }}" class="{% if ACTIVE_MENU == 'meus_dados' %}active{% endif %}">
+        <i class="fa-solid fa-user"></i> <span>Meus Dados</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cotacoes_clientes') }}" class="{% if ACTIVE_MENU == 'cotacoes' %}active{% endif %}">
+        <i class="fa-solid fa-file-signature"></i> <span>Solicitar Cotações</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('acompanhamento_ap_cliente') }}" class="{% if ACTIVE_MENU == 'apolices' %}active{% endif %}">
+        <i class="fa-solid fa-file-contract"></i> <span>Minhas Apólices</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cliente_propostas_html') }}" class="{% if ACTIVE_MENU == 'propostas' %}active{% endif %}">
+        <i class="fa-solid fa-clipboard-list"></i> <span>Minhas Propostas</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('sinistros_segurado') }}" class="{% if ACTIVE_MENU == 'sinistros' %}active{% endif %}">
+        <i class="fa-solid fa-car-crash"></i> <span>Meus Sinistros</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+    </div>
+    <div class="bottom-section">
+      <p class="admin-title"><span>ADMINISTRAÇÃO</span></p>
+      <ul>
+  <ul>
+  <li class="support-item">
+    <a class="support-link"
+       href="https://wa.me/5518988076390?text=Ol%C3%A1!%20Preciso%20de%20suporte."
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;width:100%;
+              padding:8px;border-radius:8px;">
+      <i class="fa-solid fa-circle-question"></i>
+      <span>Suporte</span>
+    </a>
+  </li>
+</ul>
+
+      <a href="index.html"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></button></a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="brand">
+        <button id="toggleSidebar" class="hamburger" aria-label="Alternar menu lateral">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+      </div>
+      
+      <div class="user-info" id="userInfo">
+  <div class="profile-avatar small-avatar" id="topbarAvatar" title="Meu Perfil">
+    {# tenta pegar da instância 'cliente'; senão, usa 'cliente_foto' #}
+    {% set foto_norm = (cliente.foto_de_perfil|replace('\\','/')|replace('static/','')) if cliente and cliente.foto_de_perfil
+                       else (cliente_foto|replace('static/','') if cliente_foto else None) %}
+    {% if foto_norm %}
+      <img src="{{ url_for('static', filename=foto_norm) }}" alt="Foto de Perfil">
+    {% else %}
+      {# === mesmas iniciais da outra página: primeira letra do nome + primeira do segundo token === #}
+      {% set name_str = (cliente.nome if cliente else (cliente_nome or '')) | trim %}
+      {% set parts = name_str.split() %}
+      {% set first  = parts[0][:1] if parts else '' %}
+      {% set second = (parts[1][:1] if parts|length > 1 else (parts[0][1:2] if parts and parts[0]|length>1 else '')) %}
+      <span class="initials">{{ (first ~ second).upper() }}</span>
+    {% endif %}
+  </div>
+  <span class="user-name">{{ cliente.nome if cliente else (cliente_nome or '') }}</span>
+</div>
+
+    </header>
+
+    <div class="content">
+      <h2 class="page-title">Meus Dados</h2>
+
+      <!-- Perfil (themed) -->
+      <div class="profile-card card--themed">
+        <div class="profile-chip"><i class="fa-solid fa-user-check"></i> Perfil</div>
+
+        <img id="profilePic" class="profile-pic" alt="Foto de Perfil"
+             src="{{ url_for('static', filename=(cliente.foto_de_perfil|replace('\\','/')|replace('static/',''))) if cliente.foto_de_perfil else 'https://via.placeholder.com/96' }}">
+
+        <div class="profile-info">
+          <h3 id="nomeTitulo">{{ cliente.nome or "Cliente" }}</h3>
+
+          {% set dc = cliente.data_cadastro or cliente.created_at or cliente.data_criacao %}
+          <p class="profile-since">
+            Cliente desde:
+            <time id="clienteDesde" data-raw="{{ dc if dc else '' }}">
+              {{ (dc.strftime('%d/%m/%Y') if dc and dc.__class__.__name__ in ('date','datetime') else (dc or '—')) }}
+            </time>
+          </p>
+
+          <span class="account-status">CONTA ATIVA</span>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn-upload" onclick="document.getElementById('fileInput').click()"><i class="fa-solid fa-camera"></i> Alterar Foto</button>
+          <button class="btn-remove" onclick="openConfirmModal()"><i class="fa-solid fa-trash"></i> Remover</button>
+          <input type="file" id="fileInput" accept="image/*" style="display:none">
+        </div>
+      </div>
+
+      <!-- Grid Principal -->
+      <div class="grid">
+        <!-- Dados Pessoais -->
+        <div class="card card--themed">
+          <div class="card-head">
+            <h3><i class="fa-solid fa-id-card"></i> Dados Pessoais</h3>
+            <span class="chip chip--primary"><i class="fa-solid fa-user-check"></i> Perfil</span>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Nome Completo</label><input data-field="nome" type="text" value="{{ cliente.nome }}" disabled></div>
+            <div class="field"><label>Email</label><input data-field="email" type="text" value="{{ cliente.email }}" disabled></div>
+            <div class="field"><label>Telefone</label><input data-field="telefone" type="text" value="{{ cliente.telefone }}" disabled></div>
+            <div class="field"><label>CPF</label><input data-field="cpf" type="text" value="{{ cliente.cpf }}" disabled></div>
+            <div class="field"><label>Gênero</label><input data-field="genero" type="text" value="{{ cliente.genero }}" disabled></div>
+          </div>
+          <button class="btn-primary" onclick="openEditModal('pessoais')"><i class="fa-solid fa-pen"></i> Editar Dados</button>
+        </div>
+
+        <!-- Endereço -->
+        <div class="card card--themed">
+          <div class="card-head">
+            <h3><i class="fa-solid fa-map-marker-alt"></i> Endereço</h3>
+            <span class="chip chip--muted"><i class="fa-solid fa-house"></i> Principal</span>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>CEP</label><input data-field="cep" type="text" value="{{ dados.cep if dados else '' }}" disabled></div>
+            <div class="field"><label>Rua</label><input data-field="rua" type="text" value="{{ dados.rua if dados else '' }}" disabled></div>
+            <div class="field"><label>Bairro</label><input data-field="bairro" type="text" value="{{ dados.bairro if dados else '' }}" disabled></div>
+            <div class="field"><label>Cidade</label><input data-field="cidade" type="text" value="{{ dados.cidade if dados else '' }}" disabled></div>
+            <div class="field"><label>Estado</label><input data-field="estado" type="text" value="{{ dados.estado if dados else '' }}" disabled></div>
+            <div class="field"><label>Complemento</label><input data-field="complemento" type="text" value="{{ dados.complemento if dados else '' }}" disabled></div>
+          </div>
+          <button class="btn-primary" onclick="openEditModal('endereco')"><i class="fa-solid fa-pen"></i> Editar Endereço</button>
+        </div>
+
+        <!-- Segurança -->
+        <div class="card card--security">
+          <div class="card-head">
+            <h3><i class="fa-solid fa-shield-alt"></i> Segurança</h3>
+            <span class="chip chip--primary"><i class="fa-solid fa-lock"></i> Protegida</span>
+          </div>
+          <div class="password-display">
+            <div class="pwd-dots" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <button type="button" class="btn-ghost" onclick="openEditModal('senha')">
+              <i class="fa-solid fa-key"></i> Alterar Senha
+            </button>
+          </div>
+          <p class="card-hint">Dica: use letras maiúsculas, números e símbolos.</p>
+        </div>
+      </div>
+
+      <!-- Dados Adicionais -->
+      <div class="card card--themed">
+        <div class="card-head">
+          <h3><i class="fa-solid fa-info-circle"></i> Dados Adicionais</h3>
+          <span class="chip chip--muted"><i class="fa-regular fa-file-lines"></i> Completo</span>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Estado Civil</label><input data-field="estado_civil" type="text" value="{{ dados.estado_civil if dados else '' }}" disabled></div>
+          <div class="field"><label>RG</label><input data-field="rg" type="text" value="{{ dados.rg if dados else '' }}" disabled></div>
+          <div class="field"><label>Profissão</label><input data-field="profissao" type="text" value="{{ dados.profissao if dados else '' }}" disabled></div>
+          <div class="field"><label>Data de Nascimento</label><input data-field="data_nascimento" type="text" value="{{ dados.data_nascimento.strftime('%d/%m/%Y') if dados and dados.data_nascimento else '' }}" disabled></div>
+        </div>
+        <button class="btn-primary" onclick="openEditModal('adicionais')"><i class="fa-solid fa-pen"></i> Editar Dados Adicionais</button>
+      </div>
+
+      <!-- Preferências -->
+      <div class="card card--themed">
+        <div class="card-head">
+          <h3><i class="fa-solid fa-bell"></i> Preferências de Notificação</h3>
+          <span class="chip chip--muted"><i class="fa-regular fa-bell"></i> Ajustes</span>
+        </div>
+
+        <div class="pref-grid">
+          <label class="pref-item" for="pref_email">
+            <div class="pref-left">
+              <i class="fa-solid fa-envelope"></i>
+              <div class="pref-text">
+                <strong>E-mail</strong>
+                <div class="pref-desc">Receber avisos e atualizações</div>
+              </div>
+            </div>
+            <div class="toggle"><input id="pref_email" type="checkbox" checked><span class="slider"></span></div>
+          </label>
+
+          <label class="pref-item" for="pref_whatsapp">
+            <div class="pref-left">
+              <i class="fa-brands fa-whatsapp"></i>
+              <div class="pref-text">
+                <strong>WhatsApp</strong>
+                <div class="pref-desc">Alertas rápidos e lembretes</div>
+              </div>
+            </div>
+            <div class="toggle"><input id="pref_whatsapp" type="checkbox"><span class="slider"></span></div>
+          </label>
+
+          <label class="pref-item" for="pref_sms">
+            <div class="pref-left">
+              <i class="fa-solid fa-comment-dots"></i>
+              <div class="pref-text">
+                <strong>SMS</strong>
+                <div class="pref-desc">Mensagens curtas no celular</div>
+              </div>
+            </div>
+            <div class="toggle"><input id="pref_sms" type="checkbox"><span class="slider"></span></div>
+          </label>
+        </div>
+
+        <button class="btn-primary" style="margin-top:16px" onclick="savePreferences()">
+          <i class="fa-solid fa-save"></i> Salvar Preferências
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modals -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Editar Dados</h3>
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <h3>Confirmar Remoção</h3>
+    <p>Deseja realmente remover a foto de perfil?</p>
+    <button class="btn-primary" onclick="confirmRemovePhoto()">Confirmar</button>
+    <button class="btn-remove" onclick="closeConfirmModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>window.ACTIVE_MENU = 'Meus Dados';</script>
+
+<script>
+/* Utils */
+function onlyDigits(v){return (v||'').replace(/\D/g,'');}
+function formatCPF(v){let d=onlyDigits(v).slice(0,11);if(d.length>9)return d.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,(m,a,b,c,e)=>`${a}.${b}.${c}${e?'-'+e:''}`);if(d.length>6)return d.replace(/(\d{3})(\d{3})(\d+)/,"$1.$2.$3");if(d.length>3)return d.replace(/(\d{3})(\d+)/,"$1.$2");return d;}
+function formatPhone(v){const d=onlyDigits(v).slice(0,11);if(d.length<=2)return d;if(d.length<=6)return `(${d.slice(0,2)}) ${d.slice(2)}`;if(d.length<=10)return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;}
+function formatRG(v){const d=onlyDigits(v).slice(0,9);if(d.length<=2)return d;if(d.length<=5)return d.replace(/(\d{2})(\d+)/,"$1.$2");if(d.length<=8)return d.replace(/(\d{2})(\d{3})(\d+)/,"$1.$2.$3");return d.replace(/(\d{2})(\d{3})(\d{3})(\d)/,"$1.$2.$3-$4");}
+function formatDateBR(v){const d=onlyDigits(v).slice(0,8);if(d.length<=2)return d;if(d.length<=4)return d.replace(/(\d{2})(\d{0,2})/,"$1/$2");return d.replace(/(\d{2})(\d{2})(\d{0,4})/,"$1/$2/$3");}
+function isValidDateBR(v){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);if(!m)return false;const d=parseInt(m[1],10),mo=parseInt(m[2],10)-1,y=parseInt(m[3],10);const dt=new Date(y,mo,d);return dt.getFullYear()===y&&dt.getMonth()===mo&&dt.getDate()===d;}
+
+/* Format on load */
+document.addEventListener('DOMContentLoaded',()=>{
+  const tel=document.querySelector('input[data-field="telefone"]');
+  const cpf=document.querySelector('input[data-field="cpf"]');
+  const rg=document.querySelector('input[data-field="rg"]');
+  const dn=document.querySelector('input[data-field="data_nascimento"]');
+  if(tel) tel.value=formatPhone(tel.value);
+  if(cpf) cpf.value=formatCPF(cpf.value);
+  if(rg)  rg.value =formatRG(rg.value);
+  if(dn && dn.value) dn.value=formatDateBR(dn.value);
+});
+
+/* Modal helpers */
+function openEditModal(type){
+  const modal=document.getElementById('editModal');
+  const title=document.getElementById('modalTitle');
+  const body=document.getElementById('modalBody');
+  title.innerText='Editar '+(type==='pessoais'?'Dados Pessoais':type==='endereco'?'Endereço':type==='adicionais'?'Dados Adicionais':'Senha');
+
+  if(type==='pessoais'){
+    body.innerHTML=`
+      <form id="formPessoais">
+        <div class="field"><label>Nome Completo</label><input id="p_nome" type="text" value="{{ (cliente.nome or '')|e }}"></div>
+        <div class="field"><label>Email</label><input id="p_email" type="email" value="{{ (cliente.email or '')|e }}"></div>
+        <div class="field"><label>Telefone</label><input id="p_telefone" inputmode="numeric" type="text" value="${(document.querySelector('input[data-field="telefone"]')||{value:''}).value}"></div>
+        <div class="field"><label>CPF</label><input id="p_cpf" inputmode="numeric" type="text" value="${(document.querySelector('input[data-field="cpf"]')||{value:''}).value}"></div>
+        <div class="field"><label>Gênero</label>
+          <select id="p_genero" style="width:100%;padding:10px;border:1px solid var(--sv-border);border-radius:8px;font-size:.875rem;background:#f9fafb;">
+            <option value="">Selecione</option>
+            <option value="Masculino" {{ 'selected' if (cliente.genero or '')|lower == 'masculino' else '' }}>Masculino</option>
+            <option value="Feminino"  {{ 'selected' if (cliente.genero or '')|lower == 'feminino'  else '' }}>Feminino</option>
+            <option value="Outro"     {{ 'selected' if (cliente.genero or '')|lower == 'outro'     else '' }}>Outro</option>
+          </select>
+        </div>
+        <button type="button" class="btn-primary" onclick="savePessoais()">Salvar</button>
+      </form>`;
+    const tel=document.getElementById('p_telefone');
+    const cpf=document.getElementById('p_cpf');
+    tel.addEventListener('input',e=>e.target.value=formatPhone(e.target.value));
+    cpf.addEventListener('input',e=>e.target.value=formatCPF(e.target.value));
+  }
+
+  if(type==='endereco'){
+    body.innerHTML=`
+      <form id="formEndereco">
+        <div class="field"><label>CEP</label><input id="e_cep" type="text" value="{{ dados.cep if dados else '' }}"></div>
+        <div class="field"><label>Rua</label><input id="e_rua" type="text" value="{{ dados.rua if dados else '' }}"></div>
+        <div class="field"><label>Bairro</label><input id="e_bairro" type="text" value="{{ dados.bairro if dados else '' }}"></div>
+        <div class="field"><label>Cidade</label><input id="e_cidade" type="text" value="{{ dados.cidade if dados else '' }}"></div>
+        <div class="field"><label>Estado</label><input id="e_estado" type="text" value="{{ dados.estado if dados else '' }}"></div>
+        <div class="field"><label>Complemento</label><input id="e_complemento" type="text" value="{{ dados.complemento if dados else '' }}"></div>
+        <button type="button" class="btn-primary" onclick="saveEndereco()">Salvar</button>
+      </form>`;
+  }
+
+  if(type==='adicionais'){
+    body.innerHTML=`
+      <form id="formAdicionais">
+        <div class="field"><label>Estado Civil</label><input id="a_estado_civil" type="text" value="{{ dados.estado_civil if dados else '' }}"></div>
+        <div class="field"><label>RG</label><input id="a_rg" inputmode="numeric" type="text" value="{{ dados.rg if dados else '' }}"></div>
+        <div class="field"><label>Profissão</label><input id="a_profissao" type="text" value="{{ dados.profissao if dados else '' }}"></div>
+        <div class="field"><label>Data de Nascimento (DD/MM/AAAA)</label><input id="a_data_nascimento" inputmode="numeric" type="text" value="{{ dados.data_nascimento.strftime('%d/%m/%Y') if dados and dados.data_nascimento else '' }}"></div>
+        <button type="button" class="btn-primary" onclick="saveAdicionais()">Salvar</button>
+      </form>`;
+    const rg=document.getElementById('a_rg');
+    const dn=document.getElementById('a_data_nascimento');
+    rg.addEventListener('input',e=>e.target.value=formatRG(e.target.value));
+    dn.addEventListener('input',e=>e.target.value=formatDateBR(e.target.value));
+  }
+
+  if(type==='senha'){
+    body.innerHTML=`
+      <form id="formSenha">
+        <div class="field"><label>Senha Atual</label><input id="s_atual" type="password" placeholder="Senha atual"></div>
+        <div class="field"><label>Nova Senha</label><input id="s_nova" type="password" placeholder="Nova senha (mín. 8)"></div>
+        <div class="field"><label>Confirmar Nova Senha</label><input id="s_confirma" type="password" placeholder="Confirmar nova senha"></div>
+        <button type="button" class="btn-primary" onclick="saveSenha()">Alterar Senha</button>
+      </form>`;
+  }
+  modal.style.display='flex';
+}
+function closeModal(){document.getElementById('editModal').style.display='none';}
+function openConfirmModal(){document.getElementById('confirmModal').style.display='flex';}
+function closeConfirmModal(){document.getElementById('confirmModal').style.display='none';}
+
+/* Foto perfil */
+document.getElementById('fileInput').addEventListener('change',async(e)=>{
+  const file=e.target.files && e.target.files[0];
+  if(!file) return;
+  const fd=new FormData(); fd.append('foto',file);
+  try{
+    const resp=await fetch('/api/cliente/foto',{method:'POST',body:fd});
+    const json=await resp.json();
+    if(json.ok){
+      const baseStatic="{{ url_for('static', filename='') }}";
+      let p=(json.foto_de_perfil||'').replace(/\\/g,'/').replace(/^static\//,'');
+      if(p){
+        document.getElementById('profilePic').src=baseStatic+p+'?t='+Date.now();
+        const headerAvatar=document.getElementById('headerAvatar');
+        if(headerAvatar) headerAvatar.src=baseStatic+p+'?t='+Date.now();
+      }
+      alert('Foto atualizada!');
+    }else{ alert(json.msg||'Erro ao enviar foto.'); }
+  }catch(err){ alert('Falha ao enviar foto.'); }
+});
+async function confirmRemovePhoto(){
+  try{
+    const resp=await fetch('/api/cliente/foto/remover',{method:'POST'});
+    const json=await resp.json();
+    if(json.ok){
+      document.getElementById('profilePic').src='https://via.placeholder.com/96';
+      const headerAvatar=document.getElementById('headerAvatar');
+      if(headerAvatar) headerAvatar.src='https://via.placeholder.com/40';
+      alert('Foto removida.'); closeConfirmModal();
+    }else{ alert(json.msg||'Erro ao remover foto.'); }
+  }catch(e){ alert('Falha ao remover foto.'); }
+}
+
+/* Preferências (placeholder) */
+function savePreferences(){ alert('Preferências salvas localmente.'); }
+
+/* Atualiza valores visuais pós-salvar */
+function setValue(field,value){
+  const el=document.querySelector(`input[data-field="${field}"]`);
+  if(el){
+    if(field==='cpf') el.value=formatCPF(value);
+    else if(field==='telefone') el.value=formatPhone(value);
+    else if(field==='rg') el.value=formatRG(value);
+    else if(field==='data_nascimento') el.value=formatDateBR(value);
+    else el.value=value ?? '';
+  }
+  if(field==='nome'){
+    const t=document.getElementById('nomeTitulo');
+    if(t) t.textContent=value||'Cliente';
+  }
+}
+
+/* Salvar: pessoais */
+async function savePessoais(){
+  const nome=document.getElementById('p_nome').value.trim();
+  const email=document.getElementById('p_email').value.trim();
+  const telefoneMask=document.getElementById('p_telefone').value.trim();
+  const cpfMask=document.getElementById('p_cpf').value.trim();
+  const genero=document.getElementById('p_genero').value;
+  const payload={nome,email,telefone:onlyDigits(telefoneMask),cpf:onlyDigits(cpfMask),genero};
+  try{
+    const resp=await fetch('/api/cliente/pessoais',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const json=await resp.json();
+    if(json.ok){
+      setValue('nome',payload.nome); setValue('email',payload.email);
+      setValue('telefone',payload.telefone); setValue('cpf',payload.cpf);
+      setValue('genero',payload.genero);
+      alert('Dados pessoais atualizados!'); closeModal();
+    }else{ alert(json.msg||'Erro ao salvar dados pessoais.'); }
+  }catch(e){ alert('Falha de rede ao salvar dados pessoais.'); }
+}
+
+/* Salvar: endereço */
+async function saveEndereco(){
+  const payload={
+    cep:document.getElementById('e_cep').value.trim(),
+    rua:document.getElementById('e_rua').value.trim(),
+    bairro:document.getElementById('e_bairro').value.trim(),
+    cidade:document.getElementById('e_cidade').value.trim(),
+    estado:document.getElementById('e_estado').value.trim(),
+    complemento:document.getElementById('e_complemento').value.trim()
+  };
+  try{
+    const resp=await fetch('/api/cliente/endereco',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const json=await resp.json();
+    if(json.ok){
+      setValue('cep',payload.cep); setValue('rua',payload.rua); setValue('bairro',payload.bairro);
+      setValue('cidade',payload.cidade); setValue('estado',payload.estado); setValue('complemento',payload.complemento);
+      alert('Endereço salvo!'); closeModal();
+    }else{ alert(json.msg||'Erro ao salvar endereço.'); }
+  }catch(e){ alert('Falha de rede ao salvar endereço.'); }
+}
+
+/* Salvar: adicionais */
+async function saveAdicionais(){
+  const estado_civil=document.getElementById('a_estado_civil').value.trim();
+  const rgMask=document.getElementById('a_rg').value.trim();
+  const profissao=document.getElementById('a_profissao').value.trim();
+  const dnMask=document.getElementById('a_data_nascimento').value.trim();
+  const dnBR=formatDateBR(dnMask);
+  if(dnBR && !isValidDateBR(dnBR)){ alert('Data de nascimento inválida. Use DD/MM/AAAA.'); return; }
+  const payload={estado_civil,rg:onlyDigits(rgMask),profissao,data_nascimento:dnBR};
+  try{
+    const resp=await fetch('/api/cliente/adicionais',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const json=await resp.json();
+    if(json.ok){
+      setValue('estado_civil',payload.estado_civil); setValue('rg',payload.rg);
+      setValue('profissao',payload.profissao); setValue('data_nascimento',payload.data_nascimento);
+      alert('Dados adicionais salvos!'); closeModal();
+    }else{ alert(json.msg||'Erro ao salvar dados adicionais.'); }
+  }catch(e){ alert('Falha de rede ao salvar dados adicionais.'); }
+}
+
+/* Salvar: senha */
+async function saveSenha(){
+  const atual=document.getElementById('s_atual').value;
+  const nova=document.getElementById('s_nova').value;
+  const conf=document.getElementById('s_confirma').value;
+  if(nova!==conf){ alert('As senhas não coincidem.'); return; }
+  if(nova.length<8){ alert('A nova senha deve ter pelo menos 8 caracteres.'); return; }
+  try{
+    const resp=await fetch('/api/cliente/senha',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({senha_atual:atual,nova_senha:nova})});
+    const json=await resp.json();
+    if(json.ok){ alert('Senha alterada com sucesso!'); closeModal(); }
+    else{ alert(json.msg||'Erro ao alterar senha.'); }
+  }catch(e){ alert('Falha de rede ao alterar senha.'); }
+}
+</script>
+<script>
+// === Toggle da Sidebar (fecha/abre a dashboard) ===
+(function () {
+  const sidebar = document.querySelector('.sidebar');
+  const main    = document.querySelector('.main-content'); // usado só p/ existir no DOM
+  const topbar  = document.querySelector('.topbar');       // idem
+  const btn     = document.getElementById('toggleSidebar');
+
+  if (!sidebar || !btn) return;
+
+  // Aplica o estado visual + acessibilidade + persiste no storage
+  function applyState(collapsed) {
+    sidebar.classList.toggle('collapsed', collapsed);
+    // Aria para leitores de tela
+    btn.setAttribute('aria-expanded', String(!collapsed));
+    btn.setAttribute('aria-label', collapsed ? 'Abrir menu lateral' : 'Fechar menu lateral');
+    // Persiste preferência
+    try { localStorage.setItem('sv_sidebar_collapsed', collapsed ? '1' : '0'); } catch(e){}
+  }
+
+  // Alterna ao clicar
+  btn.addEventListener('click', () => {
+    applyState(!sidebar.classList.contains('collapsed'));
+  });
+
+  // Restaura do storage e faz colapso automático em telas menores
+  function initState() {
+    let saved = null;
+    try { saved = localStorage.getItem('sv_sidebar_collapsed'); } catch(e){}
+    const preferCollapsed = saved === '1';
+
+    // Em telas pequenas, força colapsada na primeira carga
+    const shouldAutoCollapse = window.innerWidth < 900 && saved === null;
+
+    applyState(shouldAutoCollapse ? true : preferCollapsed);
+  }
+
+  // Ajusta quando a janela muda muito de tamanho (opcional)
+  let resizeTO;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTO);
+    resizeTO = setTimeout(() => {
+      // Se não houver preferência salva, adaptar ao breakpoint
+      let saved = null;
+      try { saved = localStorage.getItem('sv_sidebar_collapsed'); } catch(e){}
+      if (saved === null) {
+        applyState(window.innerWidth < 900);
+      }
+    }, 120);
+  });
+
+  // Inicializa
+  initState();
+})();
+</script>
+
+<script>
+/* ===== SafeViana • Ativar item da sidebar automaticamente ===== */
+(function () {
+  // Se quiser forçar manualmente em alguma página, defina antes:
+  // window.ACTIVE_MENU = 'dashboard' | 'meus_dados' | 'cotacoes' | 'apolices' | 'propostas' | 'sinistros';
+
+  // 0) Onde procurar links (ajuste se sua sidebar tiver outro seletor)
+  const LINK_SELECTOR = ".sidebar a, nav.sidebar a, .menu a, .nav a";
+
+  // 1) Mapa de rotas + textos comuns (pode editar/expandir conforme seu app)
+  const MAP = [
+    { key:"dashboard",  paths:["/dashboard","/area-cliente","/cliente/dashboard","/"], texts:["dashboard"] },
+    { key:"meus_dados", paths:["/meus-dados","/cliente/dados"],                   texts:["meus dados","dados"] },
+    { key:"cotacoes",   paths:["/solicitar-cotacoes","/cotacoes","/cliente/cotacoes"], texts:["solicitar cotações","nova cotação","cotações"] },
+    { key:"apolices",   paths:["/apolices","/minhas-apolices","/cliente/apolices"],    texts:["minhas apólices","apólices"] },
+    { key:"propostas",  paths:["/propostas","/minhas-propostas","/cliente/propostas"], texts:["minhas propostas","propostas"] },
+    { key:"sinistros",  paths:["/sinistros","/meus-sinistros","/cliente/sinistros"],   texts:["meus sinistros","sinistros"] },
+  ];
+
+  // 2) Normaliza path atual
+  const norm = s => (s || "").toString().trim().toLowerCase().replace(/\/+$/,"");
+  let current = norm(location.pathname);
+  if (current === "") current = "/";
+
+  // 3) Coleta links da sidebar
+  const links = Array.from(document.querySelectorAll(LINK_SELECTOR));
+  if (!links.length) return;
+
+  // Helper para extrair pathname seguro do href
+  const getPath = (a) => {
+    try { return norm(new URL(a.getAttribute("href"), location.origin).pathname); }
+    catch { return ""; }
+  };
+
+  // 4) Decide alvo (por ACTIVE_MENU → URL exata → começa com → texto)
+  let target = null;
+
+  // 4a) Se o dev quiser forçar via variável global
+  if (window.ACTIVE_MENU) {
+    const wanted = String(window.ACTIVE_MENU).toLowerCase();
+    const item = MAP.find(m => m.key === wanted);
+    if (item) {
+      target = links.find(a => {
+        const p = getPath(a);
+        const t = norm(a.textContent);
+        return item.paths.map(norm).includes(p) || item.texts.some(tx => t.includes(norm(tx)));
+      });
+    }
+  }
+
+  // 4b) Tentativa por URL exata
+  if (!target) {
+    target = links.find(a => getPath(a) === current);
+  }
+
+  // 4c) Tentativa por “começa com” (ex.: /propostas/123)
+  if (!target) {
+    target = links.find(a => {
+      const p = getPath(a);
+      return p && p !== "/" && current.startsWith(p);
+    });
+  }
+
+  // 4d) Tentativa por texto do link (fallback por título)
+  if (!target) {
+    // Descobre a chave provável pela URL atual
+    const guess = MAP.find(m => m.paths.some(p => current === norm(p) || current.startsWith(norm(p))));
+    const texts = guess ? guess.texts : MAP.flatMap(m => m.texts); // se não souber, tenta todos
+    const best = new RegExp("\\b(" + texts.map(t => t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|") + ")\\b","i");
+    target = links.find(a => best.test(a.textContent || ""));
+  }
+
+  // 5) Aplica classe/atributo e injeta estilo mínimo
+  if (target) {
+    target.classList.add("active");
+    target.setAttribute("aria-current","page");
+  }
+
+  if (!document.getElementById("sv-active-style")) {
+    const style = document.createElement("style");
+    style.id = "sv-active-style";
+    style.textContent = `
+      .sidebar a.active, nav.sidebar a.active, .menu a.active, .nav a.active{
+        background:#2e7d32; color:#fff; border-radius:12px;
+        box-shadow:0 6px 14px rgba(46,125,50,.18);
+      }
+      .sidebar a.active i, .sidebar a.active .icon{ color:#fff; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // 6) Log simples pra diagnosticar se precisar
+  // console.log("[SV] path:", current, "→ ativo:", target?.textContent?.trim());
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seja Nosso Parceiro - Safe Viana Corretora Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
+    <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --verde-principal: #18763e;
+            --verde-escuro: #0f4a26;
+            --verde-claro: #2fa855;
+            --verde-suave: #e8f5ed;
+            --dourado: #d4af37;
+            --dourado-claro: #f4e8c1;
+            --cinza-escuro: #2c3e50;
+            --cinza-medio: #546e7a;
+            --cinza-claro: #95a5a6;
+            --branco: #ffffff;
+            --gradiente-verde: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+            --gradiente-dourado: linear-gradient(135deg, var(--dourado) 0%, #b8941f 100%);
+            --sombra-suave: 0 5px 15px rgba(0,0,0,0.08);
+            --sombra-media: 0 8px 30px rgba(0,0,0,0.12);
+            --sombra-destaque: 0 10px 40px rgba(24,118,62,0.15);
+            --borda-radius: 16px;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--cinza-escuro);
+            overflow-x: hidden;
+            background: var(--branco);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+        }
+
+        /* Header Premium */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.6rem 0;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--verde-principal);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .logo-img {
+            width: 50px;
+            height: 50px;
+            background: var(--gradiente-verde);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--branco);
+            font-size: 1.5rem;
+            box-shadow: var(--sombra-suave);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--cinza-escuro);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            padding: 5px 0;
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--dourado);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--verde-principal);
+        }
+
+        .nav-cta {
+            background: var(--gradiente-verde);
+            color: var(--branco);
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(24,118,62,0.3);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(24,118,62,0.4);
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+        }
+
+        /* Hero Section Premium */
+        .hero {
+            margin-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: var(--gradiente-verde);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            animation: backgroundMove 20s linear infinite;
+        }
+
+        @keyframes backgroundMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-text {
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            color: var(--branco);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-text .highlight {
+            color: var(--dourado);
+            display: inline-block;
+            position: relative;
+        }
+
+        .hero-text .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background: rgba(212, 175, 55, 0.2);
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .hero-text p {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--gradiente-dourado);
+            color: var(--branco);
+            box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(212,175,55,0.6);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--branco);
+            border: 2px solid var(--branco);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--branco);
+            color: var(--verde-principal);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+        }
+
+        .hero-image {
+            position: relative;
+            animation: fadeInRight 1s ease;
+        }
+
+        .hero-card {
+            background: rgba(255,255,255,0.95);
+            padding: 2.5rem;
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-media);
+            backdrop-filter: blur(10px);
+            transform: perspective(1000px) rotateY(-5deg);
+            transition: var(--transition);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .hero-card:hover {
+            transform: perspective(1000px) rotateY(0deg);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: var(--verde-suave);
+            border-radius: 12px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--gradiente-dourado);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--sombra-destaque);
+        }
+
+        .stat-item:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--verde-principal);
+            display: block;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .stat-label {
+            color: var(--cinza-escuro);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            padding: 6rem 0;
+            background: var(--branco);
+            position: relative;
+        }
+
+        .benefits::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2318763e' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.8rem;
+            color: var(--verde-principal);
+            margin-bottom: 1rem;
+            position: relative;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradiente-dourado);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--cinza-medio);
+            font-size: 1.2rem;
+            margin-bottom: 4rem;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .benefit-card {
+            background: var(--branco);
+            padding: 2.5rem 2rem;
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-suave);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+            text-align: center;
+        }
+
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradiente-verde);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--sombra-destaque);
+            border-color: var(--verde-principal);
+        }
+
+        .benefit-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .benefit-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: var(--verde-suave);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--verde-principal);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .benefit-card:hover .benefit-icon {
+            background: var(--gradiente-verde);
+            color: var(--branco);
+            transform: scale(1.1);
+        }
+
+        .benefit-title {
+            font-size: 1.5rem;
+            color: var(--verde-principal);
+            margin-bottom: 1rem;
+        }
+
+        .benefit-description {
+            color: var(--cinza-medio);
+            line-height: 1.6;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--verde-suave) 0%, rgba(255,255,255,0.9) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .features::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            transform: rotate(15deg);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            background: var(--branco);
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-suave);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--sombra-destaque);
+        }
+
+        .feature-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--verde-principal), var(--verde-claro));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: var(--branco);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .feature-item:hover .feature-icon {
+            transform: rotateY(180deg);
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            color: var(--verde-principal);
+            margin-bottom: 0.8rem;
+        }
+
+        .feature-desc {
+            color: var(--cinza-medio);
+            font-size: 0.95rem;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 6rem 0;
+            background: var(--branco);
+        }
+
+        .testimonials-slider {
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+
+        .testimonial-card {
+            background: var(--branco);
+            padding: 2.5rem;
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-media);
+            margin: 1rem;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--sombra-destaque);
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 5rem;
+            color: var(--verde-suave);
+            font-family: 'Playfair Display', serif;
+            line-height: 1;
+            z-index: 0;
+        }
+
+        .testimonial-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-text {
+            color: var(--cinza-medio);
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--verde-suave);
+        }
+
+        .author-info h4 {
+            color: var(--verde-principal);
+            margin-bottom: 0.2rem;
+            font-size: 1.1rem;
+        }
+
+        .author-info p {
+            color: var(--cinza-claro);
+            font-size: 0.9rem;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: var(--verde-principal) !important;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 0;
+            background: var(--gradiente-verde);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            animation: backgroundMove 20s linear infinite;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: 2.8rem;
+            color: var(--branco);
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .cta-text {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 6rem 0;
+            background: var(--branco);
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 3rem auto 0;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+            border-radius: var(--borda-radius);
+            overflow: hidden;
+            box-shadow: var(--sombra-suave);
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            box-shadow: var(--sombra-media);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background: var(--verde-suave);
+            color: var(--verde-principal);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background: var(--verde-claro);
+            color: var(--branco);
+        }
+
+        .faq-question i {
+            transition: var(--transition);
+        }
+
+        .faq-answer {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: var(--branco);
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 1.5rem;
+            max-height: 300px;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--cinza-escuro);
+            color: var(--branco);
+            padding: 5rem 0 2rem;
+            position: relative;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--branco);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-description {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .footer-heading {
+            color: var(--branco);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--dourado);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-links a:hover {
+            color: var(--dourado);
+            transform: translateX(5px);
+        }
+
+        .footer-contact {
+            list-style: none;
+        }
+
+        .footer-contact li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .footer-contact i {
+            color: var(--dourado);
+            font-size: 1.2rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--branco);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .social-icon:hover {
+            background: var(--dourado);
+            transform: translateY(-5px);
+        }
+
+        .copyright {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+        }
+
+        /* Form Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+            padding: 1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--branco);
+            padding: 3rem;
+            border-radius: var(--borda-radius);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            animation: slideUp 0.5s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--cinza-claro);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            color: var(--verde-principal);
+            background: var(--verde-suave);
+        }
+
+        .form-title {
+            font-size: 2.2rem;
+            color: var(--verde-principal);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--gradiente-dourado);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--cinza-escuro);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--verde-principal);
+            box-shadow: 0 0 0 3px rgba(24,118,62,0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--gradiente-verde);
+            color: var(--branco);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(24,118,62,0.3);
+        }
+
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--gradiente-verde);
+            color: var(--branco);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(24,118,62,0.3);
+            transition: var(--transition);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(24,118,62,0.4);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 3rem;
+            }
+
+            .hero-text h1 {
+                font-size: 2.8rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger {
+                display: block;
+                font-size: 1.8rem;
+                color: var(--verde-principal);
+            }
+
+            .hero-text h1 {
+                font-size: 2.3rem;
+            }
+
+            .hero-text p {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 2.2rem;
+            }
+
+            .benefits-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-title {
+                font-size: 2.2rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-heading::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .social-icons {
+                justify-content: center;
+            }
+        }
+
+        /* Botão Voltar para Home */
+        .back-to-home {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--gradiente-verde);
+            color: var(--branco);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(24,118,62,0.3);
+            transition: var(--transition);
+            z-index: 999;
+            opacity: 0.9;
+        }
+
+        .back-to-home:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(24,118,62,0.4);
+            opacity: 1;
+        }
+
+        .back-to-home i {
+            font-size: 1.5rem;
+        }
+
+        /* Ajuste para o botão de voltar ao topo quando o botão home estiver presente */
+        .back-to-top {
+            right: 2rem;
+            bottom: 8rem;
+        }
+
+        @media (max-width: 768px) {
+            .back-to-home {
+                bottom: 1.5rem;
+                left: 1.5rem;
+                width: 50px;
+                height: 50px;
+            }
+            
+            .back-to-top {
+                right: 1.5rem;
+                bottom: 7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <nav>
+            <a href="" class="logo">
+                <div class="">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                Safe Viana
+            </a>
+            <ul class="nav-links">
+                <li><a href="#beneficios">Benefícios</a></li>
+                <li><a href="#recursos">Recursos</a></li>
+                <li><a href="#depoimentos">Depoimentos</a></li>
+                <li><a href="#faq">Perguntas Frequentes</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+            <div class="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <a href="index.html" class="back-to-home" title="Voltar para a página inicial">
+        <i class="fas fa-home"></i>
+    </a>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Multiplique seus <span class="highlight">Ganhos</span> como Corretor Parceiro</h1>
+                <p>Junte-se à maior rede de corretores de seguros do Brasil e tenha acesso às melhores comissões, ferramentas exclusivas e suporte completo para crescer.</p>
+                <div class="cta-buttons">
+                    <button class="btn-primary" 
+                     onclick="window.location.href='corretor_cadastro.html'" 
+                     style="font-size: 1.2rem; padding: 1.2rem 3rem;">
+                    <i class="fas fa-handshake"></i> Quero Ser Parceiro
+                </button>
+
+                    <a href="#beneficios" class="btn-secondary">
+                        <i class="fas fa-search"></i> Conhecer Benefícios
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-card">
+                    <h3 style="color: var(--verde-principal); margin-bottom: 1.5rem; text-align: center;">Resultados Comprovados</h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="5000">0</span>
+                            <span class="stat-label">Corretores Parceiros</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="35">0</span>
+                            <span class="stat-label">% Comissão Média</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="98">0</span>
+                            <span class="stat-label">% Satisfação</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="24">0</span>
+                            <span class="stat-label">Horas de Suporte</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="beneficios">
+        <div class="container">
+            <h2 class="section-title">Por que ser nosso Parceiro?</h2>
+            <p class="section-subtitle">Oferecemos as melhores condições do mercado para você crescer</p>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3 class="benefit-title">Comissões Premium</h3>
+                    <p class="benefit-description">As maiores comissões do mercado, com pagamento garantido e bonificações por performance. Ganhe até 35% de comissão em cada venda.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="benefit-title">Ferramentas Exclusivas</h3>
+                    <p class="benefit-description">Sistema completo de gestão, CRM integrado, calculadoras e simuladores que facilitam seu trabalho e aumentam suas vendas.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="benefit-title">Capacitação Contínua</h3>
+                    <p class="benefit-description">Treinamentos mensais, certificações gratuitas e material de apoio para você se tornar um especialista em seguros.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="benefit-title">Suporte Dedicado</h3>
+                    <p class="benefit-description">Equipe especializada disponível 24/7 para ajudar você em todas as etapas do processo de venda.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="benefit-title">Marketing Compartilhado</h3>
+                    <p class="benefit-description">Materiais de marketing prontos, campanhas digitais e leads qualificados para impulsionar suas vendas.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="benefit-title">Programa de Incentivos</h3>
+                    <p class="benefit-description">Premiações mensais, viagens, bônus especiais e reconhecimento para os melhores parceiros da rede.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="recursos">
+        <div class="container">
+            <h2 class="section-title">Recursos Exclusivos para Parceiros</h2>
+            <p class="section-subtitle">Tecnologia e inovação ao seu alcance</p>
+            
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">App Mobile</h3>
+                    <p class="feature-desc">Gerencie suas vendas e clientes de qualquer lugar</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3 class="feature-title">Portal do Corretor</h3>
+                    <p class="feature-desc">Plataforma completa para gestão do seu negócio</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="feature-title">Dashboard Analytics</h3>
+                    <p class="feature-desc">Acompanhe seus resultados em tempo real</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="feature-title">API Integrada</h3>
+                    <p class="feature-desc">Integre nossos produtos ao seu sistema</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-phone-volume"></i>
+                    </div>
+                    <h3 class="feature-title">Central de Vendas</h3>
+                    <p class="feature-desc">Suporte especializado para fechar negócios</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3 class="feature-title">Leads Qualificados</h3>
+                    <p class="feature-desc">Receba contatos de clientes interessados</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="depoimentos">
+        <div class="container">
+            <h2 class="section-title">O que nossos Parceiros dizem</h2>
+            <p class="section-subtitle">Depoimentos de corretores que já fazem parte da nossa rede</p>
+            
+            <div class="testimonials-slider swiper">
+                <div class="swiper-wrapper">
+                    <div class="testimonial-card swiper-slide">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">Desde que me tornei parceiro da Safe Viana, minha rentabilidade aumentou 65%. As comissões são realmente as melhores do mercado e o suporte é excepcional.</p>
+                            <div class="testimonial-author">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Carlos Silva" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>Carlos Silva</h4>
+                                    <p>Corretor há 8 anos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card swiper-slide">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">As ferramentas disponíveis para os corretores parceiros facilitaram muito meu trabalho. Agora consigo gerenciar meus clientes de forma muito mais eficiente.</p>
+                            <div class="testimonial-author">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Ana Santos" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>Ana Santos</h4>
+                                    <p>Corretora há 5 anos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card swiper-slide">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">A capacitação contínua fez toda a diferença na minha carreira. Os treinamentos são de altíssima qualidade e me tornaram um corretor muito mais confiante.</p>
+                            <div class="testimonial-author">
+                                <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Roberto Almeida" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>Roberto Almeida</h4>
+                                    <p>Corretor há 12 anos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="parceria">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Pronto para Transformar sua Carreira?</h2>
+                <p class="cta-text">Junte-se a mais de 5.000 corretores que já fazem parte da nossa rede de sucesso. Cadastre-se agora e comece a lucrar mais!</p>
+                <button class="btn-primary" onclick="window.location.href='corretor_cadastro.html'" 
+        style="font-size: 1.2rem; padding: 1.2rem 3rem;">
+    <i class="fas fa-user-plus"></i> Cadastrar Agora Mesmo
+</button>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Perguntas Frequentes</h2>
+            <p class="section-subtitle">Tire suas dúvidas sobre nossa parceria</p>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Como faço para me tornar um corretor parceiro? <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>O processo é simples: preencha o formulário de cadastro, nossa equipe entrará em contato para validar suas informações e agendar uma entrevista. Após a aprovação, você receberá acesso à plataforma e todo o treinamento necessário.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Quais são os requisitos para ser um parceiro? <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Você precisa ter registro ativo na SUSEP, experiência mínima de 6 meses na área de seguros e disponibilidade para participar dos treinamentos iniciais. Não exigimos volume mínimo de vendas para ingressar na rede.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Como funcionam os pagamentos das comissões? <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>As comissões são pagas mensamente, até o dia 10 de cada mês, referentes às vendas do mês anterior. O pagamento é realizado via transferência bancária e disponibilizamos um extrato detalhado de todas as transações.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Vocês fornecem material de apoio? <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sim, fornecemos amplo material de apoio incluindo apresentações personalizáveis, propostas comerciais, materiais gráficos, campanhas prontas para mídias sociais e acesso à nossa biblioteca de recursos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contato">
+        <div class="footer-content">
+            <div class="footer-col">
+                <div class="footer-logo">
+                    <div class="logo-img">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    Safe Viana
+                </div>
+                <p class="footer-description">A mais completa plataforma de parceria para corretores de seguros do Brasil. Junte-se a nós e transforme sua carreira.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3 class="footer-heading">Links Rápidos</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Sobre Nós</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Nossos Produtos</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Seja um Parceiro</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Carreiras</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3 class="footer-heading">Suporte</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Central de Ajuda</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Área do Corretor</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Contato</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Portal de Treinamento</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3 class="footer-heading">Contato</h3>
+                <ul class="footer-contact">
+                    <li><i class="fas fa-map-marker-alt"></i> Av. Paulista, 1000, São Paulo - SP</li>
+                    <li><i class="fas fa-phone"></i> (11) 3000-1000</li>
+                    <li><i class="fas fa-envelope"></i> parceiros@safeViana.com.br</li>
+                    <li><i class="fas fa-clock"></i> Seg a Sex: 8h às 18h</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2024 Safe Viana Corretora de Seguros. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <a href="#" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- Modal Form -->
+    <div class="modal" id="partnerModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 class="form-title">Torne-se um Parceiro</h2>
+            <form id="partnerForm">
+                <div class="form-group">
+                    <label for="name">Nome Completo</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Telefone</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="experience">Tempo de Experiência</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">Selecione</option>
+                        <option value="less-1">Menos de 1 ano</option>
+                        <option value="1-3">1 a 3 anos</option>
+                        <option value="3-5">3 a 5 anos</option>
+                        <option value="5-10">5 a 10 anos</option>
+                        <option value="more-10">Mais de 10 anos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="state">Estado</label>
+                    <select id="state" name="state" required>
+                        <option value="">Selecione seu estado</option>
+                        <option value="AC">Acre</option>
+                        <option value="AL">Alagoas</option>
+                        <option value="AP">Amapá</option>
+                        <!-- Todos os estados brasileiros -->
+                        <option value="SP">São Paulo</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Por que quer ser nosso parceiro?</label>
+                    <textarea id="message" name="message"></textarea>
+                </div>
+                <button type="submit" class="form-submit">Enviar Cadastro</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Back to top button
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 500) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+
+        backToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Number counter animation
+        const counters = document.querySelectorAll('.stat-number');
+        const speed = 200;
+
+        function animateCounters() {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+                const inc = target / speed;
+                
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + inc);
+                    setTimeout(() => animateCounters(), 1);
+                } else {
+                    counter.innerText = target;
+                }
+            });
+        }
+
+        // Intersection Observer for counter animation
+        const statsSection = document.querySelector('.stats');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        observer.observe(statsSection);
+
+        // Testimonials slider
+        const swiper = new Swiper('.testimonials-slider', {
+            loop: true,
+            spaceBetween: 30,
+            centeredSlides: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            breakpoints: {
+                0: {
+                    slidesPerView: 1,
+                },
+                768: {
+                    slidesPerView: 2,
+                },
+                1024: {
+                    slidesPerView: 3,
+                },
+            },
+        });
+
+        // FAQ accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                item.classList.toggle('active');
+            });
+        });
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('partnerModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('partnerModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('partnerModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('partnerModal')) {
+                closeModal();
+            }
+        });
+
+        // Form submission
+        document.getElementById('partnerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would normally send the form data to a server
+            alert('Obrigado pelo seu interesse! Entraremos em contato em breve.');
+            closeModal();
+            this.reset();
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

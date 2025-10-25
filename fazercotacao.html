@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeViana — Nova Cotação de Seguro</title>
+  <link rel="stylesheet" href="{{ url_for('serve_css', filename='areacr.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+    :root {
+      --sv-green: #2e7d32;
+      --sv-green-dark: #1e6028;
+      --sv-accent: #10b981;
+      --sv-border: #e5e7eb;
+      --sv-light: #f9fafb;
+      --sv-text: #111827;
+      --sv-gradient: linear-gradient(135deg, #2e7d32, #10b981);
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      color: var(--sv-text);
+      background: var(--sv-light);
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    /* ===== Conteúdo principal ===== */
+    .main-content {
+      flex: 1;
+      padding: 20px 30px;
+    }
+
+    .cotacao-wrapper {
+      background: white;
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .cotacao-header {
+      border: 1px solid #d1e7dd;
+      background: linear-gradient(180deg, #f8fcf9, #ffffff);
+      border-radius: 12px;
+      padding: 25px 30px;
+      margin-bottom: 30px;
+    }
+
+    .cotacao-header h1 {
+      font-size: 2rem;
+      color: var(--sv-green-dark);
+      margin: 0 0 10px;
+      font-weight: 700;
+    }
+
+    .cotacao-header p {
+      color: #4b5563;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ===== Seção Tipo de Seguro ===== */
+    .tipo-seguro {
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 25px 30px;
+      background: #ffffff;
+    }
+
+    .tipo-seguro h2 {
+      display: flex;
+      align-items: center;
+      font-size: 1.3rem;
+      color: var(--sv-green-dark);
+      font-weight: 700;
+      margin-bottom: 25px;
+      gap: 10px;
+    }
+
+    .tipo-seguro h2 i {
+      color: var(--sv-green-dark);
+      font-size: 1.4rem;
+    }
+
+    .tipos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .tipo-card {
+      background: #ffffff;
+      border: 1px solid #d1e7dd;
+      border-radius: 12px;
+      text-align: center;
+      padding: 25px 20px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .tipo-card:hover {
+      box-shadow: 0 8px 20px rgba(46, 125, 50, 0.15);
+      border-color: var(--sv-green);
+      transform: translateY(-3px);
+    }
+
+    .tipo-card i {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--sv-green-dark);
+      font-size: 1.8rem;
+      border-radius: 50%;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .tipo-card h3 {
+      margin: 8px 0 6px;
+      font-size: 1.1rem;
+      color: var(--sv-green-dark);
+      font-weight: 700;
+    }
+
+    .tipo-card p {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .cotacao-header h1 {
+        font-size: 1.6rem;
+      }
+      .tipo-seguro {
+        padding: 20px;
+      }
+    }
+
+    /* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;
+  display: inline-block;
+}
+
+/* Avatar + nome lado a lado no topo */
+.topbar .user-info,
+.topbar-right .user-info {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px;
+}
+
+/* Tamanho e alinhamento do avatar */
+.topbar .user-info .small-avatar,
+.topbar .user-info .profile-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #1e7a34; /* sua cor */
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Imagem do avatar */
+.topbar .user-info .small-avatar img,
+.topbar .user-info .profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+/* Nome sem quebrar linha estranha */
+.topbar .user-info .user-name {
+  white-space: nowrap;
+  line-height: 1;
+  display: inline-block;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ======= FORMULÁRIO DE COTAÇÃO AUTOMÓVEL ======= */
+.form-section {
+  border: 1px solid #d1e7dd;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 25px 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+}
+
+.form-section h3 {
+  color: var(--sv-green-dark);
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.form-section p {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+/* Grades responsivas */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 20px;
+}
+
+/* Campos e inputs */
+label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #111827;
+  margin-bottom: 4px;
+  display: block;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #111827;
+  transition: all 0.2s ease;
+  background-color: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--sv-green);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Botão principal */
+.btn-submit,
+button[type="submit"] {
+  background: var(--sv-green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 22px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-submit:hover,
+button[type="submit"]:hover {
+  background: var(--sv-green-dark);
+  transform: translateY(-1px);
+}
+
+/* Card selecionado */
+.tipo-card.active {
+  border: 2px solid var(--sv-green);
+  background: #f0faf4;
+  box-shadow: 0 6px 14px rgba(46, 125, 50, 0.12);
+  transform: scale(1.02);
+  transition: 0.3s;
+}
+
+/* Fade suave ao abrir o formulário */
+#formAuto {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#formAuto.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Anotação final */
+.note {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 15px;
+  text-align: right;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .form-section {
+    padding: 20px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+section[id^="form"]{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s}
+section[id^="form"].show{opacity:1;transform:translateY(0)}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <!-- ===== Sidebar (mantida do dashboard padrão) ===== -->
+    <aside class="sidebar">
+      <div class="topbar-left">
+        <h2>Area<span> Corretor</span></h2>
+      </div>          
+      <nav>
+        <ul>
+          <li><a href="area_corretor"><span class="icon"></span> Dashboard</a></li>
+          <li><a href="visu_clientes_corretor.html"><span class="icon"></span> Clientes</a></li>
+          <li><a href="relatorio_corretor.html" class="active"><span class="icon"></span> Cotações</a></li>
+          <li><a href="apolices_corretor.html"><span class="icon"></span> Apólices</a></li>
+          <li><a href="propostas_corretor.html"><span class="icon"></span> Propostas</a></li>
+          <li><a href="sinistros_corretor.html"><span class="icon"></span> Sinistros</a></li>
+          <li><a href="calendario_corretor.html"><span class="icon"></span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+   <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+          
+          <div class="user-info" id="userInfo">
+  {% set nome = corretor_nome 
+                or session.get('corretor_nome') 
+                or (session.get('user') and session['user'].get('nome')) 
+                or '' %}
+  {% set foto = corretor_foto or session.get('corretor_foto') %}
+
+  {# remove espaços, pega as 2 primeiras letras e sobe pra maiúsculas #}
+  {% set iniciais = ((nome|trim|replace(' ', ''))[:2])|upper %}
+
+  <div class="profile-avatar small-avatar" title="Meu Perfil">
+    {% if foto %}
+      <img src="{{ url_for('static', filename=foto|replace('static/','')) }}" alt="Foto de Perfil">
+    {% else %}
+      <span class="avatar-initials">{{ iniciais }}</span>
+    {% endif %}
+  </div>
+
+  <span class="user-name">{{ nome }}</span>
+</div>
+
+      </header>
+
+      <!-- ===== Corpo principal ===== -->
+<div class="cotacao-wrapper">
+  <div class="cotacao-header">
+    <h1>Nova Cotação de Seguro</h1>
+    <p>
+      Preencha cuidadosamente todas as informações solicitadas abaixo para gerar uma cotação personalizada e precisa
+      para seu cliente. Quanto mais detalhes fornecidos, melhor será a análise de risco e o valor final.
+    </p>
+  </div>
+
+  <!-- ===== Tipo de Seguro ===== -->
+  <section class="tipo-seguro">
+    <h2><i class="fa-solid fa-shield"></i> Tipo de Seguro</h2>
+
+    <div class="tipos-grid">
+      <div class="tipo-card" id="cardAuto">
+        <i class="fa-solid fa-car"></i>
+        <h3>Automóvel</h3>
+        <p>Proteção completa para seu veículo</p>
+      </div>
+
+      <div class="tipo-card" id="cardResid">
+        <i class="fa-solid fa-house"></i>
+        <h3>Residencial</h3>
+        <p>Segurança para seu lar</p>
+      </div>
+
+      <div class="tipo-card" id="cardVida">
+        <i class="fa-solid fa-heart"></i>
+        <h3>Vida</h3>
+        <p>Tranquilidade para sua família</p>
+      </div>
+
+      <div class="tipo-card" id="cardEmpresarial">
+        <i class="fa-solid fa-building"></i>
+        <h3>Empresarial</h3>
+        <p>Cobertura para seu negócio</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Formulário de Automóvel (oculto até clicar) ===== -->
+  <section id="formAuto" style="display:none; margin-top:30px;">
+    <!-- 🔹 Dados do Segurado -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-user"></i> Dados do Segurado</h3>
+      <p>Informações pessoais do cliente para análise da cotação</p>
+
+      <div class="form-grid">
+        <div><label>Nome Completo *</label><input name="nome" type="text" placeholder="Nome completo do segurado"></div>
+        <div><label>CPF/CNPJ *</label><input name="cpf_cnpj" type="text" placeholder="000.000.000-00 ou 00.000.000/0000-00"></div>
+        <div><label>E-mail *</label><input name="email" type="email" placeholder="email@exemplo.com"></div>
+        <div><label>Telefone *</label><input name="telefone" type="text" placeholder="(00) 00000-0000"></div>
+        <div><label>CEP *</label><input name="cep" type="text" placeholder="00000-000"></div>
+        <div><label>Endereço Completo *</label><input name="endereco" type="text" placeholder="Rua, número, complemento, bairro"></div>
+        <div><label>Cidade *</label><input name="cidade" type="text" placeholder="Cidade"></div>
+        <div>
+          <label>Estado *</label>
+          <select name="estado">
+            <option selected disabled>Selecione o estado</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div><label>Data de Nascimento *</label><input name="data_nascimento" type="date"></div>
+      </div>
+    </div>
+
+    <!-- 🔹 Dados do Veículo -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-car-side"></i> Dados do Veículo</h3>
+      <p>Informações detalhadas do automóvel para cálculo do seguro</p>
+
+      <div class="form-grid">
+        <div>
+          <label>Marca *</label>
+          <select name="marca">
+            <option selected disabled>Selecione a marca</option>
+            <option>Chevrolet</option><option>Fiat</option><option>Volkswagen</option>
+            <option>Ford</option><option>Hyundai</option><option>Honda</option>
+            <option>Toyota</option><option>Renault</option><option>Peugeot</option><option>Outros</option>
+          </select>
+        </div>
+
+        <div><label>Modelo *</label><input name="modelo" type="text" placeholder="Ex: Civic, Corolla, Onix"></div>
+        <div><label>Versão *</label><input name="versao" type="text" placeholder="Ex: EXL, XEi, LTZ"></div>
+
+        <div>
+          <label>Ano Modelo *</label>
+          <select name="ano_modelo">
+            <option selected disabled>Selecione</option>
+            {% for ano in range(2025, 1995, -1) %}<option>{{ ano }}</option>{% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label>Ano Fabricação *</label>
+          <select name="ano_fabricacao">
+            <option selected disabled>Selecione</option>
+            {% for ano in range(2025, 1995, -1) %}<option>{{ ano }}</option>{% endfor %}
+          </select>
+        </div>
+
+        <div><label>Placa *</label><input name="placa" type="text" placeholder="ABC-1234"></div>
+        <div><label>RENAVAM</label><input name="renavam" type="text" placeholder="00000000000"></div>
+        <div><label>Chassi *</label><input name="chassi" type="text" placeholder="000000"></div>
+        <div><label>Valor FIPE *</label><input name="valor_fipe" type="text" placeholder="R$ 0,00"></div>
+
+        <div>
+          <label>Combustível *</label>
+          <select name="combustivel">
+            <option selected disabled>Selecione</option>
+            <option>Gasolina</option><option>Etanol</option><option>Flex</option>
+            <option>Diesel</option><option>GNV</option><option>Elétrico</option><option>Híbrido</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Cor do Veículo *</label>
+          <select name="cor">
+            <option selected disabled>Selecione</option>
+            <option>Preto</option><option>Branco</option><option>Prata</option>
+            <option>Cinza</option><option>Vermelho</option><option>Azul</option>
+            <option>Verde</option><option>Outro</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Número de Portas *</label>
+          <select name="portas">
+            <option selected disabled>Selecione</option>
+            <option>2</option><option>4</option><option>5</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Finalidade de Uso *</label>
+          <select name="finalidade_uso">
+            <option selected disabled>Selecione</option>
+            <option>Particular</option><option>Profissional</option>
+            <option>Aplicativo</option><option>Locadora</option>
+            <option>Táxi</option><option>Outros</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Quilometragem Anual *</label>
+          <select name="km_anual">
+            <option selected disabled>Selecione</option>
+            <option>Até 5.000 km</option>
+            <option>5.001 a 10.000 km</option>
+            <option>10.001 a 20.000 km</option>
+            <option>20.001 a 30.000 km</option>
+            <option>Acima de 30.000 km</option>
+          </select>
+        </div>
+
+        <div><label>CEP de Pernoite *</label><input name="cep_pernoite" type="text" placeholder="00000-000"></div>
+
+        <div>
+          <label>Local de Pernoite *</label>
+          <select name="local_pernoite">
+            <option selected disabled>Selecione</option>
+            <option>Garagem fechada</option>
+            <option>Garagem aberta</option>
+            <option>Via pública</option>
+            <option>Estacionamento</option>
+            <option>Outro local</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Possui Alarme? *</label>
+          <select name="alarme"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+
+        <div>
+          <label>Possui Rastreador? *</label>
+          <select name="rastreador"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+
+        <div>
+          <label>Bloqueador/Antifurto? *</label>
+          <select name="bloqueador"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+
+        <div><label>Nome do Condutor *</label><input name="condutor_nome" type="text" placeholder="Nome completo"></div>
+        <div><label>CPF do Condutor *</label><input name="condutor_cpf" type="text" placeholder="000.000.000-00"></div>
+        <div><label>Data de Nascimento *</label><input name="condutor_nascimento" type="date"></div>
+        <div><label>Número da CNH *</label><input name="cnh" type="text" placeholder="00000000000"></div>
+
+        <div>
+          <label>Tempo de Habilitação *</label>
+          <select name="tempo_habilitacao">
+            <option selected disabled>Selecione</option>
+            <option>Menos de 1 ano</option>
+            <option>1 a 3 anos</option>
+            <option>3 a 5 anos</option>
+            <option>Mais de 5 anos</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Estado Civil *</label>
+          <select name="estado_civil">
+            <option selected disabled>Selecione</option>
+            <option>Solteiro(a)</option>
+            <option>Casado(a)</option>
+            <option>Divorciado(a)</option>
+            <option>Viúvo(a)</option>
+            <option>União Estável</option>
+          </select>
+        </div>
+
+        <div><label>Profissão *</label><input name="profissao" type="text" placeholder="Ex: Advogado, Médico"></div>
+      </div>
+    </div>
+
+    <!-- 🔹 Informações adicionais -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-note-sticky"></i> Informações Adicionais e Observações</h3>
+      <textarea name="observacoes" placeholder="Descreva qualquer informação adicional relevante, como histórico de sinistros, necessidades específicas de cobertura, prazos desejados, etc."></textarea>
+    </div>
+
+    <div style="text-align:right;margin-top:10px;">
+      <button class="btn-submit" type="button">
+        <i class="fa-solid fa-paper-plane"></i> Solicitar Cotação
+      </button>
+      <p class="note">Ao solicitar a cotação, você concorda que todas as informações fornecidas são verdadeiras e precisas.</p>
+    </div>
+  </section>
+
+  <!-- ===== RESIDENCIAL ===== -->
+  <section id="formResidencial" style="display:none; margin-top:30px;">
+    <!-- 🔹 Dados do Segurado -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-user"></i> Dados do Segurado</h3>
+      <p>Informações pessoais do cliente para análise da cotação</p>
+
+      <div class="form-grid">
+        <div><label>Nome Completo *</label><input name="nome" type="text" placeholder="Nome completo do segurado"></div>
+        <div><label>CPF/CNPJ *</label><input name="cpf_cnpj" type="text" placeholder="000.000.000-00 ou 00.000.000/0000-00"></div>
+        <div><label>E-mail *</label><input name="email" type="email" placeholder="email@exemplo.com"></div>
+        <div><label>Telefone *</label><input name="telefone" type="text" placeholder="(00) 00000-0000"></div>
+        <div><label>CEP *</label><input name="cep" type="text" placeholder="00000-000"></div>
+        <div><label>Endereço Completo *</label><input name="endereco" type="text" placeholder="Rua, número, complemento, bairro"></div>
+        <div><label>Cidade *</label><input name="cidade" type="text" placeholder="Cidade"></div>
+        <div>
+          <label>Estado *</label>
+          <select name="estado">
+            <option selected disabled>Selecione o estado</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div><label>Data de Nascimento *</label><input name="data_nascimento" type="date"></div>
+      </div>
+    </div>
+
+    <!-- 🔹 Dados do Imóvel -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-house"></i> Dados do Imóvel</h3>
+      <p>Informações detalhadas do imóvel para cálculo do seguro residencial</p>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:15px;">• Características do Imóvel</h4>
+      <div class="form-grid">
+        <div>
+          <label>Tipo de Imóvel *</label>
+          <select name="tipo_imovel">
+            <option selected disabled>Selecione</option>
+            <option>Casa</option><option>Apartamento</option><option>Sobrado</option><option>Kitnet</option><option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label>Uso do Imóvel *</label>
+          <select name="uso_imovel">
+            <option selected disabled>Selecione</option>
+            <option>Residencial</option><option>Veraneio</option><option>Locação</option><option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label>Ocupação *</label>
+          <select name="ocupacao">
+            <option selected disabled>Selecione</option>
+            <option>Próprio</option><option>Alugado</option><option>Desocupado</option>
+          </select>
+        </div>
+        <div><label>Área Total (m²) *</label><input name="area_total" type="number" min="0" placeholder="0"></div>
+        <div><label>Área Construída (m²) *</label><input name="area_construida" type="number" min="0" placeholder="0"></div>
+        <div><label>Quartos *</label><input name="quartos" type="number" min="0" placeholder="Qtd"></div>
+        <div><label>Banheiros *</label><input name="banheiros" type="number" min="0" placeholder="Qtd"></div>
+        <div>
+          <label>Ano de Construção *</label>
+          <select name="ano_construcao">
+            <option selected disabled>Ano</option>
+            {% for ano in range(2025, 1960, -1) %}<option>{{ ano }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Tipo de Construção *</label>
+          <select name="tipo_construcao">
+            <option selected disabled>Selecione</option>
+            <option>Alvenaria</option><option>Madeira</option><option>Mista</option><option>Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Valores para Cobertura</h4>
+      <div class="form-grid">
+        <div><label>Valor do Imóvel *</label><input name="valor_imovel" type="text" placeholder="R$ 0,00"></div>
+        <div><label>Valor do Conteúdo *</label><input name="valor_conteudo" type="text" placeholder="R$ 0,00"></div>
+        <div><label>Responsabilidade Civil</label><input name="responsabilidade_civil" type="text" placeholder="R$ 0,00"></div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Segurança do Imóvel</h4>
+      <div class="form-grid">
+        <div>
+          <label>Possui Alarme? *</label>
+          <select name="alarme"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Possui Câmeras? *</label>
+          <select name="cameras"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Portaria/Segurança 24h?</label>
+          <select name="portaria_24h"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Grades nas Janelas?</label>
+          <select name="grades_janelas"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Extintores de Incêndio?</label>
+          <select name="extintores"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 Informações adicionais -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-note-sticky"></i> Informações Adicionais e Observações</h3>
+      <p>Observações, dúvidas ou requisitos especiais</p>
+      <textarea name="observacoes" placeholder="Descreva qualquer informação adicional relevante que possa auxiliar na elaboração da cotação, como histórico de sinistros, necessidades específicas de cobertura, prazos desejados, etc."></textarea>
+    </div>
+
+    <div style="text-align:right;margin-top:10px;">
+      <button class="btn-submit" type="button">
+        <i class="fa-solid fa-paper-plane"></i> Solicitar Cotação
+      </button>
+      <p class="note">Ao solicitar a cotação, você concorda que todas as informações fornecidas são verdadeiras e precisas.</p>
+    </div>
+  </section>
+
+  <!-- ===== VIDA ===== -->
+  <section id="formVida" style="display:none; margin-top:30px;">
+    <!-- 🔹 Dados do Segurado -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-user"></i> Dados do Segurado</h3>
+      <p>Informações pessoais do cliente para análise da cotação</p>
+
+      <div class="form-grid">
+        <div><label>Nome Completo *</label><input name="nome" type="text" placeholder="Nome completo do segurado"></div>
+        <div><label>CPF/CNPJ *</label><input name="cpf_cnpj" type="text" placeholder="000.000.000-00 ou 00.000.000/0000-00"></div>
+        <div><label>E-mail *</label><input name="email" type="email" placeholder="email@exemplo.com"></div>
+        <div><label>Telefone *</label><input name="telefone" type="text" placeholder="(00) 00000-0000"></div>
+        <div><label>CEP *</label><input name="cep" type="text" placeholder="00000-000"></div>
+        <div><label>Endereço Completo *</label><input name="endereco" type="text" placeholder="Rua, número, complemento, bairro"></div>
+        <div><label>Cidade *</label><input name="cidade" type="text" placeholder="Cidade"></div>
+        <div>
+          <label>Estado *</label>
+          <select name="estado">
+            <option selected disabled>Selecione o estado</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div><label>Data de Nascimento *</label><input name="data_nascimento" type="date"></div>
+      </div>
+    </div>
+
+    <!-- 🔹 Dados do Seguro de Vida -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-heart"></i> Dados do Seguro de Vida</h3>
+      <p>Informações para cálculo do seguro de vida e coberturas desejadas</p>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:15px;">• Informações Pessoais</h4>
+      <div class="form-grid">
+        <div><label>Altura (cm) *</label><input name="altura_cm" type="number" placeholder="170"></div>
+        <div><label>Peso (kg) *</label><input name="peso_kg" type="number" placeholder="70"></div>
+        <div>
+          <label>Estado Civil *</label>
+          <select name="estado_civil">
+            <option selected disabled>Selecione</option>
+            <option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option>
+          </select>
+        </div>
+        <div><label>Profissão *</label><input name="profissao" type="text" placeholder="Ex: Engenheiro, Médico, Professor"></div>
+        <div>
+          <label>Renda Mensal *</label>
+          <select name="renda_mensal">
+            <option selected disabled>Selecione</option>
+            <option>Até R$ 3.000</option><option>R$ 3.001 a R$ 6.000</option><option>R$ 6.001 a R$ 10.000</option><option>Acima de R$ 10.000</option>
+          </select>
+        </div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Saúde e Hábitos</h4>
+      <div class="form-grid">
+        <div>
+          <label>É Fumante? *</label>
+          <select name="fumante"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Pratica Esportes de Risco?</label>
+          <select name="esportes_risco"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Pratica Atividade Física?</label>
+          <select name="atividade_fisica"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Possui Doença Preexistente? *</label>
+          <select name="doenca_preexistente"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+      </div>
+
+      <label>Detalhes sobre Saúde <span style="color:#6b7280;font-weight:normal;">(cirurgias, tratamentos, medicamentos)</span></label>
+      <textarea name="detalhes_saude" placeholder="Descreva qualquer condição de saúde relevante..."></textarea>
+    </div>
+
+    <div class="form-section">
+      <h4 style="color:var(--sv-green-dark);margin-top:15px;">• Coberturas Desejadas</h4>
+      <div class="form-grid">
+        <div>
+          <label>Capital para Morte *</label>
+          <select name="capital_morte"><option selected disabled>Selecione</option><option>R$ 50.000</option><option>R$ 100.000</option><option>R$ 200.000</option><option>R$ 500.000</option></select>
+        </div>
+        <div>
+          <label>Capital para Invalidez *</label>
+          <select name="capital_invalidez"><option selected disabled>Selecione</option><option>R$ 50.000</option><option>R$ 100.000</option><option>R$ 200.000</option><option>R$ 500.000</option></select>
+        </div>
+        <div>
+          <label>Cobertura para Doenças Graves?</label>
+          <select name="doencas_graves"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Assistência Funeral?</label>
+          <select name="assistencia_funeral"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4 style="color:var(--sv-green-dark);margin-top:15px;">• Beneficiários</h4>
+      <div class="form-grid">
+        <div><label>Nome do Beneficiário *</label><input name="beneficiario_nome" type="text" placeholder="Nome completo"></div>
+        <div><label>CPF do Beneficiário *</label><input name="beneficiario_cpf" type="text" placeholder="000.000.000-00"></div>
+        <div>
+          <label>Parentesco *</label>
+          <select name="beneficiario_parentesco">
+            <option selected disabled>Selecione</option>
+            <option>Cônjuge</option><option>Filho(a)</option><option>Pai/Mãe</option><option>Irmão(a)</option><option>Outro</option>
+          </select>
+        </div>
+        <div><label>Percentual da Indenização (%) *</label><input name="beneficiario_percentual" type="number" value="100"></div>
+      </div>
+    </div>
+
+    <!-- 🔹 Informações adicionais -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-note-sticky"></i> Informações Adicionais e Observações</h3>
+      <p>Observações, dúvidas ou requisitos especiais</p>
+      <textarea name="observacoes" placeholder="Descreva qualquer informação adicional relevante que possa auxiliar na elaboração da cotação, como histórico de sinistros, necessidades específicas de cobertura, prazos desejados, etc."></textarea>
+    </div>
+
+    <div style="text-align:right;margin-top:10px;">
+      <button class="btn-submit" type="button">
+        <i class="fa-solid fa-paper-plane"></i> Solicitar Cotação
+      </button>
+      <p class="note">Ao solicitar a cotação, você concorda que todas as informações fornecidas são verdadeiras e precisas.</p>
+    </div>
+  </section>
+
+  <!-- ===== EMPRESARIAL ===== -->
+  <section id="formEmpresarial" style="display:none; margin-top:30px;">
+    <!-- 🔹 Dados do Segurado -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-user"></i> Dados do Segurado</h3>
+      <p>Informações pessoais do cliente para análise da cotação</p>
+
+      <div class="form-grid">
+        <div><label>Nome Completo *</label><input name="nome" type="text" placeholder="Nome completo do segurado"></div>
+        <div><label>CPF/CNPJ *</label><input name="cpf_cnpj" type="text" placeholder="000.000.000-00 ou 00.000.000/0000-00"></div>
+        <div><label>E-mail *</label><input name="email" type="email" placeholder="email@exemplo.com"></div>
+        <div><label>Telefone *</label><input name="telefone" type="text" placeholder="(00) 00000-0000"></div>
+        <div><label>CEP *</label><input name="cep" type="text" placeholder="00000-000"></div>
+        <div><label>Endereço Completo *</label><input name="endereco" type="text" placeholder="Rua, número, complemento, bairro"></div>
+        <div><label>Cidade *</label><input name="cidade" type="text" placeholder="Cidade"></div>
+        <div>
+          <label>Estado *</label>
+          <select name="estado">
+            <option selected disabled>Selecione o estado</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div><label>Data de Nascimento *</label><input name="data_nascimento" type="date"></div>
+      </div>
+    </div>
+
+    <!-- 🔹 Dados da Empresa -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-building"></i> Dados da Empresa</h3>
+      <p>Informações empresariais para cálculo do seguro</p>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:15px;">• Informações da Empresa</h4>
+      <div class="form-grid">
+        <div><label>Razão Social *</label><input name="razao_social" type="text" placeholder="Razão social da empresa"></div>
+        <div><label>Nome Fantasia</label><input name="nome_fantasia" type="text" placeholder="Nome fantasia"></div>
+        <div><label>CNPJ *</label><input name="cnpj" type="text" placeholder="00.000.000/0000-00"></div>
+        <div><label>Inscrição Estadual</label><input name="inscricao_estadual" type="text" placeholder="000.000.000.000"></div>
+        <div><label>Inscrição Municipal</label><input name="inscricao_municipal" type="text" placeholder="000000"></div>
+        <div>
+          <label>Ramo de Atividade *</label>
+          <select name="ramo_atividade">
+            <option selected disabled>Selecione</option>
+            <option>Comércio</option><option>Serviços</option><option>Indústria</option><option>Saúde</option><option>Educação</option><option>Outros</option>
+          </select>
+        </div>
+        <div>
+          <label>Número de Funcionários *</label>
+          <select name="num_funcionarios">
+            <option selected disabled>Selecione</option>
+            <option>1 a 5</option><option>6 a 10</option><option>11 a 50</option><option>Mais de 50</option>
+          </select>
+        </div>
+        <div>
+          <label>Faturamento Anual *</label>
+          <select name="faturamento_anual">
+            <option selected disabled>Selecione</option>
+            <option>Até R$ 500 mil</option><option>R$ 500 mil a R$ 1 milhão</option><option>R$ 1 a 5 milhões</option><option>Acima de R$ 5 milhões</option>
+          </select>
+        </div>
+        <div>
+          <label>Tempo de Atividade *</label>
+          <select name="tempo_atividade">
+            <option selected disabled>Selecione</option>
+            <option>Menos de 1 ano</option><option>1 a 3 anos</option><option>3 a 5 anos</option><option>Mais de 5 anos</option>
+          </select>
+        </div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Imóvel Comercial</h4>
+      <div class="form-grid">
+        <div>
+          <label>Tipo de Imóvel *</label>
+          <select name="tipo_imovel_comercial"><option selected disabled>Selecione</option><option>Próprio</option><option>Alugado</option></select>
+        </div>
+        <div><label>Área Total (m²) *</label><input name="area_total" type="number" placeholder="0"></div>
+        <div>
+          <label>Tipo de Construção *</label>
+          <select name="tipo_construcao"><option selected disabled>Selecione</option><option>Alvenaria</option><option>Madeira</option><option>Mista</option></select>
+        </div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Valores e Coberturas</h4>
+      <div class="form-grid">
+        <div><label>Valor do Edifício *</label><input name="valor_edificio" type="text" placeholder="R$ 0,00"></div>
+        <div><label>Valor do Conteúdo *</label><input name="valor_conteudo" type="text" placeholder="R$ 0,00"></div>
+        <div><label>Valor dos Equipamentos</label><input name="valor_equipamentos" type="text" placeholder="R$ 0,00"></div>
+        <div><label>Valor do Estoque</label><input name="valor_estoque" type="text" placeholder="R$ 0,00"></div>
+        <div>
+          <label>Lucros Cessantes (meses)</label>
+          <select name="lucros_cessantes"><option selected disabled>Selecione</option><option>3</option><option>6</option><option>12</option></select>
+        </div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Segurança</h4>
+      <div class="form-grid">
+        <div>
+          <label>Sistema de Segurança *</label>
+          <select name="sistema_seguranca"><option selected disabled>Selecione</option><option>Alarme</option><option>Monitoramento</option><option>Portaria</option><option>Outros</option></select>
+        </div>
+        <div>
+          <label>CFTV/Câmeras?</label>
+          <select name="cftv"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Segurança 24h?</label>
+          <select name="seguranca_24h"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+        <div>
+          <label>Sistema Sprinklers?</label>
+          <select name="sprinklers"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+      </div>
+
+      <h4 style="color:var(--sv-green-dark);margin-top:25px;">• Responsabilidade Civil</h4>
+      <div class="form-grid">
+        <div>
+          <label>RC Geral - Limite</label>
+          <select name="rc_geral"><option selected disabled>Selecione</option><option>R$ 100.000</option><option>R$ 500.000</option><option>R$ 1.000.000</option></select>
+        </div>
+        <div>
+          <label>RC Profissional</label>
+          <select name="rc_profissional"><option selected disabled>Selecione</option><option>Sim</option><option>Não</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 Informações adicionais -->
+    <div class="form-section">
+      <h3><i class="fa-solid fa-note-sticky"></i> Informações Adicionais e Observações</h3>
+      <p>Observações, dúvidas ou requisitos especiais</p>
+      <textarea name="observacoes" placeholder="Descreva qualquer informação adicional relevante que possa auxiliar na elaboração da cotação, como histórico de sinistros, necessidades específicas de cobertura, prazos desejados, etc."></textarea>
+    </div>
+
+    <div style="text-align:right;margin-top:10px;">
+      <button class="btn-submit" type="button">
+        <i class="fa-solid fa-paper-plane"></i> Solicitar Cotação
+      </button>
+      <p class="note">Ao solicitar a cotação, você concorda que todas as informações fornecidas são verdadeiras e precisas.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+// ======================= Utils =======================
+const brl = (n) => (Number(n)||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' });
+
+function formToJSON(sectionEl){
+  const data = {};
+  sectionEl.querySelectorAll("input, select, textarea").forEach(el=>{
+    let val = (el.value ?? "").toString().trim();
+    // Se for <select> e o texto começar com "Selec..." vira vazio
+    if (el.tagName === "SELECT") {
+      const low = val.toLowerCase();
+      if (low.startsWith("selec")) val = "";
+    }
+    const name = el.name || el.id || el.placeholder || "campo";
+    const key = String(name).toLowerCase().replace(/[^\w]+/g,'_').replace(/^_+|_+$/g,'');
+    data[key] = val;
+  });
+  return data;
+}
+
+function detectTipoBySection(sectionId){
+  if (sectionId === "formAuto") return "automovel";
+  if (sectionId === "formResidencial") return "residencial";
+  if (sectionId === "formVida") return "vida";
+  if (sectionId === "formEmpresarial") return "empresarial";
+  return "";
+}
+async function criarCotacoesJSON(tipo, dados){
+  const resp = await fetch("/cotacoes/json", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ tipo_seguro: tipo, dados })
+  });
+  if(!resp.ok){
+    const txt = await resp.text().catch(()=> "Erro ao consultar cotações");
+    throw new Error(txt || "Erro ao consultar cotações");
+  }
+  return resp.json(); // << agora esperamos JSON
+}
+
+// ======================= Estilos dos cards (injeção) =======================
+(function ensureStyles(){
+  if (document.getElementById("sv-propostas-css")) return;
+  const css = `
+  .grid-propostas{
+    display:grid; gap:16px; 
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    margin-top:10px;
+  }
+  .proposta-card{
+    border:1px solid var(--sv-border);
+    background:#fff; border-radius:12px; padding:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    transition:.25s ease; position:relative; overflow:hidden;
+  }
+  .proposta-card:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,.08); }
+  .proposta-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .badge-seg{ font-weight:700; color:var(--sv-green-dark); }
+  .score{ font-size:.9rem; color:#6b7280; }
+  .preco{ font-size:1.35rem; font-weight:800; color:var(--sv-green-dark); margin:8px 0; }
+  .linha{ height:1px; background:var(--sv-border); margin:10px 0; }
+  .ul-clean{ list-style:none; padding:0; margin:0; font-size:.9rem; color:#374151; }
+  .ul-clean li{ display:flex; align-items:center; gap:8px; margin:6px 0; }
+  .proposta-actions{ margin-top:12px; display:flex; gap:8px; }
+  .btn-sv{
+    background:var(--sv-green); color:#fff; border:0; border-radius:8px;
+    padding:10px 14px; font-weight:700; cursor:pointer; transition:.2s;
+  }
+  .btn-sv:hover{ background:var(--sv-green-dark); transform:translateY(-1px); }
+  .btn-outline{
+    background:#fff; color:var(--sv-green-dark); border:1px solid var(--sv-green);
+  }
+  .pill{ font-size:.75rem; padding:3px 8px; border-radius:999px; background:#e9f5ee; color:#1e6028; }
+  `;
+  const style = document.createElement("style");
+  style.id = "sv-propostas-css";
+  style.textContent = css;
+  document.head.appendChild(style);
+})();
+
+// ======================= DOM refs =======================
+const sidebarBtn = document.getElementById("toggleSidebar");
+const cardAuto = document.getElementById("cardAuto");
+const cardResid = document.getElementById("cardResid");
+const cardVida = document.getElementById("cardVida");
+const cardEmpresarial = document.getElementById("cardEmpresarial");
+
+const formAuto = document.getElementById("formAuto");
+const formResid = document.getElementById("formResidencial");
+const formVida = document.getElementById("formVida");
+const formEmpresarial = document.getElementById("formEmpresarial");
+
+// ======================= Sidebar =======================
+sidebarBtn?.addEventListener("click", () => {
+  document.querySelector(".sidebar")?.classList.toggle("collapsed");
+});
+
+// ======================= Abre/fecha formulários =======================
+function toggleFormulario(cardAtivo, formAtivo) {
+  if (!cardAtivo || !formAtivo) return;
+  const mesmoCard = cardAtivo.classList.contains("active");
+
+  if (mesmoCard) {
+    cardAtivo.classList.remove("active");
+    formAtivo.classList.remove("show");
+    setTimeout(() => formAtivo.style.display = "none", 200);
+    return;
+  }
+
+  document.querySelectorAll(".tipo-card").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll("section[id^='form']").forEach(f => {
+    f.style.display = "none";
+    f.classList.remove("show");
+  });
+
+  cardAtivo.classList.add("active");
+  formAtivo.style.setProperty('display','block','important');
+  requestAnimationFrame(() => formAtivo.classList.add("show"));
+  formAtivo.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// Eventos dos cards
+cardAuto?.addEventListener("click", () => toggleFormulario(cardAuto, formAuto));
+cardResid?.addEventListener("click", () => toggleFormulario(cardResid, formResid));
+cardVida?.addEventListener("click", () => toggleFormulario(cardVida, formVida));
+cardEmpresarial?.addEventListener("click", () => toggleFormulario(cardEmpresarial, formEmpresarial));
+
+// ======================= Renderização dos cards =======================
+function buildCardHTML(p){
+  const franquiaStr = p.tipo_seguro === "automovel" ? `<li><i class="fa-solid fa-shield-halved"></i> Franquia: <strong>${brl(p.franquia)}</strong></li>` : "";
+  const cob = (p.coberturas||[]).slice(0,4).map(c=>`<li><i class="fa-regular fa-circle-check"></i> ${c}</li>`).join("");
+  const ast = (p.assistencias||[]).slice(0,3).map(a=>`<span class="pill">${a}</span>`).join(" ");
+
+  return `
+  <div class="proposta-card" data-id="${p.id}">
+    <div class="proposta-head">
+      <div class="badge-seg">${p.seguradora}</div>
+      <div class="score" title="Score interno de aderência">Score: <strong>${p.score}</strong></div>
+    </div>
+    <div class="preco">${brl(p.premio_mensal)} <span style="font-size:.9rem;font-weight:600;color:#6b7280">/ mês</span></div>
+    <div class="linha"></div>
+    <ul class="ul-clean">
+      ${franquiaStr}
+      ${cob}
+    </ul>
+    <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${ast}</div>
+    <div style="margin-top:8px; font-size:.8rem; color:#6b7280;">Validade: ${p.validade} • Pagamento: ${p.prazo_pagamento||"Mensal"}</div>
+    <div class="proposta-actions">
+      <button class="btn-sv" data-action="detalhes"><i class="fa-regular fa-eye"></i> Ver detalhes</button>
+      <button class="btn-sv btn-outline" data-action="enviar"><i class="fa-regular fa-paper-plane"></i> Enviar ao cliente</button>
+    </div>
+  </div>`;
+}
+
+function montarGridHTML(propostas){
+  if(!propostas || !propostas.length){
+    return `
+      <div style="padding:16px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;color:#92400e;">
+        Nenhuma proposta encontrada para os critérios informados.
+      </div>`;
+  }
+  const cards = propostas.map(buildCardHTML).join("");
+  return `
+    <div class="grid-propostas">
+      ${cards}
+    </div>`;
+}
+
+// ======================= Enviar cotação =======================
+document.querySelectorAll(".btn-submit").forEach(btn => {
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const section = e.target.closest("section");
+    const tipo = detectTipoBySection(section?.id || "");
+    if(!tipo){ alert("Selecione um tipo de seguro."); return; }
+
+    const dados = formToJSON(section);
+    btn.disabled = true;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Buscando cotações...`;
+
+    let container = document.getElementById("resultadoCotacao");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "resultadoCotacao";
+      container.style.marginTop = "30px";
+      document.querySelector(".cotacao-wrapper").appendChild(container);
+    }
+    container.innerHTML = `
+      <div id="loadingCotacao" style="text-align:center;padding:40px 0;font-size:1.1rem;color:#1e6028;font-weight:600;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;margin-bottom:10px;"></i><br>
+        Consultando seguradoras...
+        <p style="font-size:.9rem;color:#6b7280;margin-top:8px;">Aguarde alguns segundos…</p>
+      </div>
+    `;
+
+    try{
+      const json = await criarCotacoesJSON(tipo, dados);
+      if(!json.ok) throw new Error(json.erro || "Falha ao obter propostas.");
+
+      // Renderiza grid
+      container.innerHTML = montarGridHTML(json.propostas);
+
+      // Animação de entrada
+      const grid = container.querySelector(".grid-propostas");
+      if (grid){
+        grid.style.opacity = "0";
+        grid.style.transform = "translateY(20px)";
+        grid.style.transition = "all .45s ease";
+        requestAnimationFrame(()=>{
+          grid.style.opacity = "1";
+          grid.style.transform = "translateY(0)";
+        });
+      }
+
+      // Ações dos botões nos cards (exemplo)
+      container.querySelectorAll(".proposta-card .btn-sv").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const action = b.getAttribute("data-action");
+          const id = b.closest(".proposta-card")?.getAttribute("data-id");
+          if(action === "detalhes"){
+            alert("Detalhes da proposta: " + id);
+          } else if (action === "enviar"){
+            alert("Enviar proposta ao cliente: " + id);
+            // aqui você pode abrir um modal, chamar outra rota, etc.
+          }
+        });
+      });
+
+    } catch(err){
+      container.innerHTML = `
+        <div style="padding:16px;border:1px solid #fecaca;background:#fef2f2;border-radius:10px;color:#991b1b;">
+          <strong>Erro ao gerar cotações:</strong> ${err.message || "Tente novamente."}
+        </div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+    }
+  });
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Apenas logging
+  console.log('[SafeViana] Cards:', {cardAuto, cardResid, cardVida, cardEmpresarial});
+});
+</script>
+
+
+</body>
+</html>

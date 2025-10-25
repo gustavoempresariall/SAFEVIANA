@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cotações - SafeViana</title>
+  <link rel="stylesheet" href="css/areacr.css" />
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+    /* Estilos atualizados para combinar com a imagem */
+    .content-container {
+      padding: 20px;
+      background-color: #f5f7fa;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .page-header {
+      margin-bottom: 30px;
+    }
+    
+    .page-header h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .page-header p {
+      color: #7f8c8d;
+      margin-top: 0;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background-color: #179e4d;
+      color: white;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #036d2d;
+      color: #036d2d;
+    }
+    
+    .quote-requests {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    
+    .section-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      background-color: #f8f9fa;
+    }
+    
+    .section-header h2 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.2em;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 15px 20px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      color: #7f8c8d;
+      font-weight: normal;
+      text-transform: uppercase;
+      font-size: 0.8em;
+    }
+    
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: bold;
+    }
+    
+    .status-open {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .status-pending {
+      background-color: #fff8e1;
+      color: #ff8f00;
+    }
+    
+    .status-completed {
+      background-color: #e8f5e9;
+      color: #388e3c;
+    }
+    
+    .action-link {
+      color: #128f44;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    
+    .action-link:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  
+    /* Avatar + nome lado a lado no topo */
+.topbar .user-info,
+.topbar-right .user-info {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px;
+}
+
+/* Tamanho e alinhamento do avatar */
+.topbar .user-info .small-avatar,
+.topbar .user-info .profile-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #1e7a34; /* sua cor */
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Imagem do avatar */
+.topbar .user-info .small-avatar img,
+.topbar .user-info .profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+/* Nome sem quebrar linha estranha */
+.topbar .user-info .user-name {
+  white-space: nowrap;
+  line-height: 1;
+  display: inline-block;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;
+  display: inline-block;
+}
+
+/* === Painel de detalhes (linha expansível) === */
+.details-row { background:#fbfcfd; }
+.det-card {
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:16px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.det-grid {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+@media (max-width: 900px){ .det-grid{ grid-template-columns: 1fr; } }
+
+.kv { display:flex; gap:10px; align-items:flex-start; }
+.kv .k { min-width:140px; color:#6b7280; }
+.kv .v { color:#111827; font-weight:600; word-break:break-word; }
+
+.det-actions {
+  display:flex; align-items:center; gap:12px; margin-top:12px;
+  flex-wrap: wrap;
+}
+
+.sel {
+  border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; outline:none; min-width:240px;
+}
+.btn-solid {
+  border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer;
+  background:#179e4d; color:#fff;
+}
+.btn-ghost {
+  border:1px solid #036d2d; color:#036d2d; background:transparent; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer;
+}
+.hint { color:#6b7280; display:none; }
+
+/* Toast simples */
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #10b981;      /* verde sucesso */
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s, transform .2s;
+}
+.toast.error { background: #ef4444; }  /* vermelho erro */
+.toast.show  { opacity: 1; transform: translateY(0); }
+
+/* ==== Modal Cotação (centralizado) ==== */
+.cot-modal {
+  display: none; /* escondido por padrão */
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.cot-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 25px;
+  width: 95%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  animation: zoomIn .2s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(.96); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.cot-form label { display:block; margin-top:10px; font-weight:600; color:#1f2937; }
+.cot-form input, .cot-form select, .cot-form textarea {
+  width:100%; border:1px solid #ddd; border-radius:8px; padding:8px 10px; font-size:.95rem;
+}
+
+/* ============ MODAL SAFEVIANA COTAÇÃO (ISOLADO) ============ */
+.svcot-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.svcot-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 35px 40px;
+  width: 95%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e5e7eb;
+  animation: svcotZoom 0.25s ease;
+}
+
+@keyframes svcotZoom {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Cabeçalho */
+.svcot-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1e6028;
+  margin: 0;
+}
+.svcot-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 6px 0 24px;
+  line-height: 1.5;
+}
+
+/* Seções */
+.svcot-form h4 {
+  font-size: 1rem;
+  color: #2e7d32;
+  font-weight: 700;
+  margin: 26px 0 14px;
+  border-left: 4px solid #2e7d32;
+  padding-left: 10px;
+}
+
+/* Grid */
+.svcot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+@media (max-width: 680px) {
+  .svcot-grid { grid-template-columns: 1fr; }
+}
+
+/* Inputs e selects */
+.svcot-form label {
+  display: block;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+  font-size: 0.93rem;
+}
+.svcot-form input,
+.svcot-form select,
+.svcot-form textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #111827;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.svcot-form input:focus,
+.svcot-form select:focus,
+.svcot-form textarea:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  outline: none;
+}
+.svcot-form textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Extra (automóvel) */
+.svcot-extra {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-top: 22px;
+}
+.svcot-extra h4 {
+  margin: 0 0 14px;
+  color: #1e6028;
+  font-weight: 700;
+}
+
+/* Botões */
+.svcot-btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #2e7d32, #10b981);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 20px;
+}
+.svcot-btn-primary:hover {
+  background: linear-gradient(135deg, #1e6028, #0ea271);
+  transform: translateY(-1px);
+}
+.svcot-btn-outline {
+  width: 100%;
+  border: 2px solid #1e6028;
+  color: #1e6028;
+  font-weight: 600;
+  background: transparent;
+  border-radius: 10px;
+  padding: 12px 0;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.svcot-btn-outline:hover {
+  background: #1e6028;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Scrollbar */
+.svcot-card::-webkit-scrollbar { width: 8px; }
+.svcot-card::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+.svcot-card::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+
+/* MODAL COTAÇÕES */
+
+/* ==== Modal SafeViana - Sistema de Cotações ==== */
+.svcot-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.svcot-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 35px 40px;
+  width: 95%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e5e7eb;
+  animation: svcotZoom 0.25s ease;
+}
+
+@keyframes svcotZoom {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Cabeçalho */
+.svcot-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1e6028;
+  margin: 0;
+}
+.svcot-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 6px 0 24px;
+  line-height: 1.5;
+}
+
+/* Seções */
+.svcot-form h4 {
+  font-size: 1rem;
+  color: #2e7d32;
+  font-weight: 700;
+  margin: 26px 0 14px;
+  border-left: 4px solid #2e7d32;
+  padding-left: 10px;
+}
+
+/* Grid */
+.svcot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+@media (max-width: 680px) {
+  .svcot-grid { grid-template-columns: 1fr; }
+}
+
+/* Inputs e selects */
+.svcot-form label {
+  display: block;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+  font-size: 0.93rem;
+}
+.svcot-form input,
+.svcot-form select,
+.svcot-form textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #111827;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.svcot-form input:focus,
+.svcot-form select:focus,
+.svcot-form textarea:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  outline: none;
+}
+.svcot-form textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Extra (automóvel) */
+.svcot-extra {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-top: 22px;
+}
+.svcot-extra h4 {
+  margin: 0 0 14px;
+  color: #1e6028;
+  font-weight: 700;
+}
+
+/* Botões */
+.svcot-btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #2e7d32, #10b981);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 20px;
+}
+.svcot-btn-primary:hover {
+  background: linear-gradient(135deg, #1e6028, #0ea271);
+  transform: translateY(-1px);
+}
+.svcot-btn-outline {
+  width: 100%;
+  border: 2px solid #1e6028;
+  color: #1e6028;
+  font-weight: 600;
+  background: transparent;
+  border-radius: 10px;
+  padding: 12px 0;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.svcot-btn-outline:hover {
+  background: #1e6028;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Scrollbar */
+.svcot-card::-webkit-scrollbar { width: 8px; }
+.svcot-card::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+.svcot-card::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+
+
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left">
+        <h2>Area<span> Corretor</span></h2>
+      </div>          
+      <nav>
+        <ul>
+          <li><a href="area_corretor"><span class="icon"></span> Dashboard</a></li>
+          <li><a href="visu_clientes_corretor.html"><span class="icon"></span> Clientes</a></li>
+          <li><a href="relatorio_corretor.html" class="active"><span class="icon"></span> Cotações</a></li>
+          <li><a href="apolices_corretor.html"><span class="icon"></span> Apólices</a></li>
+          <li><a href="propostas_corretor.html"><span class="icon"></span> Propostas</a></li>
+          <li><a href="sinistros_corretor.html"><span class="icon"></span> Sinistros</a></li>
+          <li><a href="calendario_corretor.html"><span class="icon"></span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+          <div class="user-info" id="userInfo">
+            <div class="profile-avatar small-avatar" title="Meu Perfil">
+              {% if corretor_foto %}
+                <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+              {% elif session.get('corretor_foto') %}
+                <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+              {% else %}
+                <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+              {% endif %}
+            </div>
+            <span class="user-name">{{ corretor_nome }}</span>
+          </div>
+        </div>
+      </header>
+      
+      <div class="content-container">
+        <div class="page-header">
+          <h1>Cotações do Corretor</h1>
+          <p>Acompanhe as solicitações recebidas e envie novas propostas de cotação.</p>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-primary" id="btnNovaCotacao">
+            <span class="icon">✉️</span> Simular Cotação
+          </button>
+          <button class="btn btn-outline" id="btnAtualizar">
+            <span class="icon">🔄</span> Atualizar lista
+          </button>
+        </div>
+        
+        <div class="quote-requests">
+          <div class="section-header">
+            <h2>Solicitações de cotações</h2>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Produto</th>
+                <th>Criado em</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="cotTableBody">
+              <!-- preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+document.getElementById("btnNovaCotacao").addEventListener("click", function() {
+  window.location.href = "{{ url_for('fazercotacao') }}";
+});
+</script>
+
+
+<script>
+/* ================== HELPERS & CONSTANTES ================== */
+const $  = (s, el=document)=> el.querySelector(s);
+const $$ = (s, el=document)=> [...el.querySelectorAll(s)];
+
+const STATUS_OPTS = [
+  {value:"recebida",           label:"Recebida"},
+  {value:"em_analise",         label:"Em análise"},
+  {value:"enviada_seguradora", label:"Enviada à seguradora"},
+  {value:"respondida",         label:"Respondida"},
+  {value:"concluida",          label:"Concluída"},
+  {value:"cancelada",          label:"Cancelada"},
+];
+
+const STATUS_LABEL = {
+  recebida: "Recebida",
+  em_analise: "Em análise",
+  enviada_seguradora: "Enviada à seguradora",
+  respondida: "Respondida",
+  concluida: "Concluída",
+  cancelada: "Cancelada",
+};
+
+const COT_CACHE = new Map(); // id -> dados da cotação
+
+/* ================== TOAST (mensagem bonita) ================== */
+function showToast(msg, isError=false, ms=2500){
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=> t.classList.add('show'));
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=> t.remove(), 200);
+  }, ms);
+}
+
+/* ================== BADGE DE STATUS ================== */
+function badge(status){
+  const map = {
+    recebida:{cls:"status status-open",      txt:"Recebida"},
+    em_analise:{cls:"status status-pending", txt:"Em análise"},
+    enviada_seguradora:{cls:"status status-completed", txt:"Enviada à seguradora"},
+    respondida:{cls:"status status-completed", txt:"Respondida"},
+    concluida:{cls:"status status-completed", txt:"Concluída"},
+    cancelada:{cls:"status", txt:"Cancelada"},
+  };
+  const it = map[(status||"").toLowerCase()] || {cls:"status", txt:status||"-"};
+  return `<span class="${it.cls}">${it.txt}</span>`;
+}
+
+/* ================== FETCH JSON SEGURO ================== */
+async function fetchJSON(url, opts){
+  const res  = await fetch(url, {credentials:"same-origin", ...opts});
+  const text = await res.text();
+  let data; try{ data = JSON.parse(text); }catch{ throw new Error("Resposta inválida do servidor"); }
+  if(!res.ok) throw new Error(data.error || "Falha na requisição");
+  return data;
+}
+
+/* ================== SIDEBAR ================== */
+$('#toggleSidebar')?.addEventListener('click', ()=>{
+  $('.sidebar')?.classList.toggle('collapsed');
+  $('.main-content')?.classList.toggle('expanded');
+});
+
+/* ================== LISTA PRINCIPAL ================== */
+async function carregarLista(){
+  const tb = $('#cotTableBody') || $('tbody');
+  if(!tb) return;
+  tb.innerHTML = `<tr><td colspan="6">Carregando...</td></tr>`;
+
+  try{
+    const lista = await fetchJSON('/api/corretor/cotacoes');
+    if(!Array.isArray(lista) || !lista.length){
+      tb.innerHTML = `<tr><td colspan="6" style="color:#7f8c8d">Nenhuma solicitação para este corretor.</td></tr>`;
+      return;
+    }
+
+    COT_CACHE.clear();
+    lista.forEach(c => COT_CACHE.set(String(c.id), {...c}));
+
+    tb.innerHTML = lista.map(c => `
+      <tr data-id="${c.id}">
+        <td>${c.id}</td>
+        <td>${c.cliente_nome || '-'}</td>
+        <td>${c.tipo || '-'}</td>
+        <td>${c.criado_em_fmt || '-'}</td>
+        <td class="td-status">${badge(c.status)}</td>
+        <td>
+          <a href="#" class="action-link jsDetalhes">Detalhes</a>
+        </td>
+      </tr>
+      <tr class="details-row" data-parent="${c.id}" style="display:none">
+        <td colspan="6">
+          <div class="det-card">
+            <div class="det-loading" style="color:#6b7280">Carregando detalhes…</div>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    // abrir/fechar e carregar detalhes
+    $$('.jsDetalhes', tb).forEach(a=>{
+      a.addEventListener('click', async (e)=>{
+        e.preventDefault();
+        const tr  = a.closest('tr');
+        const id  = tr?.dataset.id;
+        const row = tb.querySelector(`tr.details-row[data-parent="${id}"]`);
+        if(!row) return;
+
+        const isOpen = row.style.display !== 'none';
+        row.style.display = isOpen ? 'none' : '';
+        if(isOpen) return;
+
+        // carrega do cache da lista…
+        let data = {...(COT_CACHE.get(String(id)) || {})};
+
+        // …e tenta complementar com o endpoint de detalhes (se existir)
+        try{
+          const extra = await fetchJSON(`/api/corretor/cotacoes/${id}`);
+          data = {...data, ...extra};
+          COT_CACHE.set(String(id), data);
+        }catch(_e){ /* segue com o que temos */ }
+
+        $('.det-card', row).innerHTML = renderDetails(data);
+        bindDetails(row, id);
+      });
+    });
+
+  }catch(err){
+    tb.innerHTML = `<tr><td colspan="6" style="color:#b91c1c">Erro: ${err.message}</td></tr>`;
+  }
+}
+
+/* ================== DETALHES ================== */
+function info(k, v){
+  return `<div class="kv"><div class="k">${k}</div><div class="v">${v ? String(v) : '-'}</div></div>`;
+}
+function firstNonEmpty(...vals){
+  for(const v of vals){ if(v!==undefined && v!==null && String(v).trim()!=="") return v; }
+  return null;
+}
+function normalizePhone(p){
+  const d = (p||'').replace(/\D/g,'');
+  if(!d) return '';
+  if(d.startsWith('55')) return d;     // já com DDI Brasil
+  if(d.length >= 10 && d.length <= 11) return '55' + d; // adiciona DDI
+  return d; // fallback
+}
+function renderWhatsAppBtn(phoneRaw){
+  const norm = normalizePhone(phoneRaw);
+  if(!norm) return '-';
+  const href = `https://wa.me/${norm}`;
+  return `
+    <span class="phone-with-wa">
+      <a href="tel:${phoneRaw.replace(/\s/g,'')}" class="tel-link">${phoneRaw}</a>
+      <a class="wa-chip" href="${href}" target="_blank" rel="noopener noreferrer" title="Chamar no WhatsApp">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M19.11 17.56c-.28-.14-1.64-.81-1.89-.9-.25-.09-.43-.14-.61.14-.18.28-.7.9-.86 1.08-.16.18-.32.2-.6.07-.28-.14-1.18-.43-2.25-1.39-.83-.74-1.4-1.66-1.56-1.94-.16-.28-.02-.43.12-.57.12-.12.28-.32.41-.48.14-.16.18-.28.28-.46.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.46-.16 0-.34-.02-.52-.02-.18 0-.48.07-.73.34-.25.28-.96.94-.96 2.29 0 1.35.99 2.66 1.13 2.84.14.18 1.94 2.96 4.7 4.04.66.29 1.17.46 1.57.59.66.21 1.26.18 1.73.11.53-.08 1.64-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.25-.2-.53-.34zM16.04 3C9.39 3 4 8.39 4 15.04c0 2.12.56 4.11 1.54 5.83L4 29l8.3-1.52c1.67.91 3.59 1.43 5.64 1.43 6.65 0 12.04-5.39 12.04-12.04S22.69 3 16.04 3zm0 21.97c-1.97 0-3.8-.59-5.32-1.6l-.38-.25-4.93.91.94-4.81-.25-.39a9.93 9.93 0 0 1-1.55-5.41c0-5.5 4.48-9.98 9.98-9.98s9.98 4.48 9.98 9.98-4.48 9.98-9.98 9.98z"/>
+        </svg>
+        <span>WhatsApp</span>
+      </a>
+    </span>
+  `;
+}
+function renderDetails(d){
+  const email   = firstNonEmpty(d.email, d.cliente_email, d.email_cliente);
+  const fone    = firstNonEmpty(d.telefone, d.cliente_telefone, d.phone);
+  const cep     = firstNonEmpty(d.cep, d.zipcode);
+  const cidade  = firstNonEmpty(d.cidade, d.city, d.municipio);
+  const obs     = firstNonEmpty(d.observacoes, d.obs, d.comentarios);
+  const tipo    = firstNonEmpty(d.tipo, d.tipo_seguro, d.produto);
+  const cliente = firstNonEmpty(d.cliente_nome, d.nome, d.nome_cliente);
+  const statusNow = (d.status||'').toLowerCase();
+
+  // monta link do WhatsApp a partir do número
+  const phoneDigits = (fone || '').replace(/\D/g,'');
+  const waHref = phoneDigits
+    ? `https://wa.me/55${phoneDigits}?text=${encodeURIComponent('Olá, sou seu corretor da SafeViana. Podemos falar sobre sua cotação?')}`
+    : null;
+
+  return `
+    <div class="det-grid">
+      <div>
+        ${info("Tipo do seguro", tipo)}
+        ${info("Cliente", cliente)}
+        ${info("E-mail", email)}
+        ${info("Telefone", `
+          <div class="wa-row">
+            <span class="phone-number">${fone || '-'}</span>
+            ${waHref ? `
+              <a class="wa-chip" href="${waHref}" target="_blank" rel="noopener">
+                <span class="ico" aria-hidden="true">
+                  <!-- Ícone de telefone (SVG) -->
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+                             19.8 19.8 0 0 1-8.63-3.07
+                             19.5 19.5 0 0 1-6-6
+                             19.8 19.8 0 0 1-3.07-8.67
+                             A2 2 0 0 1 4.11 2h3
+                             a2 2 0 0 1 2 1.72l.43 3.05
+                             a2 2 0 0 1-.57 1.86L7.11 9.64
+                             a16 16 0 0 0 6 6l1-1
+                             a2 2 0 0 1 1.86-.57l3.05.43
+                             A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </span>
+                WhatsApp
+              </a>` : ''
+            }
+          </div>
+        `)}
+      </div>
+      <div>
+        ${info("CEP", cep)}
+        ${info("Cidade", cidade)}
+        ${info("Observações", obs)}
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #eee;margin:14px 0">
+
+    <div class="det-actions">
+      <div class="status-now">${badge(statusNow)}</div>
+
+      <label style="color:#6b7280">Alterar status</label>
+      <select class="sel jsStatusSelect">
+        ${STATUS_OPTS.map(o=>`<option value="${o.value}" ${o.value===statusNow?'selected':''}>${o.label}</option>`).join('')}
+      </select>
+
+      <div style="flex:1"></div>
+
+      <button class="btn-ghost jsResponderBtn">Responder cotação</button>
+      <span class="hint jsHint">salvando…</span>
+    </div>
+  `;
+}
+
+
+function bindDetails(row, id){
+  const select    = $('.jsStatusSelect', row);
+  const hint      = $('.jsHint', row);
+  const btn       = $('.jsResponderBtn', row);
+  const tdStatus  = $(`tr[data-id="${id}"] .td-status`);
+
+  btn?.addEventListener('click', async ()=>{
+    const value = (select?.value || '').toLowerCase();
+    if(!value){ showToast('Selecione um status.', true); return; }
+
+    try{
+      hint.style.display = '';
+      btn.disabled = true;
+
+// dentro do bindDetails, depois de renderizar o HTML:
+row.querySelectorAll('.wa-btn, .wa-icon-btn, .whats-mini, .btn-whatsapp, .whatsapp-icon')
+  .forEach(el => el.remove());
+
+
+      // salva status
+      await fetch(`/api/corretor/cotacoes/${id}/status`, {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        credentials:'same-origin',
+        body: JSON.stringify({ status: value })
+      }).then(async r=>{
+        const t = await r.text(); let j;
+        try{ j = JSON.parse(t); }catch{ throw new Error('Resposta inválida do servidor'); }
+        if(!r.ok || j.ok === false) throw new Error(j.error || 'Falha ao atualizar status');
+      });
+
+      // atualiza UI/cache
+      tdStatus.innerHTML = badge(value);
+      $('.status-now', row).innerHTML = badge(value);
+      const prev = COT_CACHE.get(String(id)) || {};
+      COT_CACHE.set(String(id), {...prev, status:value});
+
+      showToast(`Status atualizado para “${STATUS_LABEL[value] || value}” com sucesso!`);
+
+    }catch(err){
+      showToast(err.message || 'Falha ao atualizar status', true);
+    }finally{
+      hint.style.display = 'none';
+      btn.disabled = false;
+    }
+  });
+}
+
+/* ================== BOTÕES TOPO ================== */
+$('#btnNovaCotacao')?.addEventListener('click', ()=>{
+  showToast('Abrindo formulário de nova cotação…');
+});
+$('#btnAtualizar')?.addEventListener('click', carregarLista);
+
+/* ================== INIT ================== */
+document.addEventListener('DOMContentLoaded', carregarLista);
+
+// Mostrar/ocultar campos de automóvel
+document.getElementById("cotTipo").addEventListener("change", function () {
+  const isAuto = this.value === "Automóvel";
+  document.getElementById("camposAutomovel").style.display = isAuto ? "block" : "none";
+});
+
+// Abrir modal ao clicar em "Fazer cotação"
+document.getElementById("btnNovaCotacao").addEventListener("click", () => {
+  document.getElementById("cotacaoModal").style.display = "flex";
+});
+
+// Fechar modal
+document.getElementById("btnFecharCotacao").addEventListener("click", () => {
+  document.getElementById("cotacaoModal").style.display = "none";
+});
+
+// Fechar clicando fora
+window.addEventListener("click", (e) => {
+  const modal = document.getElementById("cotacaoModal");
+  if (e.target === modal) modal.style.display = "none";
+});
+
+
+</script>
+
+<style>
+
+/* --- WhatsApp chip com ícone de telefone alinhado --- */
+.wa-row{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.wa-chip{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:10px 16px; border-radius:9999px;
+  background:#25D366; color:#fff; font-weight:700;
+  text-decoration:none; box-shadow:0 6px 16px rgba(37,211,102,.25),
+                          inset 0 0 0 2px rgba(255,255,255,.25);
+  transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
+}
+.wa-chip:hover{ transform:translateY(-1px); filter:saturate(1.05);
+  box-shadow:0 8px 18px rgba(37,211,102,.32), inset 0 0 0 2px rgba(255,255,255,.25);}
+.wa-chip:active{ transform:translateY(0); }
+.wa-chip .ico{
+  width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;
+}
+.wa-chip .ico svg{ width:100%; height:100%; display:block; }
+.phone-number{ font-weight:600; color:#0f172a; }
+
+/* --- WhatsApp chip menor --- */
+.wa-row{ gap:8px; }
+
+.wa-chip{
+  padding:6px 12px;        /* era 10px 16px */
+  font-size:14px;          /* menor */
+  gap:8px;                 /* era 10px */
+  box-shadow:0 4px 12px rgba(37,211,102,.22),
+             inset 0 0 0 2px rgba(255,255,255,.22);
+}
+
+.wa-chip .ico{
+  width:16px;              /* era 18px */
+  height:16px;
+}
+
+</style>
+
+
+</body>
+</html>

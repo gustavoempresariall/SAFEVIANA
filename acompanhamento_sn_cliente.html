@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Cliente - Acompanhamento de Sinistros</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="/imagens/icones/iconecabc.png">
+  <style>
+    /* =========================================================
+       SafeViana • Dashboard Styles (sv-dashboard-css-20250922)
+       – Mantém a aparência padrão da Sidebar, Topbar e componentes
+       ========================================================= */
+
+    /* ===== Tokens / Design System ===== */
+    :root{
+      --sv-green:#2e7d32;
+      --sv-green-dark:#1e6028;
+      --sv-accent:#10b981;
+      --sv-border:#e5e7eb;
+      --sv-light:#f9fafb;
+      --sv-text:#111827;
+      --sv-shadow:0 10px 30px rgba(0,0,0,.08);
+      --sv-gradient:linear-gradient(135deg,#2e7d32 0%,#10b981 100%);
+    }
+
+    *{ box-sizing:border-box }
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;
+      background:var(--sv-light);
+      color:var(--sv-text);
+    }
+
+    /* ===== LAYOUT (sidebar/topbar) ===== */
+    .container{ display:flex; min-height:100vh }
+
+    .sidebar{
+      width:200px;
+      background:#fff;
+      border-right:1px solid var(--sv-border);
+      padding:20px 10px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:fixed; inset:0 auto 0 0;
+      z-index:1000; box-shadow:var(--sv-shadow);
+      transition:width .3s;
+    }
+    .sidebar.collapsed{ width:60px; padding:20px 6px }
+
+    .logo{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; color:#111827; margin-bottom:18px;
+      white-space:nowrap; width:100%;
+    }
+    .logo i{
+      font-size:1.35rem; color:var(--sv-green);
+      display:grid; place-items:center; width:40px; height:40px;
+      border-radius:12px; background:#f3f7f4; margin:0;
+    }
+    .sidebar.collapsed .logo{ justify-content:center; gap:0; padding-inline:0 }
+    .sidebar.collapsed .logo span{ display:none }
+    .sidebar.collapsed .logo i{ margin-inline:auto }
+
+    .sidebar nav ul{ list-style:none; margin:0; padding:0 }
+    .sidebar nav li{ margin:10px 0 }
+    .sidebar nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px;
+      text-decoration:none; color:#374151; font-weight:600; transition:.2s;
+    }
+    .sidebar nav a i{ width:20px; text-align:center }
+    .sidebar nav a:hover{ background:var(--sv-green); color:#fff }
+    .sidebar nav a.active{
+      background:linear-gradient(135deg,#2e7d32 0%,#2e7d32 60%,#10b981 100%);
+      color:#fff; box-shadow:0 6px 16px rgba(46,125,50,.25);
+    }
+    .sidebar.collapsed nav a{ justify-content:center }
+    .sidebar.collapsed nav a span{ display:none }
+
+    .admin-title{ font-size:.78rem; color:#6b7280; margin:10px 8px }
+    .sidebar.collapsed .admin-title{ display:none }
+
+    .bottom-section ul{ list-style:none; margin:6px 0 0; padding:0 }
+    .bottom-section li{
+      display:flex; align-items:center; gap:8px;
+      padding:8px; border-radius:10px; cursor:pointer;
+    }
+    .bottom-section li:hover{ background:var(--sv-green); color:#fff }
+    .logout-btn{
+      width:100%; margin-top:8px; padding:10px; border:0; border-radius:12px; cursor:pointer;
+      background:var(--sv-gradient); color:#fff; font-weight:700;
+      box-shadow:0 8px 20px rgba(16,185,129,.35);
+    }
+    .sidebar.collapsed .bottom-section li span,
+    .sidebar.collapsed .logout-btn span{ display:none }
+
+    .main{ flex:1; display:flex; flex-direction:column; margin-left:200px }
+
+    .topbar{
+      position:fixed; left:200px; right:0; top:0; z-index:900;
+      background:#fff; border-bottom:1px solid var(--sv-border);
+      padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:var(--sv-shadow);
+    }
+    .hamburger{ border:0; background:transparent; font-size:1.4rem; cursor:pointer; margin-right:8px }
+    .topbar h2{ font-size:1.25rem; margin:0 }
+    .topbar h2 span{ color:var(--sv-green) }
+    .topbar input{
+      padding:8px 12px; border:1px solid var(--sv-border); border-radius:10px; width:230px;
+    }
+
+    .user-info{ display:flex; align-items:center; gap:8px; font-weight:600 }
+    .profile-avatar{
+      width:36px; height:36px; border-radius:50%; overflow:hidden;
+      border:2px solid var(--sv-green); display:flex; align-items:center; justify-content:center; background:#fff;
+    }
+    .profile-avatar img{ width:100%; height:100%; object-fit:cover; display:block }
+    .profile-avatar .initials{
+      text-transform:uppercase; color:var(--sv-green); font-weight:800; font-size:.9rem; letter-spacing:.5px;
+    }
+
+    .content{ padding:22px; margin-top:72px }
+
+    /* ===== HERO ===== */
+    .hero{
+      position:relative; overflow:hidden; border-radius:16px; padding:22px;
+      background:var(--sv-gradient); color:#fff; box-shadow:var(--sv-shadow);
+    }
+    .hero h1{ margin:0 0 6px; font-size:clamp(1.1rem,1.6vw,1.4rem) }
+    .hero p{ margin:0; opacity:.95 }
+    .hero .badges{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap }
+    .chip{
+      background:rgba(255,255,255,.14); backdrop-filter:blur(6px);
+      padding:6px 10px; border-radius:999px; font-size:.8rem; border:1px solid rgba(255,255,255,.25);
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title{
+      font-size:1.05rem; margin:18px 0 10px; display:flex; align-items:center; gap:8px; color:#222;
+    }
+    .section-title i{
+      color:#fff; background:var(--sv-green); width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+    }
+
+    /* ===== SINISTROS SECTION ===== */
+    .sinistros-section {
+      background: #fff;
+      border: 1px solid var(--sv-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--sv-shadow);
+    }
+
+    .sinistros-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .sinistros-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--sv-light);
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(46,125,50,0.15);
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--sv-green);
+      margin: 5px 0;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .filters-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-input {
+      padding: 10px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-select {
+      padding: 10px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: #fff;
+      min-width: 150px;
+    }
+
+    .sinistros-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .sinistro-card {
+      background: #fff;
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sinistro-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(46,125,50,0.15);
+    }
+
+    .sinistro-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--sv-gradient);
+    }
+
+    .sinistro-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .sinistro-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--sv-text);
+      margin: 0;
+    }
+
+    .sinistro-number {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+
+    .sinistro-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-em-analise {
+      background: rgba(245,158,11,0.1);
+      color: #f59e0b;
+    }
+
+    .status-aprovado {
+      background: rgba(46,125,50,0.1);
+      color: var(--sv-green);
+    }
+
+    .status-rejeitado {
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+    }
+
+    .status-concluido {
+      background: rgba(59,130,246,0.1);
+      color: #3b82f6;
+    }
+
+    .sinistro-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--sv-text);
+    }
+
+    .sinistro-progress {
+      margin-bottom: 15px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--sv-gradient);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .sinistro-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--sv-text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-decoration: none;
+    }
+
+    .action-btn.primary {
+      background: var(--sv-green);
+      color: #fff;
+      border-color: var(--sv-green);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .action-btn.primary:hover {
+      background: var(--sv-green-dark);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      color: #d1d5db;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    /* ===== MODAL ===== */
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(17,24,39,.55); z-index:1200; padding:18px;
+    }
+    .modal.open{ display:flex }
+
+    .modal-card{
+      width:min(720px, 96vw);
+      background:#fff; border-radius:16px; border:1px solid var(--sv-border);
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+      max-height:90vh;
+    }
+
+    .modal-header{
+      padding:14px 16px; background:var(--sv-gradient); color:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      position:sticky; top:0; z-index:1;
+    }
+    .modal-body{ padding:16px; overflow:auto }
+    .grid2{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px }
+    .modal-body label{ font-weight:700; font-size:.9rem }
+    .modal-body input,.modal-body select{
+      width:100%; padding:10px; border:1px solid var(--sv-border); border-radius:10px; font-size:.95rem;
+    }
+    .modal-footer{
+      padding:14px 16px; display:flex; gap:10px; justify-content:flex-end;
+      border-top:1px solid var(--sv-border); background:#fafafa;
+      position:sticky; bottom:0; z-index:1;
+    }
+    .btn{ border:0; border-radius:12px; padding:10px 14px; font-weight:800; cursor:pointer }
+    .btn.primary{ background:var(--sv-gradient); color:#fff }
+    .btn.secondary{ background:#f3f4f6; color:#111827; border:1px solid var(--sv-border) }
+    .btn.link{ background:transparent; color:var(--sv-green); padding:8px }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px){
+      .main{ margin-left:60px }
+      .topbar{ left:60px }
+    }
+    @media (max-width: 640px){
+      .topbar input{ display:none }
+      .grid2{ grid-template-columns:1fr }
+      .modal-card{ max-height:92vh }
+      .sinistros-grid{ grid-template-columns:1fr }
+      .sinistros-stats{ flex-direction:column }
+      .filters-section{ flex-direction:column }
+      .filter-input, .filter-select{ min-width:100% }
+    }
+
+    /* Link com classe .btn não deve sublinhar */
+a.btn,
+a.btn:visited,
+a.btn:hover,
+a.btn:focus,
+a.btn:active {
+  text-decoration: none !important;
+  border-bottom: 0 !important; /* se houver regra global usando borda */
+  outline: none;
+}
+
+/* Deixa o link com "cara" de botão */
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Modal de Detalhes do Sinistro (mesmo padrão do de Propostas) ===== */
+.modal-proposta {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  padding: 24px 32px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  position: relative;
+  animation: fadeIn .25s ease;
+}
+
+.close-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 28px;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+}
+.close-btn:hover { color: var(--sv-green); }
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px 18px;
+  margin-top: 15px;
+}
+
+.modal-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.modal-item strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--sv-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--sv-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-decoration: none;
+}
+
+.action-btn.primary {
+  background: var(--sv-green);
+  color: #fff;
+  border-color: var(--sv-green);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.action-btn.primary:hover {
+  background: var(--sv-green-dark);
+}
+
+/* ===== Sinistro Card (idêntico ao Proposta Card) ===== */
+.sinistro-card {
+  background: #fff;
+  border: 1px solid var(--sv-border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.sinistro-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(46,125,50,0.15);
+}
+
+.sinistro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--sv-gradient);
+}
+
+
+  /* Hover claro só para o item Suporte */
+  .bottom-section li.support-item:hover {
+    background: #f3f4f6 !important;   /* cinza/branco */
+    color: var(--sv-green) !important; /* texto/ícone verdes */
+  }
+  .bottom-section li.support-item:hover .support-link { 
+    color: var(--sv-green) !important; 
+  }
+  .bottom-section li.support-item:hover .support-link i {
+    color: var(--sv-green) !important;
+  }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="logo">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Área do Cliente</span>
+      </div>
+
+       <nav>
+  <ul>
+    <li>
+      <a href="{{ url_for('area_cliente') }}" class="{% if ACTIVE_MENU == 'dashboard' %}active{% endif %}">
+        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('dadosclientes') }}" class="{% if ACTIVE_MENU == 'meus_dados' %}active{% endif %}">
+        <i class="fa-solid fa-user"></i> <span>Meus Dados</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cotacoes_clientes') }}" class="{% if ACTIVE_MENU == 'cotacoes' %}active{% endif %}">
+        <i class="fa-solid fa-file-signature"></i> <span>Solicitar Cotações</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('acompanhamento_ap_cliente') }}" class="{% if ACTIVE_MENU == 'apolices' %}active{% endif %}">
+        <i class="fa-solid fa-file-contract"></i> <span>Minhas Apólices</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cliente_propostas_html') }}" class="{% if ACTIVE_MENU == 'propostas' %}active{% endif %}">
+        <i class="fa-solid fa-clipboard-list"></i> <span>Minhas Propostas</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('sinistros_segurado') }}" class="{% if ACTIVE_MENU == 'sinistros' %}active{% endif %}">
+        <i class="fa-solid fa-car-crash"></i> <span>Meus Sinistros</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+      </nav>
+    </div>
+    <div class="bottom-section">
+      <p class="admin-title"><span>ADMINISTRAÇÃO</span></p>
+    <ul>
+  <li class="support-item">
+    <a class="support-link"
+       href="https://wa.me/5518988076390?text=Ol%C3%A1!%20Preciso%20de%20suporte."
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;width:100%;
+              padding:8px;border-radius:8px;">
+      <i class="fa-solid fa-circle-question"></i>
+      <span>Suporte</span>
+    </a>
+  </li>
+</ul>
+
+      <button class="logout-btn" onclick="window.location.href='{{ url_for('home') }}'">
+  <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
+</button>
+
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+      </div>
+      <input type="text" placeholder="Buscar apólices...">
+
+      <div class="user-info">
+  <div class="profile-avatar">
+    {% if foto_url %}
+      <img src="{{ foto_url }}" alt="{{ user.nome }}">
+    {% else %}
+      <span class="initials">
+        {{ user.nome[0] ~ (user.nome.split(' ')[1][0] if user.nome.split(' ')|length > 1 else '') }}
+      </span>
+    {% endif %}
+  </div>
+  <span>{{ user.nome }}</span>
+</div>
+
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <div class="content">
+      <!-- Seção de Boas-Vindas -->
+      <div class="hero">
+  <h1>Acompanhamento de Sinistros</h1>
+  <p>Acompanhe o status e andamento de todos os seus sinistros reportados.</p>
+  <div class="badges">
+    <span class="chip">{{ kpis.em_analise }} Sinistro(s) em Andamento</span>
+    <span class="chip">{{ kpis.concluidos }} Sinistro(s) Concluído(s)</span>
+    <span class="chip">R$ {{ "%.2f"|format(kpis.valor_indenizado) }} em Indenizações</span>
+  </div>
+</div>
+
+<!-- Seção de Estatísticas -->
+<div class="sinistros-section">
+  <div class="sinistros-header">
+    <h2 class="section-title">
+      <i class="fa-solid fa-car-crash"></i> Meus Sinistros
+    </h2>
+  </div>
+
+  <div class="sinistros-stats">
+    <div class="stat-card">
+      <i class="fa-solid fa-list" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+      <div class="stat-value">{{ kpis.total }}</div>
+      <div class="stat-label">Total de Sinistros</div>
+    </div>
+
+    <div class="stat-card">
+      <i class="fa-solid fa-hourglass-half" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+      <div class="stat-value">{{ kpis.em_analise }}</div>
+      <div class="stat-label">Em Análise</div>
+    </div>
+
+    <div class="stat-card">
+      <i class="fa-solid fa-check-circle" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+      <div class="stat-value">{{ kpis.concluidos }}</div>
+      <div class="stat-label">Concluídos</div>
+    </div>
+
+    <div class="stat-card">
+      <i class="fa-solid fa-dollar-sign" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+      <div class="stat-value">R$ {{ "%.2f"|format(kpis.valor_indenizado) }}</div>
+      <div class="stat-label">Valor Indenizado</div>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Filtros -->
+        <div class="filters-section">
+          <input type="text" class="filter-input" placeholder="Buscar por número, apólice ou descrição...">
+          <select class="filter-select" id="statusFilter">
+            <option value="">Todos os Status</option>
+            <option value="em-analise">Em Análise</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="rejeitado">Rejeitado</option>
+            <option value="concluido">Concluído</option>
+          </select>
+          <select class="filter-select" id="typeFilter">
+            <option value="">Todos os Tipos</option>
+            <option value="auto">Automóvel</option>
+            <option value="residencial">Residencial</option>
+            <option value="vida">Vida</option>
+            <option value="empresarial">Empresarial</option>
+          </select>
+          <button class="btn secondary"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        </div>
+
+        <div class="sinistros-grid">
+  {% if sinistros %}
+    {% for s in sinistros %}
+      <div class="sinistro-card" 
+           data-status="{{ s.status|lower|replace(' ', '-') }}" 
+           data-type="{{ s.tipo_sinistro|lower }}">
+        <div class="sinistro-header">
+          <div>
+            <h3 class="sinistro-title">{{ s.descricao or 'Sinistro' }}</h3>
+            <div class="sinistro-number">SIN-{{ '%06d'|format(s.sinistro_id) }}</div>
+          </div>
+          <span class="sinistro-status status-{{ s.status|lower|replace(' ', '-') }}">
+            {{ s.status }}
+          </span>
+        </div>
+
+        <div class="sinistro-details">
+          <div class="detail-item">
+            <span class="detail-label">Apólice</span>
+            <span class="detail-value">{{ s.numero_apolice }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Data do Sinistro</span>
+            <span class="detail-value">
+              {{ s.data_ocorrencia.strftime('%d/%m/%Y') if s.data_ocorrencia else '-' }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipo</span>
+            <span class="detail-value">{{ s.tipo_sinistro }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Valor Estimado</span>
+            <span class="detail-value">
+              R$ {{ "%.2f"|format(s.valor_estimado or 0) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="sinistro-progress">
+          <div class="progress-label">
+            <span>Progresso do Processo</span>
+            <span>
+              {% if s.status == 'Em Análise' %}40%
+              {% elif s.status == 'Aprovado' %}100%
+              {% elif s.status == 'Concluído' %}100%
+              {% else %}20%
+              {% endif %}
+            </span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill"
+                 style="width:{% if s.status == 'Em Análise' %}40{% elif s.status == 'Aprovado' or s.status == 'Concluído' %}100{% else %}20{% endif %}%">
+            </div>
+          </div>
+        </div>
+
+        <div class="sinistro-actions">
+  <a href="#" class="action-btn primary btn-detalhes-sin">
+    <i class="fa-solid fa-eye"></i> Detalhes
+  </a>
+
+  <!-- PDF direto do card (sem depender de JS) -->
+  <a href="#" class="action-btn btn-sin-pdf-card"
+   onclick="baixarSinistroPdf('{{ s.sinistro_id }}', event)">
+   <i class="fa-solid fa-file-pdf"></i> PDF
+</a>
+
+</div>
+
+
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="fa-solid fa-file-circle-exclamation"></i>
+      <h3>Nenhum sinistro encontrado</h3>
+      <p>Você ainda não possui sinistros registrados.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Modal para Novo Sinistro -->
+<div class="modal" id="novoSinistroModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="margin:0">Reportar Novo Sinistro</h3>
+      <button class="btn link" id="closeModal" style="color:#fff">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div>
+          <label for="apoliceSelect">Apólice</label>
+          <select id="apoliceSelect">
+            <option value="">Selecione uma apólice</option>
+            <option value="AUTO-2023-001234">AUTO-2023-001234 - Seguro Auto</option>
+            <option value="RES-2022-005678">RES-2022-005678 - Seguro Residencial</option>
+            <option value="EMP-2023-007890">EMP-2023-007890 - Seguro Empresarial</option>
+          </select>
+        </div>
+        <div>
+          <label for="dataSinistro">Data do Sinistro</label>
+          <input type="date" id="dataSinistro">
+        </div>
+        <div>
+          <label for="tipoSinistro">Tipo de Sinistro</label>
+          <select id="tipoSinistro">
+            <option value="">Selecione o tipo</option>
+            <option value="colisao">Colisão</option>
+            <option value="furto">Furto/Roubo</option>
+            <option value="incendio">Incêndio</option>
+            <option value="alagamento">Alagamento</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div>
+          <label for="valorEstimado">Valor Estimado (R$)</label>
+          <input type="number" id="valorEstimado" placeholder="0,00">
+        </div>
+      </div>
+      <div style="margin-top:15px">
+        <label for="descricaoSinistro">Descrição do Sinistro</label>
+        <textarea id="descricaoSinistro" style="width:100%; padding:10px; border:1px solid var(--sv-border); border-radius:10px; font-size:.95rem; min-height:100px" placeholder="Descreva detalhadamente o ocorrido..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary">Cancelar</button>
+      <button class="btn primary">Reportar Sinistro</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes do Sinistro -->
+<div id="modalDetalhesSinistro" class="modal-proposta">
+  <div class="modal-content">
+    <span class="close-btn" id="fecharModalSinistro">&times;</span>
+    <h2>Detalhes do Sinistro</h2>
+
+    <div class="modal-grid">
+      <div class="modal-item"><strong>Número do Sinistro:</strong> <span id="sin-numero"></span></div>
+      <div class="modal-item"><strong>Apólice:</strong> <span id="sin-apolice"></span></div>
+      <div class="modal-item"><strong>Tipo de Sinistro:</strong> <span id="sin-tipo"></span></div>
+      <div class="modal-item"><strong>Status:</strong> <span id="sin-status"></span></div>
+      <div class="modal-item"><strong>Data da Ocorrência:</strong> <span id="sin-data"></span></div>
+      <div class="modal-item"><strong>Valor Estimado:</strong> <span id="sin-valor"></span></div>
+      <div class="modal-item"><strong>Descrição:</strong> <span id="sin-descricao"></span></div>
+      <div class="modal-item"><strong>Seguradora:</strong> <span id="sin-seguradora"></span></div>
+    </div>
+
+    <a id="btnSinPdfModal" class="action-btn primary" href="#"
+   onclick="baixarSinistroPdf(window.selectedSinistroId, event)">
+   <i class="fa-solid fa-file-pdf"></i> Baixar PDF
+</a>
+
+</div>
+
+
+  </div>
+</div>
+
+<script>
+  // Abre o modal ao clicar no botão "Detalhes"
+  document.querySelectorAll('.sinistro-card .action-btn.primary').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const card = btn.closest('.sinistro-card');
+      const numero = card.querySelector('.sinistro-number')?.textContent.trim();
+
+      // Busca no array renderizado de sinistros (igual ao de propostas)
+      const sinistro = {{ sinistros|tojson }}.find(s => 
+        ("SIN-" + String(s.sinistro_id).padStart(6, '0')) === numero
+      );
+
+      if (!sinistro) {
+        alert("Erro ao carregar detalhes do sinistro.");
+        return;
+      }
+
+       window.selectedSinistroId = sinistro.sinistro_id;
+
+// ... após preencher os campos do modal:
+const linkPdf = document.getElementById('btnGerarAnexosPdf');
+if (linkPdf) {
+  // abre num nova aba a rota que gera/mescla SOMENTE documentos_json de sinistros_segurado
+  linkPdf.href = `/cliente/sinistros/${sinistro.sinistro_id}/anexos-pdf`;
+}
+
+
+      // Preenche os campos do modal
+      document.getElementById('sin-numero').textContent = "SIN-" + String(sinistro.sinistro_id).padStart(6, '0');
+      document.getElementById('sin-apolice').textContent = sinistro.numero_apolice || '-';
+      document.getElementById('sin-tipo').textContent = sinistro.tipo_sinistro || '-';
+      document.getElementById('sin-status').textContent = sinistro.status || '-';
+      document.getElementById('sin-data').textContent = formatarData(sinistro.data_ocorrencia);
+      document.getElementById('sin-valor').textContent = sinistro.valor_estimado 
+        ? `R$ ${parseFloat(sinistro.valor_estimado).toFixed(2)}` : '-';
+      document.getElementById('sin-descricao').textContent = sinistro.descricao || '-';
+      document.getElementById('sin-seguradora').textContent = sinistro.seguradora || '-';
+
+      // Exibe o modal
+      document.getElementById('modalDetalhesSinistro').style.display = 'flex';
+    });
+  });
+
+  // Fechar o modal
+  document.getElementById('fecharModalSinistro').addEventListener('click', () => {
+    document.getElementById('modalDetalhesSinistro').style.display = 'none';
+  });
+
+  // Fechar clicando fora
+  window.addEventListener('click', (e) => {
+    const modal = document.getElementById('modalDetalhesSinistro');
+    if (e.target === modal) modal.style.display = 'none';
+  });
+
+  // Formatar datas
+  function formatarData(data) {
+    if (!data) return '-';
+    const d = new Date(data);
+    return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  }
+</script>
+
+
+
+<script>
+  // Toggle sidebar
+  const toggleBtn = document.getElementById('toggleSidebar');
+  const sidebar = document.querySelector('.sidebar');
+  const main = document.querySelector('.main');
+  const topbar = document.querySelector('.topbar');
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    if (sidebar.classList.contains('collapsed')) {
+      main.style.marginLeft = '60px';
+      topbar.style.left = '60px';
+    } else {
+      main.style.marginLeft = '200px';
+      topbar.style.left = '200px';
+    }
+  });
+
+  // Filtro de sinistros
+  const statusFilter = document.getElementById('statusFilter');
+  const typeFilter = document.getElementById('typeFilter');
+  const sinistroCards = document.querySelectorAll('.sinistro-card');
+
+  function filterSinistros() {
+    const statusValue = statusFilter.value;
+    const typeValue = typeFilter.value;
+
+    sinistroCards.forEach(card => {
+      const cardStatus = card.getAttribute('data-status');
+      const cardType = card.getAttribute('data-type');
+
+      const statusMatch = !statusValue || cardStatus === statusValue;
+      const typeMatch = !typeValue || cardType === typeValue;
+
+      if (statusMatch && typeMatch) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  statusFilter.addEventListener('change', filterSinistros);
+  typeFilter.addEventListener('change', filterSinistros);
+
+  // Busca por texto
+  const searchInput = document.querySelector('.filter-input');
+  
+  searchInput.addEventListener('input', function() {
+    const searchText = this.value.toLowerCase();
+    
+    sinistroCards.forEach(card => {
+      const title = card.querySelector('.sinistro-title').textContent.toLowerCase();
+      const number = card.querySelector('.sinistro-number').textContent.toLowerCase();
+      
+      if (title.includes(searchText) || number.includes(searchText)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+
+  // Modal para novo sinistro
+  const novoSinistroBtn = document.getElementById('novoSinistroBtn');
+  const novoSinistroModal = document.getElementById('novoSinistroModal');
+  const closeModal = document.getElementById('closeModal');
+
+  novoSinistroBtn.addEventListener('click', () => {
+    novoSinistroModal.classList.add('open');
+  });
+
+  closeModal.addEventListener('click', () => {
+    novoSinistroModal.classList.remove('open');
+  });
+
+  // Fechar modal ao clicar fora
+  window.addEventListener('click', (event) => {
+    if (event.target === novoSinistroModal) {
+      novoSinistroModal.classList.remove('open');
+    }
+  });
+</script>
+<script>
+/* ===== SafeViana • Ativar item da sidebar automaticamente ===== */
+(function () {
+  // Se quiser forçar manualmente em alguma página, defina antes:
+  // window.ACTIVE_MENU = 'dashboard' | 'meus_dados' | 'cotacoes' | 'apolices' | 'propostas' | 'sinistros';
+
+  // 0) Onde procurar links (ajuste se sua sidebar tiver outro seletor)
+  const LINK_SELECTOR = ".sidebar a, nav.sidebar a, .menu a, .nav a";
+
+  // 1) Mapa de rotas + textos comuns (pode editar/expandir conforme seu app)
+  const MAP = [
+    { key:"dashboard",  paths:["/dashboard","/area-cliente","/cliente/dashboard","/"], texts:["dashboard"] },
+    { key:"meus_dados", paths:["/meus-dados","/cliente/dados"],                   texts:["meus dados","dados"] },
+    { key:"cotacoes",   paths:["/solicitar-cotacoes","/cotacoes","/cliente/cotacoes"], texts:["solicitar cotações","nova cotação","cotações"] },
+    { key:"apolices",   paths:["/apolices","/minhas-apolices","/cliente/apolices"],    texts:["minhas apólices","apólices"] },
+    { key:"propostas",  paths:["/propostas","/minhas-propostas","/cliente/propostas"], texts:["minhas propostas","propostas"] },
+    { key:"sinistros",  paths:["/sinistros","/meus-sinistros","/cliente/sinistros"],   texts:["meus sinistros","sinistros"] },
+  ];
+
+  // 2) Normaliza path atual
+  const norm = s => (s || "").toString().trim().toLowerCase().replace(/\/+$/,"");
+  let current = norm(location.pathname);
+  if (current === "") current = "/";
+
+  // 3) Coleta links da sidebar
+  const links = Array.from(document.querySelectorAll(LINK_SELECTOR));
+  if (!links.length) return;
+
+  // Helper para extrair pathname seguro do href
+  const getPath = (a) => {
+    try { return norm(new URL(a.getAttribute("href"), location.origin).pathname); }
+    catch { return ""; }
+  };
+
+  // 4) Decide alvo (por ACTIVE_MENU → URL exata → começa com → texto)
+  let target = null;
+
+  // 4a) Se o dev quiser forçar via variável global
+  if (window.ACTIVE_MENU) {
+    const wanted = String(window.ACTIVE_MENU).toLowerCase();
+    const item = MAP.find(m => m.key === wanted);
+    if (item) {
+      target = links.find(a => {
+        const p = getPath(a);
+        const t = norm(a.textContent);
+        return item.paths.map(norm).includes(p) || item.texts.some(tx => t.includes(norm(tx)));
+      });
+    }
+  }
+
+  // 4b) Tentativa por URL exata
+  if (!target) {
+    target = links.find(a => getPath(a) === current);
+  }
+
+  // 4c) Tentativa por “começa com” (ex.: /propostas/123)
+  if (!target) {
+    target = links.find(a => {
+      const p = getPath(a);
+      return p && p !== "/" && current.startsWith(p);
+    });
+  }
+
+  // 4d) Tentativa por texto do link (fallback por título)
+  if (!target) {
+    // Descobre a chave provável pela URL atual
+    const guess = MAP.find(m => m.paths.some(p => current === norm(p) || current.startsWith(norm(p))));
+    const texts = guess ? guess.texts : MAP.flatMap(m => m.texts); // se não souber, tenta todos
+    const best = new RegExp("\\b(" + texts.map(t => t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|") + ")\\b","i");
+    target = links.find(a => best.test(a.textContent || ""));
+  }
+
+  // 5) Aplica classe/atributo e injeta estilo mínimo
+  if (target) {
+    target.classList.add("active");
+    target.setAttribute("aria-current","page");
+  }
+
+  if (!document.getElementById("sv-active-style")) {
+    const style = document.createElement("style");
+    style.id = "sv-active-style";
+    style.textContent = `
+      .sidebar a.active, nav.sidebar a.active, .menu a.active, .nav a.active{
+        background:#2e7d32; color:#fff; border-radius:12px;
+        box-shadow:0 6px 14px rgba(46,125,50,.18);
+      }
+      .sidebar a.active i, .sidebar a.active .icon{ color:#fff; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // 6) Log simples pra diagnosticar se precisar
+  // console.log("[SV] path:", current, "→ ativo:", target?.textContent?.trim());
+})();
+</script>
+
+<script>
+  // Base da rota (funciona em subpath também)
+  const SIN_PDF_ROUTE_BASE =
+    ("{{ request.script_root|default('') }}".replace(/\/+$/,'') || "") +
+    "/cliente/sinistro/anexos-pdf";
+
+  // Abrir modal "Detalhes" e configurar o link do modal
+  document.querySelectorAll('.btn-detalhes-sin').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const card   = btn.closest('.sinistro-card');
+      const numero = (card.querySelector('.sinistro-number')?.textContent || '').trim();
+
+      const data = {{ sinistros|tojson }};
+      const s = data.find(x => ("SIN-" + String(x.sinistro_id).padStart(6,'0')) === numero);
+      if (!s) { alert("Erro ao carregar detalhes."); return; }
+
+      // ...preenche os campos do modal aqui (seu código)...
+
+      const aPdf = document.getElementById('btnSinPdfModal');
+      if (aPdf) aPdf.href = `${SIN_PDF_ROUTE_BASE}?sinistro_id=${encodeURIComponent(s.sinistro_id)}`;
+
+      document.getElementById('modalDetalhesSinistro').style.display = 'flex';
+    });
+  });
+
+  // Fechar modal
+  document.getElementById('fecharModalSinistro').addEventListener('click', () => {
+    document.getElementById('modalDetalhesSinistro').style.display = 'none';
+  });
+  window.addEventListener('click', (e) => {
+    const modal = document.getElementById('modalDetalhesSinistro');
+    if (e.target === modal) modal.style.display = 'none';
+  });
+</script>
+
+<script>
+function baixarSinistroPdf(id, event) {
+  if (event) event.preventDefault();
+
+  if (!id) {
+    alert("❌ Nenhum sinistro selecionado.");
+    return;
+  }
+
+  fetch(`/cliente/sinistro/anexos-pdf?sinistro_id=${id}`)
+    .then(async res => {
+      const contentType = res.headers.get("Content-Type") || "";
+      if (contentType.includes("application/json")) {
+        const data = await res.json();
+        alert("❌ " + (data.message || "Nenhum arquivo disponível para este sinistro."));
+        return;
+      }
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "sinistro_" + id + ".pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        alert("✅ PDF baixado com sucesso!");
+      } else {
+        alert("❌ Nenhum arquivo disponível para este sinistro.");
+      }
+    })
+    .catch(() => alert("❌ Erro ao conectar com o servidor."));
+}
+</script>
+
+
+
+</body>
+</html>

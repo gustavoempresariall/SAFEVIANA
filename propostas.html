@@ -1,0 +1,34 @@
+{% if not propostas or propostas|length == 0 %}
+  <div style="padding:16px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;">
+    <strong>Nenhuma proposta encontrada</strong><br>
+    Tente revisar os dados ou tente novamente mais tarde.
+  </div>
+{% else %}
+  <h2 style="color:#1e6028;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+    <i class="fa-regular fa-file-lines"></i> Propostas Disponíveis
+  </h2>
+  <div class="grid-propostas" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+    {% for p in propostas %}
+      <div style="background:#fff;border:1px solid #d1e7dd;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.05);padding:20px;">
+        <h3 style="color:#1e6028;margin:0 0 8px 0;">{{ p.seguradora or "Seguradora" }}</h3>
+        {% if p.plano %}<p><strong>Plano:</strong> {{ p.plano }}</p>{% endif %}
+        {% if p.premio_total %}<p><strong>Prêmio:</strong> {{ p.premio_total }}</p>{% endif %}
+        {% if p.franquia %}<p><strong>Franquia:</strong> {{ p.franquia }}</p>{% endif %}
+        {% if p.coberturas %}<p><strong>Coberturas:</strong> {{ p.coberturas|join(", ") }}</p>{% endif %}
+        {% if p.validade %}<p style="font-size:.85rem;color:#6b7280;"><strong>Validade:</strong> {{ p.validade }}</p>{% endif %}
+
+        {% if p.redirect_url %}
+          <a href="{{ p.redirect_url }}" target="_blank" rel="noopener noreferrer" style="
+            display:inline-flex;align-items:center;gap:8px;background:var(--sv-green);color:#fff;border:none;border-radius:8px;
+            padding:10px 14px;text-decoration:none;margin-top:10px;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Continuar na Seguradora
+          </a>
+        {% else %}
+          <button disabled style="opacity:.6;background:#9ca3af;color:#fff;border:none;border-radius:8px;padding:10px 14px;margin-top:10px;">
+            Indisponível
+          </button>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

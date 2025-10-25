@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Cliente - Acompanhamento de Apólices</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="/imagens/icones/iconecabc.png">
+  <style>
+    /* =========================================================
+       SafeViana • Dashboard Styles (sv-dashboard-css-20250922)
+       – Mantém a aparência padrão da Sidebar, Topbar e componentes
+       ========================================================= */
+
+    /* ===== Tokens / Design System ===== */
+    :root{
+      --sv-green:#2e7d32;
+      --sv-green-dark:#1e6028;
+      --sv-accent:#10b981;
+      --sv-border:#e5e7eb;
+      --sv-light:#f9fafb;
+      --sv-text:#111827;
+      --sv-shadow:0 10px 30px rgba(0,0,0,.08);
+      --sv-gradient:linear-gradient(135deg,#2e7d32 0%,#10b981 100%);
+    }
+
+    *{ box-sizing:border-box }
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;
+      background:var(--sv-light);
+      color:var(--sv-text);
+    }
+
+    /* ===== LAYOUT (sidebar/topbar) ===== */
+    .container{ display:flex; min-height:100vh }
+
+    .sidebar{
+      width:200px;
+      background:#fff;
+      border-right:1px solid var(--sv-border);
+      padding:20px 10px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:fixed; inset:0 auto 0 0;
+      z-index:1000; box-shadow:var(--sv-shadow);
+      transition:width .3s;
+    }
+    .sidebar.collapsed{ width:60px; padding:20px 6px }
+
+    .logo{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; color:#111827; margin-bottom:18px;
+      white-space:nowrap; width:100%;
+    }
+    .logo i{
+      font-size:1.35rem; color:var(--sv-green);
+      display:grid; place-items:center; width:40px; height:40px;
+      border-radius:12px; background:#f3f7f4; margin:0;
+    }
+    .sidebar.collapsed .logo{ justify-content:center; gap:0; padding-inline:0 }
+    .sidebar.collapsed .logo span{ display:none }
+    .sidebar.collapsed .logo i{ margin-inline:auto }
+
+    .sidebar nav ul{ list-style:none; margin:0; padding:0 }
+    .sidebar nav li{ margin:10px 0 }
+    .sidebar nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px;
+      text-decoration:none; color:#374151; font-weight:600; transition:.2s;
+    }
+    .sidebar nav a i{ width:20px; text-align:center }
+    .sidebar nav a:hover{ background:var(--sv-green); color:#fff }
+    .sidebar nav a.active{
+      background:linear-gradient(135deg,#2e7d32 0%,#2e7d32 60%,#10b981 100%);
+      color:#fff; box-shadow:0 6px 16px rgba(46,125,50,.25);
+    }
+    .sidebar.collapsed nav a{ justify-content:center }
+    .sidebar.collapsed nav a span{ display:none }
+
+    .admin-title{ font-size:.78rem; color:#6b7280; margin:10px 8px }
+    .sidebar.collapsed .admin-title{ display:none }
+
+    .bottom-section ul{ list-style:none; margin:6px 0 0; padding:0 }
+    .bottom-section li{
+      display:flex; align-items:center; gap:8px;
+      padding:8px; border-radius:10px; cursor:pointer;
+    }
+    .bottom-section li:hover{ background:var(--sv-green); color:#fff }
+    .logout-btn{
+      width:100%; margin-top:8px; padding:10px; border:0; border-radius:12px; cursor:pointer;
+      background:var(--sv-gradient); color:#fff; font-weight:700;
+      box-shadow:0 8px 20px rgba(16,185,129,.35);
+    }
+    .sidebar.collapsed .bottom-section li span,
+    .sidebar.collapsed .logout-btn span{ display:none }
+
+    .main{ flex:1; display:flex; flex-direction:column; margin-left:200px }
+
+    .topbar{
+      position:fixed; left:200px; right:0; top:0; z-index:900;
+      background:#fff; border-bottom:1px solid var(--sv-border);
+      padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:var(--sv-shadow);
+    }
+    .hamburger{ border:0; background:transparent; font-size:1.4rem; cursor:pointer; margin-right:8px }
+    .topbar h2{ font-size:1.25rem; margin:0 }
+    .topbar h2 span{ color:var(--sv-green) }
+    .topbar input{
+      padding:8px 12px; border:1px solid var(--sv-border); border-radius:10px; width:230px;
+    }
+
+    .user-info{ display:flex; align-items:center; gap:8px; font-weight:600 }
+    .profile-avatar{
+      width:36px; height:36px; border-radius:50%; overflow:hidden;
+      border:2px solid var(--sv-green); display:flex; align-items:center; justify-content:center; background:#fff;
+    }
+    .profile-avatar img{ width:100%; height:100%; object-fit:cover; display:block }
+    .profile-avatar .initials{
+      text-transform:uppercase; color:var(--sv-green); font-weight:800; font-size:.9rem; letter-spacing:.5px;
+    }
+
+    .content{ padding:22px; margin-top:72px }
+
+    /* ===== HERO ===== */
+    .hero{
+      position:relative; overflow:hidden; border-radius:16px; padding:22px;
+      background:var(--sv-gradient); color:#fff; box-shadow:var(--sv-shadow);
+    }
+    .hero h1{ margin:0 0 6px; font-size:clamp(1.1rem,1.6vw,1.4rem) }
+    .hero p{ margin:0; opacity:.95 }
+    .hero .badges{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap }
+    .chip{
+      background:rgba(255,255,255,.14); backdrop-filter:blur(6px);
+      padding:6px 10px; border-radius:999px; font-size:.8rem; border:1px solid rgba(255,255,255,.25);
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title{
+      font-size:1.05rem; margin:18px 0 10px; display:flex; align-items:center; gap:8px; color:#222;
+    }
+    .section-title i{
+      color:#fff; background:var(--sv-green); width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+    }
+
+    /* ===== APÓLICES SECTION ===== */
+    .apolices-section {
+      background: #fff;
+      border: 1px solid var(--sv-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--sv-shadow);
+    }
+
+    .apolices-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .apolices-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--sv-light);
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(46,125,50,0.15);
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--sv-green);
+      margin: 5px 0;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .filters-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-input {
+      padding: 10px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-select {
+      padding: 10px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: #fff;
+      min-width: 150px;
+    }
+
+    .apolices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .apolice-card {
+      background: #fff;
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+      padding: 18px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .apolice-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(46,125,50,0.15);
+    }
+
+    .apolice-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--sv-gradient);
+    }
+
+    .apolice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .apolice-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--sv-text);
+      margin: 0;
+    }
+
+    .apolice-number {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+
+    .apolice-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-ativa {
+      background: rgba(46,125,50,0.1);
+      color: var(--sv-green);
+    }
+
+    .status-vencida {
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+    }
+
+    .status-pendente {
+      background: rgba(245,158,11,0.1);
+      color: #f59e0b;
+    }
+
+    .apolice-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--sv-text);
+    }
+
+    .apolice-progress {
+      margin-bottom: 15px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--sv-gradient);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .apolice-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--sv-text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-decoration: none;
+    }
+
+    .action-btn.primary {
+      background: var(--sv-green);
+      color: #fff;
+      border-color: var(--sv-green);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .action-btn.primary:hover {
+      background: var(--sv-green-dark);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      color: #d1d5db;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    /* ===== MODAL ===== */
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(17,24,39,.55); z-index:1200; padding:18px;
+    }
+    .modal.open{ display:flex }
+
+    .modal-card{
+      width:min(720px, 96vw);
+      background:#fff; border-radius:16px; border:1px solid var(--sv-border);
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+      max-height:90vh;
+    }
+
+    .modal-header{
+      padding:14px 16px; background:var(--sv-gradient); color:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      position:sticky; top:0; z-index:1;
+    }
+    .modal-body{ padding:16px; overflow:auto }
+    .grid2{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px }
+    .modal-body label{ font-weight:700; font-size:.9rem }
+    .modal-body input,.modal-body select{
+      width:100%; padding:10px; border:1px solid var(--sv-border); border-radius:10px; font-size:.95rem;
+    }
+    .modal-footer{
+      padding:14px 16px; display:flex; gap:10px; justify-content:flex-end;
+      border-top:1px solid var(--sv-border); background:#fafafa;
+      position:sticky; bottom:0; z-index:1;
+    }
+    .btn{ border:0; border-radius:12px; padding:10px 14px; font-weight:800; cursor:pointer }
+    .btn.primary{ background:var(--sv-gradient); color:#fff }
+    .btn.secondary{ background:#f3f4f6; color:#111827; border:1px solid var(--sv-border) }
+    .btn.link{ background:transparent; color:var(--sv-green); padding:8px }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px){
+      .main{ margin-left:60px }
+      .topbar{ left:60px }
+    }
+    @media (max-width: 640px){
+      .topbar input{ display:none }
+      .grid2{ grid-template-columns:1fr }
+      .modal-card{ max-height:92vh }
+      .apolices-grid{ grid-template-columns:1fr }
+      .apolices-stats{ flex-direction:column }
+      .filters-section{ flex-direction:column }
+      .filter-input, .filter-select{ min-width:100% }
+    }
+
+    /* Link com classe .btn não deve sublinhar */
+a.btn,
+a.btn:visited,
+a.btn:hover,
+a.btn:focus,
+a.btn:active {
+  text-decoration: none !important;
+  border-bottom: 0 !important; /* se houver regra global usando borda */
+  outline: none;
+}
+
+/* Deixa o link com “cara” de botão */
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Modal de Detalhes da Apólice ===== */
+.modal-proposta {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 860px;
+  width: 90%;
+  padding: 0;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  animation: fadeIn .25s ease;
+  overflow: hidden;
+}
+
+.modal-header-apolice {
+  background: var(--sv-gradient);
+  color: #fff;
+  padding: 24px 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.modal-header-apolice .header-icon {
+  background: rgba(255,255,255,0.2);
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+}
+
+.modal-header-apolice h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.modal-header-apolice .sub {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.close-btn {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  font-size: 28px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 10;
+}
+.close-btn:hover { color: #c1f1cc; }
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px 20px;
+  padding: 24px 30px;
+}
+
+.modal-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.modal-item strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(46,125,50,0.1);
+  color: var(--sv-green);
+}
+
+.modal-divider {
+  border-top: 1px solid #e5e7eb;
+  margin: 0 30px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px 30px;
+  background: #f9fafb;
+}
+
+.modal-actions .action-btn {
+  border: 1px solid var(--sv-border);
+  background: #fff;
+  color: var(--sv-text);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.modal-actions .action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.modal-actions .primary {
+  background: var(--sv-green);
+  color: #fff;
+  border-color: var(--sv-green);
+}
+
+  /* Hover claro só para o item Suporte */
+  .bottom-section li.support-item:hover {
+    background: #f3f4f6 !important;   /* cinza/branco */
+    color: var(--sv-green) !important; /* texto/ícone verdes */
+  }
+  .bottom-section li.support-item:hover .support-link { 
+    color: var(--sv-green) !important; 
+  }
+  .bottom-section li.support-item:hover .support-link i {
+    color: var(--sv-green) !important;
+  }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="logo">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Área do Cliente</span>
+      </div>
+
+      <nav>
+  <ul>
+    <li>
+      <a href="{{ url_for('area_cliente') }}" class="{% if ACTIVE_MENU == 'dashboard' %}active{% endif %}">
+        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('dadosclientes') }}" class="{% if ACTIVE_MENU == 'meus_dados' %}active{% endif %}">
+        <i class="fa-solid fa-user"></i> <span>Meus Dados</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cotacoes_clientes') }}" class="{% if ACTIVE_MENU == 'cotacoes' %}active{% endif %}">
+        <i class="fa-solid fa-file-signature"></i> <span>Solicitar Cotações</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('acompanhamento_ap_cliente') }}" class="{% if ACTIVE_MENU == 'apolices' %}active{% endif %}">
+        <i class="fa-solid fa-file-contract"></i> <span>Minhas Apólices</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cliente_propostas_html') }}" class="{% if ACTIVE_MENU == 'propostas' %}active{% endif %}">
+        <i class="fa-solid fa-clipboard-list"></i> <span>Minhas Propostas</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('sinistros_segurado') }}" class="{% if ACTIVE_MENU == 'sinistros' %}active{% endif %}">
+        <i class="fa-solid fa-car-crash"></i> <span>Meus Sinistros</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+    </div>
+    <div class="bottom-section">
+      <p class="admin-title"><span>ADMINISTRAÇÃO</span></p>
+      <ul>
+  <li class="support-item">
+    <a class="support-link"
+       href="https://wa.me/5518988076390?text=Ol%C3%A1!%20Preciso%20de%20suporte."
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;width:100%;
+              padding:8px;border-radius:8px;">
+      <i class="fa-solid fa-circle-question"></i>
+      <span>Suporte</span>
+    </a>
+  </li>
+</ul>
+
+      <button class="logout-btn" onclick="window.location.href='{{ url_for('home') }}'">
+  <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
+</button>
+
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+      </div>
+      <input type="text" placeholder="Buscar apólices...">
+
+      <div class="user-info">
+  <div class="profile-avatar">
+    {% if foto_url %}
+      <img src="{{ foto_url }}" alt="{{ user.nome }}">
+    {% else %}
+      <span class="initials">
+        {{ user.nome[0] ~ (user.nome.split(' ')[1][0] if user.nome.split(' ')|length > 1 else '') }}
+      </span>
+    {% endif %}
+  </div>
+  <span>{{ user.nome }}</span>
+</div>
+
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <div class="content">
+      <!-- Seção de Boas-Vindas -->
+      <div class="hero">
+        <h1>Acompanhamento de Apólices</h1>
+        <p>Gerencie e acompanhe todas as suas apólices de seguro em um só lugar.</p>
+        <div class="badges">
+          <div class="badges">
+  <span class="chip">{{ kpis.ativas }} Apólices Ativas</span>
+  <span class="chip">{{ kpis.vencimentos }} Vencimento(s) Próximo(s)</span>
+  <span class="chip">R$ {{ "%.2f"|format(kpis.valor_total) }} em Prêmios</span>
+</div>
+        </div>
+      </div>
+
+      <!-- Seção de Estatísticas -->
+      <div class="apolices-section">
+        <div class="apolices-header">
+          <h2 class="section-title"><i class="fa-solid fa-file-contract"></i> Minhas Apólices</h2>
+          <a href="{{ url_for('cotacoes_clientes') }}" class="btn primary">
+          <i class="fa-solid fa-plus"></i> Nova Cotação
+        </a>
+
+        </div>
+
+        <div class="apolices-stats">
+          <div class="stat-card">
+  <i class="fa-solid fa-file-contract" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+  <div class="stat-value">{{ kpis.ativas }}</div>
+  <div class="stat-label">Apólices Ativas</div>
+</div>
+<div class="stat-card">
+  <i class="fa-solid fa-calendar-day" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+  <div class="stat-value">{{ kpis.vencimentos }}</div>
+  <div class="stat-label">Vencimento Próximo</div>
+</div>
+<div class="stat-card">
+  <i class="fa-solid fa-dollar-sign" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+  <div class="stat-value">R$ {{ "%.2f"|format(kpis.valor_total) }}</div>
+  <div class="stat-label">Valor em Prêmios</div>
+</div>
+<div class="stat-card">
+  <i class="fa-solid fa-shield-alt" style="color: var(--sv-green); font-size: 1.5rem;"></i>
+  <div class="stat-value">{{ kpis.cobertura }}</div>
+  <div class="stat-label">Cobertura Ativa</div>
+</div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+          <input type="text" class="filter-input" placeholder="Buscar por apólice, tipo ou seguradora...">
+          <select class="filter-select" id="statusFilter">
+            <option value="">Todos os Status</option>
+            <option value="ativa">Ativa</option>
+            <option value="vencida">Vencida</option>
+            <option value="pendente">Pendente</option>
+          </select>
+          <select class="filter-select" id="typeFilter">
+            <option value="">Todos os Tipos</option>
+            <option value="auto">Auto</option>
+            <option value="residencial">Residencial</option>
+            <option value="vida">Vida</option>
+            <option value="empresarial">Empresarial</option>
+          </select>
+          <button class="btn secondary"><i class="fa-solid fa-filter"></i> Filtrar</button>
+        </div>
+
+        <div class="apolices-grid">
+  {% if apolices %}
+    {% for ap in apolices %}
+      <div class="apolice-card" data-status="{{ ap.status|lower }}" data-type="{{ ap.tipo_apolice|lower }}">
+        <div class="apolice-header">
+          <div>
+            <h3 class="apolice-title">Seguro {{ ap.tipo_apolice or "-" }}</h3>
+            <div class="apolice-number">{{ ap.numero_apolice or "—" }}</div>
+          </div>
+          <span class="apolice-status status-{{ ap.status|lower }}">{{ ap.status }}</span>
+        </div>
+        
+        <div class="apolice-details">
+          <div class="detail-item">
+            <span class="detail-label">Vigência</span>
+            <span class="detail-value">{{ ap.data_inicio_fmt }} - {{ ap.data_termino_fmt }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prêmio</span>
+            <span class="detail-value">R$ {{ "%.2f"|format(ap.valor_apolice or 0) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Seguradora</span>
+            <span class="detail-value">{{ ap.seguradora or "-" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Próximo Vencimento</span>
+            <span class="detail-value">{{ ap.vencimento_fmt or "-" }}</span>
+          </div>
+        </div>
+
+        <div class="apolice-actions">
+  <a href="#" class="action-btn primary"><i class="fa-solid fa-eye"></i> Detalhes</a>
+  <button class="action-btn" onclick="baixarApolice('{{ ap.id }}')">
+    <i class="fa-solid fa-file-pdf"></i> Imprimir
+  </button>
+  <a href="{{ url_for('cotacoes_clientes') }}" class="action-btn"><i class="fa-solid fa-rotate"></i> Renovar</a>
+</div>
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="fa-solid fa-file-circle-exclamation"></i>
+      <h3>Nenhuma apólice encontrada</h3>
+      <p>Você ainda não possui apólices enviadas pelo corretor.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Modal de Detalhes da Apólice -->
+<div id="modalDetalhesApolice" class="modal-proposta">
+  <div class="modal-content">
+    <span class="close-btn" id="fecharModalApolice">&times;</span>
+
+    <div class="modal-header-apolice">
+      <div class="header-icon">
+        <i class="fa-solid fa-file-shield"></i>
+      </div>
+      <div>
+        <h2>Detalhes da Apólice</h2>
+        <p class="sub">Visualize as informações completas do seu contrato.</p>
+      </div>
+    </div>
+
+    <div class="modal-grid">
+      <div class="modal-item">
+        <strong>Número da Apólice</strong>
+        <span id="apol-numero">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Tipo de Seguro</strong>
+        <span id="apol-tipo">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Seguradora</strong>
+        <span id="apol-seguradora">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Status</strong>
+        <span id="apol-status" class="status-tag">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Data de Início</strong>
+        <span id="apol-inicio">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Data de Término</strong>
+        <span id="apol-fim">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Valor Total</strong>
+        <span id="apol-valor">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Próximo Vencimento</strong>
+        <span id="apol-vencimento">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Parcelas</strong>
+        <span id="apol-parcelas">—</span>
+      </div>
+      <div class="modal-item">
+        <strong>Forma de Pagamento</strong>
+        <span id="apol-pagamento">—</span>
+      </div>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <div class="modal-actions">
+  <button class="action-btn" id="btnGerarPdfModal">
+    <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+  </button>
+</div>
+
+  </div>
+</div>
+
+
+        <!-- Estado vazio (para demonstração) -->
+        <!-- <div class="empty-state">
+          <i class="fa-solid fa-file-circle-exclamation"></i>
+          <h3>Nenhuma apólice encontrada</h3>
+          <p>Você ainda não possui apólices ou os filtros aplicados não retornaram resultados.</p>
+          <button class="btn primary" style="margin-top: 15px;"><i class="fa-solid fa-plus"></i> Solicitar Cotação</button>
+        </div> -->
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ======================================================
+// 🟢 SafeViana – Modal Detalhes da Apólice (Completo)
+// ======================================================
+let apoliceSelecionadaId = null; // 🟢 ID da apólice selecionada (usado no botão Gerar PDF)
+
+// 🔹 Abrir modal ao clicar no botão “Detalhes”
+document.querySelectorAll('.apolice-card .action-btn.primary').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const card = btn.closest('.apolice-card');
+    const numero = card.querySelector('.apolice-number')?.textContent.trim();
+
+    // Busca no array JSON de apólices
+    const apolice = {{ apolices|tojson }}.find(ap => ap.numero_apolice == numero);
+
+    if (!apolice) {
+      alert("Erro ao carregar detalhes da apólice.");
+      return;
+    }
+
+    apoliceSelecionadaId = apolice.id || apolice.apolice_id; // 🟢 guarda o id atual
+
+
+    // === Preenche campos do modal ===
+    document.getElementById('apol-numero').textContent = apolice.numero_apolice || "-";
+    document.getElementById('apol-tipo').textContent = apolice.tipo_apolice || "-";
+    document.getElementById('apol-seguradora').textContent = apolice.seguradora || "-";
+
+    // Status estilizado
+    const statusElem = document.getElementById('apol-status');
+    statusElem.textContent = apolice.status || "-";
+    statusElem.className = "";
+    if (apolice.status) {
+      const s = apolice.status.toLowerCase();
+      if (s.includes("ativa")) statusElem.classList.add("status-badge", "ativa");
+      else if (s.includes("vencida")) statusElem.classList.add("status-badge", "vencida");
+      else if (s.includes("pendente")) statusElem.classList.add("status-badge", "pendente");
+    }
+
+    // Datas e valores
+    document.getElementById('apol-inicio').textContent = apolice.data_inicio_fmt || formatarData(apolice.data_inicio);
+    document.getElementById('apol-fim').textContent = apolice.data_termino_fmt || formatarData(apolice.data_termino);
+    document.getElementById('apol-valor').textContent = apolice.valor_apolice 
+      ? `R$ ${parseFloat(apolice.valor_apolice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
+      : "-";
+    document.getElementById('apol-parcelas').textContent = apolice.parcelas || "-";
+    document.getElementById('apol-pagamento').textContent = apolice.forma_pagamento || "-";
+
+    // 🟢 Campo de Próximo Vencimento corrigido
+    document.getElementById('apol-vencimento').textContent =
+      apolice.vencimento_fmt || formatarData(apolice.vencimento) || "-";
+
+    // Exibe o modal
+    document.getElementById('modalDetalhesApolice').style.display = 'flex';
+  });
+});
+
+// 🔹 Fechar modal
+document.getElementById('fecharModalApolice').addEventListener('click', () => {
+  document.getElementById('modalDetalhesApolice').style.display = 'none';
+});
+
+// 🔹 Fechar clicando fora
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('modalDetalhesApolice');
+  if (e.target === modal) modal.style.display = 'none';
+});
+
+// 🔹 Função de formatação de data
+function formatarData(data) {
+  if (!data) return null;
+  try {
+    const d = new Date(data);
+    return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  } catch {
+    return null;
+  }
+}
+
+// ======================================================
+// 🟢 Estilo adicional para o status no modal (injetado)
+// ======================================================
+const style = document.createElement('style');
+style.textContent = `
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .status-badge.ativa { background: rgba(46,125,50,0.1); color: #2e7d32; }
+  .status-badge.vencida { background: rgba(239,68,68,0.1); color: #ef4444; }
+  .status-badge.pendente { background: rgba(245,158,11,0.1); color: #f59e0b; }
+`;
+document.head.appendChild(style);
+</script>
+
+
+
+<script>
+  // Toggle sidebar
+  const toggleBtn = document.getElementById('toggleSidebar');
+  const sidebar = document.querySelector('.sidebar');
+  const main = document.querySelector('.main');
+  const topbar = document.querySelector('.topbar');
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    if (sidebar.classList.contains('collapsed')) {
+      main.style.marginLeft = '60px';
+      topbar.style.left = '60px';
+    } else {
+      main.style.marginLeft = '200px';
+      topbar.style.left = '200px';
+    }
+  });
+
+  // Filtro de apólices
+  const statusFilter = document.getElementById('statusFilter');
+  const typeFilter = document.getElementById('typeFilter');
+  const apoliceCards = document.querySelectorAll('.apolice-card');
+
+  function filterApolices() {
+    const statusValue = statusFilter.value;
+    const typeValue = typeFilter.value;
+
+    apoliceCards.forEach(card => {
+      const cardStatus = card.getAttribute('data-status');
+      const cardType = card.getAttribute('data-type');
+
+      const statusMatch = !statusValue || cardStatus === statusValue;
+      const typeMatch = !typeValue || cardType === typeValue;
+
+      if (statusMatch && typeMatch) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  statusFilter.addEventListener('change', filterApolices);
+  typeFilter.addEventListener('change', filterApolices);
+
+  // Busca por texto
+  const searchInput = document.querySelector('.filter-input');
+  
+  searchInput.addEventListener('input', function() {
+    const searchText = this.value.toLowerCase();
+    
+    apoliceCards.forEach(card => {
+      const title = card.querySelector('.apolice-title').textContent.toLowerCase();
+      const number = card.querySelector('.apolice-number').textContent.toLowerCase();
+      
+      if (title.includes(searchText) || number.includes(searchText)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+<script>
+/* ===== SafeViana • Ativar item da sidebar automaticamente ===== */
+(function () {
+  // Se quiser forçar manualmente em alguma página, defina antes:
+  // window.ACTIVE_MENU = 'dashboard' | 'meus_dados' | 'cotacoes' | 'apolices' | 'propostas' | 'sinistros';
+
+  // 0) Onde procurar links (ajuste se sua sidebar tiver outro seletor)
+  const LINK_SELECTOR = ".sidebar a, nav.sidebar a, .menu a, .nav a";
+
+  // 1) Mapa de rotas + textos comuns (pode editar/expandir conforme seu app)
+  const MAP = [
+    { key:"dashboard",  paths:["/dashboard","/area-cliente","/cliente/dashboard","/"], texts:["dashboard"] },
+    { key:"meus_dados", paths:["/meus-dados","/cliente/dados"],                   texts:["meus dados","dados"] },
+    { key:"cotacoes",   paths:["/solicitar-cotacoes","/cotacoes","/cliente/cotacoes"], texts:["solicitar cotações","nova cotação","cotações"] },
+    { key:"apolices",   paths:["/apolices","/minhas-apolices","/cliente/apolices"],    texts:["minhas apólices","apólices"] },
+    { key:"propostas",  paths:["/propostas","/minhas-propostas","/cliente/propostas"], texts:["minhas propostas","propostas"] },
+    { key:"sinistros",  paths:["/sinistros","/meus-sinistros","/cliente/sinistros"],   texts:["meus sinistros","sinistros"] },
+  ];
+
+  // 2) Normaliza path atual
+  const norm = s => (s || "").toString().trim().toLowerCase().replace(/\/+$/,"");
+  let current = norm(location.pathname);
+  if (current === "") current = "/";
+
+  // 3) Coleta links da sidebar
+  const links = Array.from(document.querySelectorAll(LINK_SELECTOR));
+  if (!links.length) return;
+
+  // Helper para extrair pathname seguro do href
+  const getPath = (a) => {
+    try { return norm(new URL(a.getAttribute("href"), location.origin).pathname); }
+    catch { return ""; }
+  };
+
+  // 4) Decide alvo (por ACTIVE_MENU → URL exata → começa com → texto)
+  let target = null;
+
+  // 4a) Se o dev quiser forçar via variável global
+  if (window.ACTIVE_MENU) {
+    const wanted = String(window.ACTIVE_MENU).toLowerCase();
+    const item = MAP.find(m => m.key === wanted);
+    if (item) {
+      target = links.find(a => {
+        const p = getPath(a);
+        const t = norm(a.textContent);
+        return item.paths.map(norm).includes(p) || item.texts.some(tx => t.includes(norm(tx)));
+      });
+    }
+  }
+
+  // 4b) Tentativa por URL exata
+  if (!target) {
+    target = links.find(a => getPath(a) === current);
+  }
+
+  // 4c) Tentativa por “começa com” (ex.: /propostas/123)
+  if (!target) {
+    target = links.find(a => {
+      const p = getPath(a);
+      return p && p !== "/" && current.startsWith(p);
+    });
+  }
+
+  // 4d) Tentativa por texto do link (fallback por título)
+  if (!target) {
+    // Descobre a chave provável pela URL atual
+    const guess = MAP.find(m => m.paths.some(p => current === norm(p) || current.startsWith(norm(p))));
+    const texts = guess ? guess.texts : MAP.flatMap(m => m.texts); // se não souber, tenta todos
+    const best = new RegExp("\\b(" + texts.map(t => t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|") + ")\\b","i");
+    target = links.find(a => best.test(a.textContent || ""));
+  }
+
+  // 5) Aplica classe/atributo e injeta estilo mínimo
+  if (target) {
+    target.classList.add("active");
+    target.setAttribute("aria-current","page");
+  }
+
+  if (!document.getElementById("sv-active-style")) {
+    const style = document.createElement("style");
+    style.id = "sv-active-style";
+    style.textContent = `
+      .sidebar a.active, nav.sidebar a.active, .menu a.active, .nav a.active{
+        background:#2e7d32; color:#fff; border-radius:12px;
+        box-shadow:0 6px 14px rgba(46,125,50,.18);
+      }
+      .sidebar a.active i, .sidebar a.active .icon{ color:#fff; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // 6) Log simples pra diagnosticar se precisar
+  // console.log("[SV] path:", current, "→ ativo:", target?.textContent?.trim());
+})();
+</script>
+
+<script>
+function baixarApolice(id) {
+  fetch(`/download_apolice/${id}`)
+    .then(async res => {
+      // Se não for JSON, é o próprio arquivo
+      const contentType = res.headers.get("Content-Type") || "";
+      if (contentType.includes("application/json")) {
+        const data = await res.json();
+        alert("❌ " + (data.message || "Erro ao baixar o arquivo."));
+      } else if (res.ok) {
+        return res.blob().then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          // Extrai o nome do arquivo do header ou fallback
+          const filename = res.headers.get("Content-Disposition")
+            ?.split("filename=")[1]?.replace(/['"]/g, "") || "apolice.pdf";
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        });
+      } else {
+        alert("❌ Falha ao obter o arquivo (erro HTTP " + res.status + ")");
+      }
+    })
+    .catch(err => {
+      console.error("Erro:", err);
+      alert("❌ Erro de conexão ao baixar a apólice.");
+    });
+}
+</script>
+
+
+<script>
+document.getElementById('btnGerarPdfModal').addEventListener('click', () => {
+  if (!apoliceSelecionadaId) {
+    alert("❌ Nenhuma apólice selecionada.");
+    return;
+  }
+  // 🔹 Reutiliza exatamente a função que já funciona
+  baixarApolice(apoliceSelecionadaId);
+});
+</script>
+
+</body>
+</html>

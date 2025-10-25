@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana - Propostas</title>
+  <link rel="stylesheet" href="{{ url_for('serve_css', filename='areacr.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+
+  <style>
+    :root{
+      --sv-green:#2e7d32;
+      --sv-green-600:#1e7a34;
+      --sv-green-50:#e9f5ee;
+      --sv-blue:#1e88e5;
+      --sv-red:#e53935;
+      --sv-slate:#111827;
+      --sv-gray:#6b7280;
+      --sv-border:#e5e7eb;
+      --sv-bg:#ffffff;
+    }
+
+    /* Topbar */
+    .topbar .user-info,.topbar-right .user-info{display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px;}
+    .topbar .user-info .small-avatar,.topbar .user-info .profile-avatar{
+      width:36px;height:36px;flex:0 0 36px;border-radius:50%;overflow:hidden;background:var(--sv-green-600);color:#fff;
+      font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;
+    }
+    .topbar .user-info .small-avatar img,.topbar .user-info .profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+    .topbar .user-info .user-name{white-space:nowrap;line-height:1;display:inline-block;font-weight:600;color:var(--sv-slate);}
+
+    /* Cabeçalho */
+    .content-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 6px 0;}
+    .content-header h2{font-weight:700;color:var(--sv-slate);}
+
+    /* KPIs */
+    .kpis{display:grid;grid-template-columns: repeat(6, minmax(160px,1fr));gap:12px;margin-top:10px;}
+    .kpi-card{background:#fff;border:1px solid var(--sv-border);border-radius:12px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+    .kpi-title{font-size:12px;color:var(--sv-gray);text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+    .kpi-value{font-size:22px;font-weight:800;margin-top:6px;color:var(--sv-slate);}
+    .kpi-value small{font-size:12px;font-weight:600;color:var(--sv-gray);margin-left:6px}
+
+    /* Formulário (card) */
+    .form-section{margin-top:18px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);border:1px solid var(--sv-border);}
+    .form-section h2{margin:0 0 12px;color:var(--sv-green-600);}
+    .form-grid{display:grid;grid-template-columns: repeat(4, minmax(180px,1fr));gap:12px;}
+    .form-grid .full{grid-column:1/-1;}
+    .form-section input,.form-section select,.form-section textarea{
+      padding:10px;border-radius:10px;border:1px solid #d1d5db;background:#fff;font-size:14px;width:100%;
+    }
+    .form-actions{margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:10px;cursor:pointer;padding:10px 16px;font-weight:600;}
+    .btn i{font-size:14px}
+    .btn-primary{background:var(--sv-green);color:#fff;}
+    .btn-secondary{background:#eef2ff;color:#1f2937;}
+    .btn-danger{background:var(--sv-red);color:#fff;}
+
+    /* Stepper (igual ao dos sinistros) */
+    .stepper{
+      width:100%;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      padding:6px 2px 2px;
+      scrollbar-width: thin;
+      margin-top:8px;
+    }
+    .stepper::-webkit-scrollbar{height:6px}
+    .stepper::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+    .step{display:flex; flex-direction:column; align-items:center; gap:6px; min-width:90px; flex:0 0 auto; text-align:center;}
+    .step .dot{width:14px; height:14px; border-radius:50%; border:2px solid #cbd5e1; background:#fff;}
+    .step .label{font-size:12px; font-weight:600; color:#334155; max-width:96px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .connector{height:2px; width:40px; align-self:center; margin-top:6px; background:#cbd5e1; border-radius:999px;}
+    .step.is-complete .dot{ background:var(--sv-green); border-color:var(--sv-green); }
+    .step.is-active .dot{ background:var(--sv-green-50); border-color:var(--sv-green); }
+    .connector.is-complete{ background:var(--sv-green); }
+
+    /* Toolbar / filtros */
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px;background:#fff;border:1px solid var(--sv-border);border-radius:12px;padding:12px;}
+    .toolbar .field{display:flex;gap:8px;align-items:center;}
+    .toolbar input,.toolbar select{padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;background:#fff;}
+    .toolbar .spacer{flex:1}
+
+    /* Chips & Badges */
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;white-space:nowrap;}
+    .badge i{font-size:11px;}
+    .badge--nova{ background:#ecfeff;color:#0e7490;border-color:#a5f3fc;}
+    .badge--enviada{ background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+    .badge--negociacao{ background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe;}
+    .badge--aguardando{ background:#fffbeb;color:#92400e;border-color:#fde68a;}
+    .badge--aprovada{ background:#ecfdf5;color:#065f46;border-color:#a7f3d0;}
+    .badge--reprovada{ background:#fef2f2;color:#991b1b;border-color:#fecaca;}
+    .badge--vencida{ background:#fff7ed;color:#9a3412;border-color:#fed7aa;}
+
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent}
+    .chip--ok{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
+    .chip--warn{background:#fffbeb;color:#92400e;border-color:#fde68a}
+    .chip--danger{background:#fef2f2;color:#991b1b;border-color:#fecaca}
+
+    /* Tabela */
+    .table-wrapper{margin-top:12px;background:#fff;border:1px solid var(--sv-border);border-radius:12px;overflow:auto;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+    table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;min-width:1150px;}
+    thead th{position:sticky;top:0;background:var(--sv-green-50);color:#064e3b;text-align:left;padding:12px;border-bottom:1px solid var(--sv-border);font-weight:700;}
+    tbody td{padding:12px;border-bottom:1px solid var(--sv-border);vertical-align:top;}
+    tbody tr:hover{background:#f8fafc;}
+    .actions{display:flex;gap:6px;flex-wrap:wrap;}
+    .btn-icon{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--sv-border);background:#fff;color:#111;cursor:pointer;}
+    .btn-icon.primary{border-color:#bfdbfe;color:#1e3a8a;background:#eff6ff;}
+    .btn-icon.danger{border-color:#fecaca;color:#7f1d1d;background:#fef2f2;}
+
+    /* Responsivo */
+    @media (max-width: 1280px){
+      .kpis{grid-template-columns: repeat(3, minmax(160px,1fr));}
+    }
+    @media (max-width: 1100px){
+      .form-grid{grid-template-columns: repeat(2, minmax(160px,1fr));}
+    }
+    @media (max-width: 640px){
+      .form-grid{grid-template-columns: 1fr;}
+      table{min-width: 900px;}
+    }
+
+    /* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+.btn-icon { transition: transform .05s ease; }
+.btn-icon:active { transform: scale(0.98); }
+.btn-icon i.fa-paper-plane { opacity:.9; }
+
+/* ===== Uploads ===== */
+.upload-box{
+  position: relative;
+  border: 2px dashed var(--sv-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+  min-height: 90px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .2s ease, background .2s ease;
+}
+.upload-box.dragover{
+  border-color: var(--sv-green);
+  background: var(--sv-green-50);
+}
+.upload-box input[type="file"]{
+  position:absolute; inset:0; opacity:0; cursor:pointer;
+}
+.upload-hint{
+  text-align:center; color:#475569; display:flex; flex-direction:column; gap:6px;
+}
+.upload-hint i{ font-size:22px; color:var(--sv-green); }
+
+/* Lista de arquivos (documentos) */
+.upload-list{ margin:8px 0 0; padding-left:18px; color:#334155; }
+.upload-list li{ margin:4px 0; font-size:13px; }
+
+/* Preview das fotos */
+.thumbs{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;
+}
+.thumbs .thumb{
+  width:84px; height:84px; border:1px solid var(--sv-border);
+  border-radius:10px; overflow:hidden; position:relative; background:#f8fafc;
+  box-shadow:0 2px 6px rgba(0,0,0,.04);
+}
+.thumbs .thumb img{
+  width:100%; height:100%; object-fit:cover;
+}
+.thumbs .thumb .remove{
+  position:absolute; top:4px; right:4px;
+  background:#fff; border:1px solid var(--sv-border);
+  border-radius:8px; padding:2px 6px; font-size:12px; cursor:pointer;
+}
+
+/* ===== Modal "Confirme os dados do cliente" (estilo premium SafeViana) ===== */
+#modalConfirmacao {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  animation: fadeIn 0.25s ease;
+}
+
+#modalConfirmacao > div {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  width: 420px;
+  max-width: 90%;
+  padding: 24px 26px;
+  text-align: left;
+  font-family: "Inter", sans-serif;
+  animation: zoomIn 0.25s ease;
+}
+
+#modalConfirmacao h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 14px;
+}
+
+#modalConfirmacao label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+#modalConfirmacao input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+#modalConfirmacao input[type="text"]:focus {
+  outline: none;
+  border-color: var(--sv-green);
+}
+
+#modalConfirmacao .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 10px 16px;
+  transition: all 0.2s ease;
+}
+
+#modalConfirmacao .btn i {
+  font-size: 15px;
+}
+
+#modalConfirmacao .btn.btn-primary {
+  background: var(--sv-green);
+  color: #fff;
+}
+#modalConfirmacao .btn.btn-primary:hover {
+  background: var(--sv-green-600);
+}
+
+#modalConfirmacao .btn.btn-secondary {
+  background: #e53935;
+  color: #fff;
+}
+#modalConfirmacao .btn.btn-secondary:hover {
+  background: #c62828;
+}
+
+#modalConfirmacao form div:last-child {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left"><h2>Area<span> Corretor</span></h2></div>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('area_corretor') }}"><span class="icon">🏠</span> Dashboard</a></li>
+          <li><a href="{{ url_for('visualizar_clientes') }}"><span class="icon">👥</span> Clientes</a></li>
+          <li><a href="{{ url_for('relatorio') }}"><span class="icon">📊</span> Cotações</a></li>
+          <li><a href="{{ url_for('apolices') }}"><span class="icon">📄</span> Apólices</a></li>
+          <li><a href="{{ url_for('propostas') }}"><span class="icon">📑</span> Propostas</a></li>
+          <li><a href="{{ url_for('sinistros') }}"><span class="icon">⚠️</span> Sinistros</a></li>
+          <li><a href="{{ url_for('calendario') }}"><span class="icon">📆</span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+
+          <div class="user-info" id="userInfo">
+            <div class="profile-avatar small-avatar" title="Meu Perfil">
+              {% if corretor_foto %}
+                <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+              {% elif session.get('corretor_foto') %}
+                <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+              {% else %}
+                <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+              {% endif %}
+            </div>
+            <span class="user-name">{{ corretor_nome }}</span>
+          </div>
+        </div>
+      </header>
+
+{% with messages = get_flashed_messages(
+      with_categories=true,
+      category_filter=['propostas-success','propostas-error','propostas-info']) %}
+  {% if messages %}
+    <div style="margin: 10px;">
+      {% for category, message in messages %}
+        {% set tone = 'success' if 'success' in category
+                      else 'danger' if 'error' in category
+                      else 'info' %}
+        <div class="alert alert-{{ tone }}" style="padding:10px; border-radius:8px; margin-bottom:6px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+      <div class="content-header"><h2>Acompanhamento de Propostas</h2></div>
+
+      <!-- KPIs -->
+      <section class="kpis">
+        <div class="kpi-card"><div class="kpi-title"><i class="fa-solid fa-list"></i> Totais</div><div class="kpi-value" id="kpiTotal">—</div></div>
+        <div class="kpi-card"><div class="kpi-title"><i class="fa-solid fa-handshake"></i> Em negociação</div><div class="kpi-value" id="kpiNegociacao">—</div></div>
+        <div class="kpi-card"><div class="kpi-title"><i class="fa-solid fa-hourglass-half"></i> Aguardando</div><div class="kpi-value" id="kpiAguardando">—</div></div>
+        <div class="kpi-card"><div class="kpi-title"><i class="fa-solid fa-check"></i> Aprovadas</div><div class="kpi-value" id="kpiAprovadas">—</div></div>
+        <div class="kpi-card"><div class="kpi-title"><i class="fa-solid fa-bell"></i> Vencem em 7 dias</div><div class="kpi-value" id="kpiVencem7">—</div></div>
+        <div class="kpi-card"><div class="kpi-title"><i class="fa-solid fa-coins"></i> Receita esperada</div><div class="kpi-value" id="kpiReceita">—</div></div>
+      </section>
+
+      <!-- Formulário -->
+      <section class="form-section">
+        <h2 id="form-title">Cadastro de Propostas</h2>
+        <form id="form-proposta"
+      action="{{ url_for('adicionar_proposta') }}"
+      method="POST"
+      enctype="multipart/form-data">
+
+          <input type="hidden" name="id_proposta" id="id_proposta">
+
+          <input type="hidden" name="existing_documentos_json" id="existing_documentos_json">
+          <input type="hidden" name="existing_fotos_json" id="existing_fotos_json">
+
+           <!-- ADICIONE ESTES DOIS -->
+         <input type="hidden" name="remove_documentos_json" id="remove_documentos_json">
+         <input type="hidden" name="remove_fotos_json" id="remove_fotos_json">
+
+
+
+          <div class="form-grid">
+            <div>
+              <label for="cliente">Cliente</label>
+              <input type="text" name="cliente" id="cliente" placeholder="Nome do Cliente" required>
+            </div>
+            <div>
+            <label for="cpf_cliente">CPF do Cliente</label>
+             <input 
+             type="text" 
+             name="cpf_cliente" 
+             id="cpf_cliente" 
+             placeholder="000.000.000-00" 
+            required>
+            </div>
+            <div>
+              <label for="proposta">Número da Proposta</label>
+              <input type="text" name="proposta" id="proposta" placeholder="Ex.: 2025-000123" required>
+            </div>
+            <div>
+              <label for="validade">Validade</label>
+              <input type="date" name="validade" id="validade" required>
+            </div>
+            <div>
+              <label for="tipo">Tipo</label>
+              <input type="text" name="tipo" id="tipo" placeholder="Automóvel, Vida, Residencial..." required>
+            </div>
+            <div>
+              <label for="valor_total">Valor (R$)</label>
+              <input type="number" step="0.01" name="valor_total" id="valor_total" placeholder="0,00">
+            </div>
+            <div>
+              <label for="probabilidade">Probabilidade (%)</label>
+              <input type="number" min="0" max="100" name="probabilidade" id="probabilidade" placeholder="0">
+              <small id="valor_esperado_hint" style="display:block;margin-top:4px;color:#6b7280">Valor esperado: R$ 0,00</small>
+            </div>
+
+            <!-- Adicione este bloco dentro de .form-grid (ex.: após o campo "Tipo") -->
+<div>
+  <label for="seguradora">Seguradora</label>
+  <select name="seguradora" id="seguradora" required>
+    <option value="" disabled selected>Selecione...</option>
+    <option>Porto Seguro</option>
+    <option>Bradesco Seguros</option>
+    <option>SulAmérica</option>
+    <option>Allianz</option>
+    <option>Tokio Marine</option>
+    <option>Sompo</option>
+    <option>MAPFRE</option>
+    <option>Zurich</option>
+    <option>HDI</option>
+    <option>Liberty Seguros</option>
+  </select>
+</div>
+            
+            <!-- Adicione dentro de .form-grid (por exemplo, após "Seguradora") -->
+<div>
+  <label for="prazo_estimado">Prazo estimado (dias)</label>
+  <input
+    type="number"
+    name="prazo_estimado"
+    id="prazo_estimado"
+    placeholder="Ex.: 7"
+    min="1"
+    max="365"
+    step="1"
+    required
+  >
+</div>
+            
+            <div class="full">
+              <label for="anotacoes">Anotações</label>
+              <input type="text" name="anotacoes" id="anotacoes" placeholder="Observações internas">
+            </div>
+            <div class="full">
+              <label for="status">Status</label>
+              <select name="status" id="status" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option>Nova</option>
+                <option>Enviada</option>
+                <option>Em negociação</option>
+                <option>Aguardando cliente</option>
+                <option>Aguardando seguradora</option>
+                <option>Aprovada</option>
+                <option>Reprovada</option>
+                <option>Vencida/Expirada</option>
+              </select>
+              <!-- Stepper -->
+              <div class="stepper" id="stepperProposta"></div>
+            </div>
+          </div>
+
+          <!-- ============== UPLOADS (lado a lado) ============== -->
+<div>
+  <label for="documentos">Anexar Arquivos (PDF, DOCX, XLSX, etc.)</label>
+  <div class="upload-box" id="dropDocs">
+    <input type="file"
+           id="documentos"
+           name="documentos[]"
+           multiple
+           accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,.zip,.rar,.7z,.odt,.ods">
+    <div class="upload-hint">
+      <i class="fa-solid fa-file-arrow-up"></i>
+      <span>Arraste e solte ou clique para selecionar</span>
+      <small>Arquivos permitidos: PDF, DOCX, XLSX, etc.</small>
+    </div>
+  </div>
+  <ul class="upload-list" id="listaDocs"></ul>
+</div>
+
+<div>
+  <label for="fotos">Anexar Fotos (JPG, PNG, WEBP)</label>
+  <div class="upload-box" id="dropFotos">
+    <input type="file"
+           id="fotos"
+           name="fotos[]"
+           multiple
+           accept="image/*">
+    <div class="upload-hint">
+      <i class="fa-solid fa-image"></i>
+      <span>Arraste e solte ou clique para selecionar</span>
+      <small>Imagens: JPG, PNG, WEBP</small>
+    </div>
+  </div>
+  <div class="thumbs" id="previewFotos"></div>
+</div>
+<!-- ==================================================== -->
+
+          <div class="form-actions">
+            <button type="submit" id="btnSalvar" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            <button type="button" class="btn btn-secondary cancelar-edicao" onclick="cancelarEdicao()" style="display:none;"><i class="fa-solid fa-rotate-left"></i> Cancelar edição</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Filtros -->
+      <div class="toolbar">
+  <div class="field">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" id="filterBusca" placeholder="Buscar por cliente, proposta, ...">
+  </div>
+
+  <div class="field">
+    <label>Status</label>
+    <select id="filterStatus">
+      <option value="">Todos</option>
+      <option>Novo</option>
+      <option>Enviada</option>
+      <option>Documentação pendente</option>
+      <option>Aguardando seguradora</option>
+      <option>Em regulação</option>
+      <option>Aprovada</option>
+      <option>Negado</option>
+      <option>Indenizado/Encerrado</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Período (validade)</label>
+    <input type="date" id="filterDe">
+    <span>—</span>
+    <input type="date" id="filterAte">
+  </div>
+
+  <!-- agrupe os dois botões aqui -->
+  <div class="toolbar-actions">
+    <button class="btn btn-secondary" id="btnLimparFiltros">
+      <i class="fa-solid fa-broom"></i> Limpar
+    </button>
+    <button class="btn btn-secondary" id="btnExportarCsv">
+      <i class="fa-solid fa-file-csv"></i> Exportar CSV
+    </button>
+  </div>
+</div>
+
+      <!-- Tabela -->
+      <div class="table-wrapper">
+        <table id="tabela-propostas">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Proposta</th>
+              <th>Validade</th>
+              <th>Tipo</th>
+              <th>Seguradora</th>
+              <th>Anotações</th>
+              <th>Status</th>
+              <th>Valor (R$)</th>
+              <th>Prob. (%)</th>
+              <th>Valor Esperado</th>
+              <th style="width:220px">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in propostas_corretor %}
+            <tr
+              data-cliente="{{ p['cliente']|e }}"
+              data-proposta="{{ p['numero_proposta']|e }}"
+              data-cpf="{{ p['cpf_cliente']|e }}"
+              data-validade="{{ p['validade']|e }}"
+              data-tipo="{{ p['tipo']|e }}"
+              data-seguradora="{{ p.get('seguradora','')|e }}" 
+              data-anotacoes="{{ p['anotacoes']|e }}"
+              data-status="{{ p['status']|e }}"
+              data-valor="{{ p.get('valor_total','') }}"
+              data-prob="{{ p.get('probabilidade','') }}"
+            >
+              <td>{{ p['cliente'] }}</td>
+              <td>{{ p['numero_proposta'] }}</td>
+              <td class="cell-validade">{{ p['validade'] }}</td>
+              <td>{{ p['tipo'] }}</td>
+              <td>{{ p.get('seguradora','') }}</td>
+              <td>{{ p['anotacoes'] }}</td>
+              <td class="cell-status">{{ p['status'] }}</td>
+              <td class="cell-valor">{{ p.get('valor_total','') }}</td>
+              <td class="cell-prob">{{ p.get('probabilidade','') }}</td>
+              <td class="cell-valor-exp">—</td>
+              <td>
+                <div class="actions">
+                  <button class="btn-icon primary" onclick='editarProposta({{ p|tojson }})'>
+                    <i class="fa-solid fa-pen"></i> Editar
+                  </button>
+                  
+                  <form action="{{ url_for('excluir_proposta') }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta proposta?');">
+                    <input type="hidden" name="id_proposta" value="{{ p['id'] }}">
+                    <button type="submit" class="btn-icon danger"><i class="fa-solid fa-trash"></i> Excluir</button>
+                  </form>
+
+                  <!-- NOVO: Enviar ao Segurado -->
+  <button type="button" class="btn-icon" 
+        onclick="abrirModalEnvio('{{ p['id'] }}', '{{ p['cliente'] }}', '{{ p['cpf_cliente'] }}')">
+  <i class="fa-solid fa-paper-plane"></i> Enviar ao Segurado
+</button>
+
+
+<div id="modalConfirmacao" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:12px; width:400px;">
+    <h3>Confirme os dados do cliente</h3>
+    <form id="formConfirmacao" method="POST" action="{{ url_for('enviar_proposta_segurado') }}">
+      <input type="hidden" name="id_proposta" id="modal_id_proposta">
+
+      <div>
+        <label>Nome do Cliente</label>
+        <input type="text" id="modal_cliente" disabled>
+      </div>
+      <div>
+        <label>CPF do Cliente</label>
+        <input type="text" name="cpf" id="modal_cpf" placeholder="000.000.000-00" value="" required>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-paper-plane"></i> Confirmar envio
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+
+  <script>
+
+    function abrirModalEnvio(id, cliente, cpf) {
+  console.log("abrirModalEnvio:", id, cliente, cpf); // debug
+  document.getElementById("modal_id_proposta").value = id;
+  document.getElementById("modal_cliente").value = cliente;
+  document.getElementById("modal_cpf").value = cpf || "";   // aqui preenche
+  document.getElementById("modalConfirmacao").style.display = "flex";
+}
+
+
+function fecharModal(){
+  document.getElementById("modalConfirmacao").style.display = "none";
+}
+
+  </script>
+  
+
+  <script>
+/* ============================ Utils ============================ */
+function norm(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+function parseDateFlexible(v){
+  if(!v) return null; v=String(v).trim();
+  let m=v.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+  let b=v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if(b) return new Date(+b[3],+b[2]-1,+b[1]);
+  const d=new Date(v); return isNaN(d)?null:d;
+}
+function toYYYYMMDD(anyDateStr){
+  if(!anyDateStr) return "";
+  if (/^\d{4}-\d{2}-\d{2}/.test(anyDateStr)) return anyDateStr.slice(0,10);
+  const m = String(anyDateStr).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  const d = new Date(anyDateStr); if (isNaN(d)) return "";
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+function daysDiff(a,b){ return Math.ceil((a-b)/(1000*60*60*24)); }
+function brl(n){ const x=Number(n)||0; return x.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+
+/* ============================ Stepper ============================ */
+const PROPOSTA_STEPS = ["Nova","Enviada","Em negociação","Aguardando cliente","Aguardando seguradora","Aprovada","Reprovada","Vencida/Expirada"];
+const SHORT = {"Em negociação":"Negociação","Aguardando cliente":"Aguard. cliente","Aguardando seguradora":"Aguard. seguradora","Vencida/Expirada":"Expirada"};
+function shortLabel(s){ return SHORT[s] || s; }
+function renderStepperProposta(current){
+  const cont = document.getElementById('stepperProposta'); if(!cont) return;
+  cont.innerHTML = "";
+  const curIdx = PROPOSTA_STEPS.findIndex(s => norm(s) === norm(current||''));
+  for (let i=0;i<PROPOSTA_STEPS.length;i++){
+    const s = PROPOSTA_STEPS[i];
+    const step = document.createElement('div');
+    step.className = 'step' + (i<curIdx?' is-complete': i===curIdx?' is-active':'');
+    step.innerHTML = `<span class="dot"></span><span class="label" title="${s}">${shortLabel(s)}</span>`;
+    cont.appendChild(step);
+    if (i < PROPOSTA_STEPS.length - 1){
+      const conn = document.createElement('div');
+      conn.className = 'connector' + (i<curIdx ? ' is-complete' : '');
+      cont.appendChild(conn);
+    }
+  }
+}
+(document.getElementById('status')||{}).addEventListener?.('change', e=> renderStepperProposta(e.target.value));
+
+/* ================= Decor / KPIs / Filtros ================= */
+function statusToBadge(text){
+  const t = norm(text); let cls = 'badge--nova', icon='fa-star';
+  if(t.includes('enviada')){ cls='badge--enviada'; icon='fa-paper-plane'; }
+  else if(t.includes('negociacao')){ cls='badge--negociacao'; icon='fa-handshake'; }
+  else if(t.includes('aguardando cliente')||t.includes('aguardando seguradora')){ cls='badge--aguardando'; icon='fa-hourglass-half'; }
+  else if(t.includes('aprovada')){ cls='badge--aprovada'; icon='fa-check'; }
+  else if(t.includes('reprovada')){ cls='badge--reprovada'; icon='fa-xmark'; }
+  else if(t.includes('vencida')||t.includes('expirada')){ cls='badge--vencida'; icon='fa-clock'; }
+  return `<span class="badge ${cls}"><i class="fa-solid ${icon}"></i>${text}</span>`;
+}
+function paintRowDecorations(tr){
+  const tdStatus=tr.querySelector('.cell-status');
+  const raw=(tdStatus?.textContent||'').trim(); tdStatus.innerHTML=statusToBadge(raw);
+
+  const tdVal = tr.querySelector('.cell-validade');
+  const rawVal = (tdVal?.textContent||'').trim();
+  const d = parseDateFlexible(rawVal);
+  if(d){
+    const today=new Date(); today.setHours(0,0,0,0); d.setHours(0,0,0,0);
+    const diff = daysDiff(d, today);
+    let cls='chip--ok', label=`${diff} dias`;
+    if(diff<0){ cls='chip--danger'; label='Expirada'; }
+    else if(diff===0){ cls='chip--danger'; label='Hoje'; }
+    else if(diff<=7){ cls='chip--warn'; label=`${diff} dias`; }
+    tdVal.dataset.original = rawVal;
+    tdVal.innerHTML = `<span class="chip ${cls}" title="Validade: ${rawVal}">Vence em: ${label}</span>`;
+  }
+
+  const v = parseFloat(tr.dataset.valor || tr.querySelector('.cell-valor')?.textContent || '0');
+  const p = parseFloat(tr.dataset.prob || tr.querySelector('.cell-prob')?.textContent || '0')/100;
+  const ve = (isNaN(v)?0:v) * (isNaN(p)?0:p);
+  const tdVE = tr.querySelector('.cell-valor-exp'); if(tdVE) tdVE.textContent = brl(ve);
+}
+function paintAllRows(){ document.querySelectorAll('#tabela-propostas tbody tr').forEach(tr=>{ if(tr.style.display!=='none') paintRowDecorations(tr); }); }
+
+function refreshKpis(){
+  const rows=[...document.querySelectorAll('#tabela-propostas tbody tr')].filter(tr=>tr.style.display!=='none');
+  let total=0, neg=0, aguard=0, aprov=0, venc7=0, receita=0;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const in7 = new Date(today); in7.setDate(in7.getDate()+7);
+  rows.forEach(tr=>{
+    total++;
+    const st = norm(tr.dataset.status || tr.querySelector('.cell-status')?.textContent || '');
+    if(st.includes('negociacao')) neg++;
+    if(st.includes('aguardando')) aguard++;
+    if(st.includes('aprovada')) aprov++;
+    const d = parseDateFlexible(tr.dataset.validade || tr.querySelector('.cell-validade')?.dataset.original || tr.querySelector('.cell-validade')?.textContent );
+    if(d){ d.setHours(0,0,0,0); if(d>=today && d<=in7) venc7++; }
+    const v = parseFloat(tr.dataset.valor || tr.querySelector('.cell-valor')?.textContent || '0');
+    const p = parseFloat(tr.dataset.prob || tr.querySelector('.cell-prob')?.textContent || '0')/100;
+    if(!isNaN(v) && !isNaN(p)) receita += v*p;
+  });
+  (document.getElementById('kpiTotal')||{}).textContent = String(total||'0');
+  (document.getElementById('kpiNegociacao')||{}).textContent = String(neg||'0');
+  (document.getElementById('kpiAguardando')||{}).textContent = String(aguard||'0');
+  (document.getElementById('kpiAprovadas')||{}).textContent = String(aprov||'0');
+  (document.getElementById('kpiVencem7')||{}).textContent = String(venc7||'0');
+  (document.getElementById('kpiReceita')||{}).textContent = brl(receita);
+}
+
+function applyFilters(){
+  const q=(document.getElementById('filterBusca')?.value||'').toLowerCase();
+  const fStatus=norm(document.getElementById('filterStatus')?.value||'');
+  const de=parseDateFlexible(document.getElementById('filterDe')?.value);
+  const ate=parseDateFlexible(document.getElementById('filterAte')?.value);
+  const rows=[...document.querySelectorAll('#tabela-propostas tbody tr')];
+
+  rows.forEach(tr=>{
+    const cliente=(tr.dataset.cliente||'').toLowerCase();
+    const prop=(tr.dataset.proposta||'').toLowerCase();
+    const tipo=(tr.dataset.tipo||'').toLowerCase();
+    const seguradora=(tr.dataset.seguradora||'').toLowerCase();
+    const anot=(tr.dataset.anotacoes||'').toLowerCase();
+    const statusKey=norm(tr.dataset.status||'');
+    const d=parseDateFlexible(tr.dataset.validade);
+    let ok=true;
+    if(q){ ok=[cliente,prop,tipo,seguradora,anot,statusKey].some(v=>v.includes(q)); }
+    if(ok && fStatus){ ok = statusKey === fStatus; }
+    if(ok && (de||ate) && d){
+      if(de && d<de) ok=false;
+      if(ate){ const end=new Date(ate); end.setHours(23,59,59,999); if(d>end) ok=false; }
+    }
+    tr.style.display=ok?'':'none';
+  });
+
+  paintAllRows(); refreshKpis();
+}
+
+(document.getElementById('filterBusca')||{}).addEventListener?.('input', applyFilters);
+document.getElementById('filterStatus')?.addEventListener('change', applyFilters);
+document.getElementById('filterDe')?.addEventListener('change', applyFilters);
+document.getElementById('filterAte')?.addEventListener('change', applyFilters);
+
+(document.getElementById('btnLimparFiltros')||{}).addEventListener?.('click', ()=>{ 
+  ['filterBusca','filterStatus','filterDe','filterAte'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  applyFilters();
+});
+
+(document.getElementById('btnExportarCsv')||{}).addEventListener?.('click', ()=>{
+  const rows=[...document.querySelectorAll('#tabela-propostas tr')].filter(tr=>tr.style.display!=='none');
+  const data=rows.map(tr=>[...tr.children].map(td=>`"${(td.innerText||'').replaceAll('"','""')}"`).join(',')).join('\n');
+  const blob=new Blob([data],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='propostas.csv';
+  document.body.appendChild(a);a.click();a.remove();
+});
+
+/* ================= Valor esperado (form) ================= */
+function updateValorEsperadoHint(){
+  const v = parseFloat(document.getElementById('valor_total')?.value||0);
+  const p = parseFloat(document.getElementById('probabilidade')?.value||0)/100;
+  const el = document.getElementById('valor_esperado_hint');
+  if(el) el.textContent = 'Valor esperado: ' + brl(v*p);
+}
+['input','change'].forEach(ev=>{
+  document.getElementById('valor_total')?.addEventListener(ev, updateValorEsperadoHint);
+  document.getElementById('probabilidade')?.addEventListener(ev, updateValorEsperadoHint);
+});
+
+/* ====================== Edit Mode & Remoções ====================== */
+let EDIT_MODE = false;
+let CURRENT_DOCS = [];
+let CURRENT_FOTOS = [];
+let REM_DOCS = [];
+let REM_FOTOS = [];
+
+function setEditMode(flag){
+  EDIT_MODE = !!flag;
+  if(!EDIT_MODE){
+    CURRENT_DOCS = [];
+    CURRENT_FOTOS = [];
+    REM_DOCS = [];
+    REM_FOTOS = [];
+    const ids = ['remove_documentos_json','remove_fotos_json','existing_documentos_json','existing_fotos_json'];
+    ids.forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    const list = document.getElementById('listaDocs'); if(list) list.innerHTML='';
+    const prev = document.getElementById('previewFotos'); if(prev) prev.innerHTML='';
+  }
+}
+function _parseJsonSafe(x){ try{ if(!x) return []; if(Array.isArray(x)) return x; return JSON.parse(x); }catch{ return []; } }
+function _syncRemovalsHidden(){
+  const hD = document.getElementById('remove_documentos_json');
+  const hF = document.getElementById('remove_fotos_json');
+  if(hD) hD.value = JSON.stringify(REM_DOCS);
+  if(hF) hF.value = JSON.stringify(REM_FOTOS);
+}
+
+/* Cria grupos "Já anexados / Novos a enviar" apenas no Editar */
+function ensureDocsGroups(){
+  const host = document.getElementById('listaDocs'); if(!host) return {};
+  if(!EDIT_MODE){ host.innerHTML=''; return {exist:null, novos:host}; }
+  if(!host.querySelector('.group-existentes')){
+    host.innerHTML = `
+      <li class="group-title" style="margin:6px 0;color:#334155;font-weight:700;">Já anexados</li>
+      <div class="group-existentes"></div>
+      <li class="group-title" style="margin:10px 0 6px;color:#334155;font-weight:700;">Novos a enviar</li>
+      <div class="group-novos"></div>`;
+  }
+  return { exist: host.querySelector('.group-existentes'), novos: host.querySelector('.group-novos') };
+}
+function ensureFotosGroups(){
+  const host = document.getElementById('previewFotos'); if(!host) return {};
+  if(!EDIT_MODE){ host.innerHTML=''; return {exist:null, novos:host}; }
+  if(!host.querySelector('.group-existentes')){
+    host.innerHTML = `
+      <div class="group-title" style="flex-basis:100%;margin:6px 0;color:#334155;font-weight:700;">Já anexados</div>
+      <div class="group-existentes" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <div class="group-title" style="flex-basis:100%;margin:10px 0 6px;color:#334155;font-weight:700;">Novos a enviar</div>
+      <div class="group-novos" style="display:flex;flex-wrap:wrap;gap:8px;"></div>`;
+  }
+  return { exist: host.querySelector('.group-existentes'), novos: host.querySelector('.group-novos') };
+}
+
+/* Render EXISTENTES (com X que marca remoção para o backend) */
+function renderExistingDocs(docs){
+  if(!EDIT_MODE) return;
+  const g = ensureDocsGroups(); if(!g.exist) return;
+  g.exist.innerHTML = '';
+
+  const arr = _parseJsonSafe(docs);
+  CURRENT_DOCS = arr.slice();
+
+  arr.forEach((d, idx)=>{
+    let href = '', name = '', mimetype = '', sizeKB = '';
+    if (typeof d === 'string') {
+      href = d.startsWith('/') ? d : '/'+d; name = href.split('/').pop();
+    } else if (d && typeof d === 'object') {
+      const raw = d.path || d.filename || d.url || '';
+      href = raw ? (raw.startsWith('/') ? raw : '/'+raw) : '';
+      name = d.original || d.name || (href ? href.split('/').pop() : '');
+      mimetype = d.mimetype || '';
+      if (d.size) sizeKB = ` • ${(Number(d.size)/1024).toFixed(0)} KB`;
+    }
+    if(!href) return;
+
+    const li = document.createElement('li');
+    li.style.margin='4px 0'; li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px';
+    li.innerHTML = `
+      <a href="${href}" target="_blank" rel="noopener">${name}</a>
+      <small style="color:#64748b;">${mimetype}${sizeKB}</small>
+      <button type="button" class="remove-existing-doc" data-idx="${idx}"
+        style="margin-left:6px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:2px 6px;cursor:pointer;">x</button>`;
+    g.exist.appendChild(li);
+  });
+
+  g.exist.querySelectorAll('.remove-existing-doc').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const idx = +e.currentTarget.dataset.idx;
+      const item = CURRENT_DOCS[idx];
+      if(item){ REM_DOCS.push(item); _syncRemovalsHidden(); }
+      e.currentTarget.closest('li')?.remove();
+    });
+  });
+}
+
+function renderExistingFotos(fotos){
+  if(!EDIT_MODE) return;
+  const g = ensureFotosGroups(); if(!g.exist) return;
+  g.exist.innerHTML = '';
+
+  const arr = _parseJsonSafe(fotos);
+  CURRENT_FOTOS = arr.slice();
+
+  arr.forEach((f, idx)=>{
+    let src = '';
+    if (typeof f === 'string') { src = f.startsWith('/') ? f : '/'+f; }
+    else if (f && typeof f === 'object') { const raw = f.path || f.filename || f.url || ''; src = raw ? (raw.startsWith('/') ? raw : '/'+raw) : ''; }
+    if(!src) return;
+
+    const box = document.createElement('div');
+    box.className = 'thumb';
+    box.style.position='relative';
+    box.innerHTML = `
+      <a href="${src}" target="_blank" rel="noopener"><img src="${src}" alt=""></a>
+      <button type="button" class="remove-existing-foto" data-idx="${idx}"
+        style="position:absolute;top:4px;right:4px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:2px 6px;cursor:pointer;">x</button>`;
+    g.exist.appendChild(box);
+  });
+
+  g.exist.querySelectorAll('.remove-existing-foto').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const idx = +e.currentTarget.dataset.idx;
+      const item = CURRENT_FOTOS[idx];
+      if(item){ REM_FOTOS.push(item); _syncRemovalsHidden(); }
+      e.currentTarget.closest('.thumb')?.remove();
+    });
+  });
+}
+
+/* ===================== Upload NOVOS (drag/drop) ===================== */
+function setupDropArea(areaEl, inputEl, onFiles){
+  const over = (e)=>{ e.preventDefault(); areaEl.classList.add('dragover'); };
+  const leave= ()=> areaEl.classList.remove('dragover');
+  const drop  = (e)=>{ e.preventDefault(); areaEl.classList.remove('dragover'); const files=[...(e.dataTransfer?.files||[])]; if(files.length) onFiles(files); };
+  areaEl.addEventListener('dragover', over);
+  areaEl.addEventListener('dragenter', over);
+  areaEl.addEventListener('dragleave', leave);
+  areaEl.addEventListener('drop', drop);
+  inputEl.addEventListener('change', (e)=> onFiles([...(e.target.files||[])]));
+}
+
+/* DOCS (novos) — com X para remover do DataTransfer */
+(function documentosController(){
+  const drop  = document.getElementById('dropDocs');
+  const input = document.getElementById('documentos');
+  const hDocs = document.getElementById('existing_documentos_json');
+  if(!drop || !input) return;
+
+  const dt = new DataTransfer();
+
+  function renderNovos(){
+    const groups = ensureDocsGroups();
+    const cont = groups.novos || document.getElementById('listaDocs');
+    if(!cont) return;
+    cont.innerHTML = '';
+    for(let i=0;i<dt.files.length;i++){
+      const f = dt.files[i];
+      const li = document.createElement('li');
+      li.style.margin='4px 0'; li.style.display='flex'; li.style.alignItems='center'; li.style.gap='6px';
+      li.innerHTML = `
+        <span>${f.name} (${(f.size/1024).toFixed(0)} KB)</span>
+        <button type="button" class="remove-new-doc" data-idx="${i}"
+          style="border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:2px 6px;cursor:pointer;">x</button>`;
+      cont.appendChild(li);
+    }
+    cont.querySelectorAll('.remove-new-doc').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const idx = +e.currentTarget.dataset.idx;
+        const ndt = new DataTransfer();
+        for(let j=0;j<dt.files.length;j++){ if(j!==idx) ndt.items.add(dt.files[j]); }
+        input.files = ndt.files; dt.items.clear(); for(let j=0;j<ndt.files.length;j++) dt.items.add(ndt.files[j]);
+        renderNovos();
+      });
+    });
+  }
+
+  setupDropArea(drop, input, (files)=>{ files.forEach(f=> dt.items.add(f)); input.files = dt.files; renderNovos(); });
+
+  // se estiver em edição, mostra existentes
+  renderExistingDocs(hDocs?.value);
+  renderNovos();
+})();
+
+/* FOTOS (novas) — com X para remover do DataTransfer */
+(function fotosController(){
+  const drop  = document.getElementById('dropFotos');
+  const input = document.getElementById('fotos');
+  const hFotos = document.getElementById('existing_fotos_json');
+  if(!drop || !input) return;
+
+  const dt = new DataTransfer();
+
+  function renderNovas(){
+    const groups = ensureFotosGroups();
+    const cont = groups.novos || document.getElementById('previewFotos');
+    if(!cont) return;
+    cont.innerHTML = '';
+    for(let i=0;i<dt.files.length;i++){
+      const f = dt.files[i]; if(!f.type.startsWith('image/')) continue;
+      const url = URL.createObjectURL(f);
+      const box = document.createElement('div');
+      box.className='thumb';
+      box.innerHTML = `<img src="${url}" alt="">
+                       <button type="button" class="remove" data-idx="${i}">x</button>`;
+      cont.appendChild(box);
+    }
+    cont.querySelectorAll('.remove').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        const idx = +e.currentTarget.dataset.idx;
+        const ndt = new DataTransfer();
+        for(let j=0;j<dt.files.length;j++){ if(j!==idx) ndt.items.add(dt.files[j]); }
+        input.files = ndt.files; dt.items.clear(); for(let j=0;j<ndt.files.length;j++) dt.items.add(ndt.files[j]);
+        renderNovas();
+      });
+    });
+  }
+
+  setupDropArea(drop, input, (files)=>{ files.forEach(f=>{ if(f.type.startsWith('image/')) dt.items.add(f); }); input.files = dt.files; renderNovas(); });
+
+  // se estiver em edição, mostra existentes
+  renderExistingFotos(hFotos?.value);
+  renderNovas();
+})();
+
+/* ================= Modal Enviar ao Segurado ================= */
+function abrirModalEnvio(id, cliente, cpf){
+  document.getElementById("modal_id_proposta").value = id;
+  document.getElementById("modal_cliente").value = cliente;
+  document.getElementById("modal_cpf").value = cpf || "";
+  document.getElementById("modalConfirmacao").style.display = "flex";
+}
+function fecharModal(){ document.getElementById("modalConfirmacao").style.display = "none"; }
+
+/* ======================= Editar / Cancelar ======================= */
+function fillSelectIfNeeded(selectEl, value){
+  if(!value || !selectEl) return;
+  const exists=[...selectEl.options].some(o=>(o.value||o.textContent)===value);
+  if(!exists){ const opt=document.createElement('option'); opt.value=value; opt.textContent=value; selectEl.appendChild(opt); }
+  selectEl.value=value;
+}
+
+window.editarProposta=function (obj){
+  setEditMode(true);
+
+  // Campos básicos
+  document.getElementById('id_proposta').value = obj.id ?? '';
+  document.getElementById('cliente').value = obj.cliente ?? '';
+  document.getElementById('proposta').value = obj.numero_proposta ?? obj.proposta ?? '';
+  const cpfEl = document.getElementById('cpf_cliente'); if (cpfEl) cpfEl.value = (obj.cpf_cliente ?? '').toString();
+  const valEl = document.getElementById('validade'); if (valEl) valEl.value = toYYYYMMDD(obj.validade || '');
+  document.getElementById('tipo').value = obj.tipo ?? '';
+  document.getElementById('anotacoes').value = obj.anotacoes ?? '';
+  document.getElementById('valor_total').value = obj.valor_total ?? '';
+  document.getElementById('probabilidade').value = obj.probabilidade ?? '';
+  fillSelectIfNeeded(document.getElementById('seguradora'), obj.seguradora);
+  const prazoEl=document.getElementById('prazo_estimado'); if(prazoEl) prazoEl.value=obj.prazo_estimado ?? '';
+  fillSelectIfNeeded(document.getElementById('status'), obj.status);
+
+  // Existentes
+  let docsExist=[], fotosExist=[];
+  try{ docsExist  = Array.isArray(obj.documentos_json)?obj.documentos_json:(obj.documentos_json?JSON.parse(obj.documentos_json):[]);}catch{}
+  try{ fotosExist = Array.isArray(obj.fotos_json)?obj.fotos_json:(obj.fotos_json?JSON.parse(obj.fotos_json):[]);}catch{}
+
+  // Hidden de existentes
+  document.getElementById('existing_documentos_json').value = JSON.stringify(docsExist);
+  document.getElementById('existing_fotos_json').value      = JSON.stringify(fotosExist);
+
+  // Zera remoções
+  REM_DOCS = []; REM_FOTOS = []; _syncRemovalsHidden();
+
+  // UI
+  renderStepperProposta(obj.status||''); updateValorEsperadoHint();
+  document.getElementById('form-proposta').action = "{{ url_for('atualizar_proposta') }}";
+  document.getElementById('form-title').innerText = "Editar Proposta";
+  document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Atualizar';
+  document.querySelector('.cancelar-edicao').style.display = 'inline-flex';
+
+  // Anexos existentes (com X)
+  renderExistingDocs(docsExist);
+  renderExistingFotos(fotosExist);
+
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+window.cancelarEdicao=function (){
+  document.getElementById('form-proposta').reset();
+  document.getElementById('id_proposta').value = '';
+  document.getElementById('form-proposta').action = "{{ url_for('adicionar_proposta') }}";
+  document.getElementById('form-title').innerText = "Cadastro de Propostas";
+  document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+  document.querySelector('.cancelar-edicao').style.display = 'none';
+  renderStepperProposta(''); updateValorEsperadoHint();
+
+  // Limpa hidden e modo
+  const ids = ['existing_documentos_json','existing_fotos_json','remove_documentos_json','remove_fotos_json'];
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  setEditMode(false);
+};
+
+/* ================= Init ================= */
+setEditMode(false);
+renderStepperProposta((document.getElementById('status')?.value)||'');
+paintAllRows(); refreshKpis();
+
+// ---------- Sidebar toggle ----------
+  const toggleBtn = document.getElementById('toggleSidebar');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('collapsed');
+  });
+</script>
+
+
+</body>
+</html>

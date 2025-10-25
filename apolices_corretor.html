@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana - Acompanhamento de Apólices</title>
+  <link rel="stylesheet" href="css/areacr.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+
+  <style>
+  /* ============== Topbar (avatar + nome) ============== */
+  .topbar .user-info,
+  .topbar-right .user-info {
+    display:flex!important; flex-direction:row!important; align-items:center!important; gap:8px;
+  }
+  .topbar .user-info .small-avatar,
+  .topbar .user-info .profile-avatar {
+    width:36px; height:36px; flex:0 0 36px; border-radius:50%; overflow:hidden;
+    background:#1e7a34; color:#fff; font-weight:700; font-size:14px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .topbar .user-info .small-avatar img,
+  .topbar .user-info .profile-avatar img {
+    width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;
+  }
+  .topbar .user-info .user-name { white-space:nowrap; line-height:1; display:inline-block; font-weight:600; color:#111827; }
+
+  /* ============== Container da tabela ============== */
+  .table-container{
+    overflow-x:hidden!important; -ms-overflow-style:none; scrollbar-width:none;
+    border:1px solid #e5e7eb; border-radius:12px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.04);
+  }
+  .table-container::-webkit-scrollbar{ display:none; }
+
+  /* ============== Tabela / Colunas ============== */
+  .table-acompanhamento{ width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; }
+  .table-acompanhamento th,.table-acompanhamento td{ vertical-align:middle; white-space:normal; overflow-wrap:anywhere; padding:12px 14px; }
+  .table-acompanhamento tbody tr:nth-child(odd){ background:#fcfcfd; }
+  .table-acompanhamento tbody tr:hover{ background:#f7fafc; }
+
+  .table-acompanhamento th:nth-child(9), .table-acompanhamento td:nth-child(9){ width:200px; } /* Ações */
+  .table-acompanhamento th:nth-child(8), .table-acompanhamento td:nth-child(8){ width:110px; }  /* Status */
+
+  .table-acompanhamento thead tr:first-child th:first-child{ border-top-left-radius:12px; }
+  .table-acompanhamento thead tr:first-child th:last-child{ border-top-right-radius:12px; }
+  .table-acompanhamento tbody tr:last-child td:first-child{ border-bottom-left-radius:12px; }
+  .table-acompanhamento tbody tr:last-child td:last-child{ border-bottom-right-radius:12px; }
+
+  .date-time{ line-height:1.15; }
+  .date-time .time{ color:#6b7280; font-size:.92em; margin-left:4px; }
+
+  /* ============== Botões reset ============== */
+  a.btn-detalhes, a.btn-detalhes:link, a.btn-detalhes:visited,
+  a.btn-detalhes:hover, a.btn-detalhes:focus, a.btn-detalhes:active{
+    text-decoration:none!important; border:0!important;
+  }
+
+  /* Botão "Adicionar" / "Detalhes" — mesmo padrão */
+  .btn-adicionar, .btn-detalhes{
+    --btn-bg:#15803d; --btn-bg-hover:#166534; --btn-bg-active:#14532d; --btn-border:#0f3d21; --ring:rgba(34,197,94,.28);
+    display:inline-flex; align-items:center; gap:10px; padding:10px 16px; border-radius:10px; border:1px solid var(--btn-border);
+    background:var(--btn-bg); color:#fff!important; font-weight:600; line-height:1; text-decoration:none;
+    box-shadow:0 1px 2px rgba(16,24,40,.05), 0 6px 14px rgba(21,128,61,.18);
+    transition:background .18s ease, box-shadow .18s ease, transform .06s ease;
+  }
+  .btn-adicionar:hover, .btn-detalhes:hover{ background:var(--btn-bg-hover); transform:translateY(-1px);
+    box-shadow:0 2px 4px rgba(16,24,40,.06), 0 10px 20px rgba(21,128,61,.22); }
+  .btn-adicionar:active, .btn-detalhes:active{ background:var(--btn-bg-active); transform:translateY(0);
+    box-shadow:0 1px 2px rgba(16,24,40,.06), 0 6px 12px rgba(21,128,61,.18); }
+  .btn-adicionar:focus-visible, .btn-detalhes:focus-visible{ outline:0; box-shadow:0 0 0 4px var(--ring),
+    0 1px 2px rgba(16,24,40,.05), 0 6px 14px rgba(21,128,61,.18); }
+  .btn-adicionar::before{
+    content:"+"; display:inline-grid; place-items:center; width:20px; height:20px; border-radius:6px;
+    background:rgba(255,255,255,.14); font-weight:700; line-height:1;
+  }
+  .btn-detalhes::before{
+    content:""; display:inline-block; width:20px; height:20px; border-radius:6px; background:rgba(255,255,255,.14);
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+    background-repeat:no-repeat; background-position:center; background-size:14px 14px;
+  }
+
+  .btn-toggle{
+    display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; margin-left:8px;
+    border-radius:8px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; font-size:16px; line-height:1; transition:background .15s ease;
+  }
+  .btn-toggle:hover{ background:#f3f4f6; }
+  .chev{ display:inline-block; transition:transform .2s ease; }
+  .btn-toggle[aria-expanded="true"] .chev{ transform:rotate(180deg); }
+
+  /* ============== Linha expansível ============== */
+  tr.expand-row{ background:#f9fafb; }
+  tr.expand-row td{ padding:16px 20px; border-top:0; }
+  .expand-card{ background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+  .expand-title{ font-weight:700; color:#111827; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .expand-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px; }
+  .expand-item{ font-size:.95rem; color:#374151; background:#f9fafb; padding:8px 10px; border-radius:8px; }
+  .expand-item strong{ color:#111827; }
+  .expand-item.observ{ grid-column:1 / -1; }
+
+  @media (max-width:1024px){
+    .table-acompanhamento th:nth-child(9), .table-acompanhamento td:nth-child(9){ width:180px; }
+  }
+
+  /* ======= KPIs ======= */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:12px 0 18px}
+  .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+  .kpi-label{font-size:.9rem;color:#6b7280;margin-bottom:6px}
+  .kpi-value{font-size:1.35rem;font-weight:800;color:#111827}
+
+  /* ======= Filtros (com botão à direita) ======= */
+  .filtros{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; flex-wrap:wrap; margin:4px 0 14px;
+  }
+  .filtros-controls{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  .filtros input, .filtros select, .filtros button{
+    height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px; background:#fff;
+  }
+  .filtros input[type="search"]{ min-width:260px; }
+  .filtros button{ background:#15803d; color:#fff; font-weight:600; cursor:pointer; }
+
+  /* ======= Barra de vigência ======= */
+  .vigencia{ margin-top:6px; font-size:.85rem; }
+  .vig-bar{ height:8px; background:#f3f4f6; border-radius:999px; overflow:hidden; border:1px solid #e5e7eb; }
+  .vig-bar span{ display:block; height:100%; background:#15803d; }
+  .vig-meta{ margin-top:4px; color:#6b7280; }
+  .vigencia.alerta .vig-bar span{ background:#eab308; }
+  .vigencia.critico .vig-bar span{ background:#e11d48; }
+
+  @media (max-width:640px){
+    .btn-adicionar{ width:100%; justify-content:center; }
+  }
+
+  /* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #0f3d21;
+  background: #15803d;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  transition: background .2s ease, transform .1s ease;
+}
+.btn-icon:hover {
+  background: #166534;
+  transform: translateY(-1px);
+}
+.btn-icon i {
+  font-size: 16px;
+}
+
+.expand-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+  animation: fadeIn .25s ease;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modal-content p {
+  margin: 14px 0;
+  font-size: 15px;
+  color: #374151;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal .close {
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ===== Layout Observações + Anexar + Anexados ===== */
+/* ===== Layout Observações + Anexar + Anexados ===== */
+.expand-grid.observ-anexo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 🔹 agora 3 colunas do mesmo tamanho */
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.expand-item.observ-col,
+.expand-item.anexo-col,
+.expand-item.anexados-col {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: .95rem;
+  color: #374151;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Títulos */
+.expand-item strong {
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+/* Campo de upload */
+.expand-item.anexo-col input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .2s ease;
+}
+.expand-item.anexo-col input[type="file"]:hover {
+  border-color: #15803d;
+}
+
+/* Lista de anexos */
+.anexos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.anexo-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.anexo-nome {
+  color: #111827;
+  font-size: .9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-del-anexo {
+  background: #dc2626;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .85rem;
+  padding: 4px 6px;
+  transition: background .2s;
+}
+.btn-del-anexo:hover {
+  background: #b91c1c;
+}
+
+.anexo-vazio {
+  color: #6b7280;
+  font-size: .9rem;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .expand-grid.observ-anexo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.anexo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--sv-light);
+  border: 1px solid var(--sv-border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  margin-top: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.anexo-item:hover {
+  background: #f0fdf4;
+  border-color: var(--sv-accent);
+}
+
+.anexo-nome {
+  color: var(--sv-green-dark);
+  font-weight: 500;
+  text-decoration: none;
+  word-break: break-all;
+  flex: 1;
+}
+
+.anexo-nome:hover {
+  text-decoration: underline;
+}
+
+.btn-del-anexo {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-del-anexo:hover {
+  background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+  transform: scale(1.1);
+}
+
+.trash-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #fff;
+}
+
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left"><h2>Area<span> Corretor</span></h2></div>
+      <nav>
+        <ul>
+          <li><a href="area_corretor"><span class="icon"></span> Dashboard</a></li>
+          <li><a href="visu_clientes_corretor.html"><span class="icon"></span> Clientes</a></li>
+          <li><a href="relatorio_corretor.html"><span class="icon"></span> Cotações</a></li>
+          <li><a href="apolices_corretor.html" class="active"><span class="icon"></span> Apólices</a></li>
+          <li><a href="propostas_corretor.html"><span class="icon"></span> Propostas</a></li>
+          <li><a href="sinistros_corretor.html"><span class="icon"></span> Sinistros</a></li>
+          <li><a href="calendario_corretor.html"><span class="icon"></span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+
+          <div class="user-info" id="userInfo">
+            <div class="profile-avatar small-avatar" title="Meu Perfil">
+              {% if corretor_foto %}
+                <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+              {% elif session.get('corretor_foto') %}
+                <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+              {% else %}
+                <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+              {% endif %}
+            </div>
+            <span class="user-name">{{ corretor_nome }}</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Acompanhamento de Apólices</h2>
+          <!-- Botão removido do cabeçalho -->
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpiGrid">
+          <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-value" id="kpi-total">0</div></div>
+          <div class="kpi"><div class="kpi-label">Ativas</div><div class="kpi-value" id="kpi-ativas">0</div></div>
+          <div class="kpi"><div class="kpi-label">Pendentes</div><div class="kpi-value" id="kpi-pendentes">0</div></div>
+          <div class="kpi"><div class="kpi-label">Vencem em 30d</div><div class="kpi-value" id="kpi-30d">0</div></div>
+          <div class="kpi"><div class="kpi-label">Inativas</div><div class="kpi-value" id="kpi-inativas">0</div></div>
+          <div class="kpi"><div class="kpi-label">Prêmio Total</div><div class="kpi-value" id="kpi-premio">R$ 0,00</div></div>
+        </div>
+
+        <!-- Filtros Rápidos + NOVA APÓLICE à direita -->
+        <div class="filtros">
+          <div class="filtros-controls">
+            <input id="q" type="search" placeholder="Buscar por cliente, nº, proposta..." />
+            <select id="fStatus" aria-label="Filtrar por status">
+              <option value="">Status</option>
+              <option>Ativo</option><option>Pendente</option><option>Inativo</option>
+            </select>
+            <select id="fTipo" aria-label="Filtrar por tipo de apólice">
+              <option value="">Tipo</option>
+              <option>Auto</option><option>Vida</option><option>Residencial</option>
+            </select>
+            <input id="iniDe" type="date" title="Início de" />
+            <input id="iniAte" type="date" title="Início até" />
+            <button type="button" id="btnLimpar">Limpar</button>
+          </div>
+
+          <a href="adicionar_apolices_corretor.html" class="btn-adicionar">Nova Apólice</a>
+        </div>
+
+        <div class="table-container">
+          <table class="table-acompanhamento">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Tipo de Apólice</th>
+                <th>Nº Apólice</th>
+                <th>Nº Proposta</th>
+                <th>Valor</th>
+                <th>Data de Início</th>
+                <th>Data de Término</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaApolices">
+              {% if apolices %}
+              {% for apolice in apolices %}
+              <tr id="row-{{ apolice.apolice_id }}"
+                  data-inicio="{{ apolice.data_inicio_iso or '' }}"
+                  data-inicio-txt="{{ apolice.data_inicio_fmt or '' }}"
+                  data-termino="{{ apolice.data_termino_iso or '' }}"
+                  data-termino-txt="{{ apolice.data_termino_fmt or '' }}"
+                  data-status="{{ apolice.status }}"
+                  data-tipo="{{ apolice.tipo_apolice }}">
+                <td>{{ apolice.nome }}</td>
+                <td>{{ apolice.tipo_apolice }}</td>
+                <td>{{ apolice.numero_apolice or '-' }}</td>
+                <td>{{ apolice.numero_proposta or '-' }}</td>
+                <td>R$ {{ "%.2f"|format(apolice.valor_apolice) }}</td>
+                <td class="date-time">{{ (apolice.data_inicio_fmt or '') | replace(' ', ' às ', 1) }}</td>
+                <td class="date-time">{{ (apolice.data_termino_fmt or '') | replace(' ', ' às ', 1) }}</td>
+                <td>
+                  {% if apolice.status == 'Ativo' %}
+                    <span class="status ativo">Ativo</span>
+                  {% elif apolice.status == 'Pendente' %}
+                    <span class="status pendente">Pendente</span>
+                  {% else %}
+                    <span class="status inativo">Inativo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a class="btn-detalhes" href="{{ url_for('detalhes_cliente', id=apolice.apolice_id) }}">Detalhes</a>
+                  <button class="btn-toggle" type="button" aria-label="Mais ações"
+                          aria-expanded="false" aria-controls="exp-{{ apolice.apolice_id }}"
+                          data-target="exp-{{ apolice.apolice_id }}">
+                    <span class="chev">▾</span>
+                  </button>
+                </td>
+              </tr>
+
+              <tr id="exp-{{ apolice.apolice_id }}" class="expand-row" style="display:none;">
+                <td colspan="9">
+                  <div class="expand-card">
+                    <div class="expand-title">Informações adicionais</div>
+                    {% set tipo = (apolice.tipo_apolice or '') | lower %}
+                    {% if tipo == 'auto' %}
+                      <div class="expand-grid">
+                        <div class="expand-item"><strong>Veículo:</strong> {{ apolice.veiculo or '-' }}</div>
+                        <div class="expand-item"><strong>Cor:</strong> {{ apolice.cor or '-' }}</div>
+                        <div class="expand-item"><strong>Placa:</strong> {{ apolice.placa or '-' }}</div>
+                        <div class="expand-item"><strong>Seguradora:</strong> {{ apolice.seguradora or '-' }}</div>
+                        <div class="expand-item"><strong>Ano Modelo:</strong> {{ apolice.ano_modelo or '-' }}</div>
+                        <div class="expand-item"><strong>Parcelas:</strong> {{ apolice.parcelas or '-' }}</div>
+                        <div class="expand-item"><strong>Primeiro Vencimento:</strong> {{ (apolice.primeiro_vencimento|string)[:10] if apolice.primeiro_vencimento else '-' }}</div>
+                        <div class="expand-item"><strong>Forma de Pagamento:</strong>
+                          {% set fp = apolice.forma_pagamento %}
+                          {% if fp == 'CartaoCredito' %}Cartão de Crédito
+                          {% elif fp == 'DebitoConta' %}Débito em Conta
+                          {% elif fp %}{{ fp }}{% else %}-{% endif %}
+                        </div>
+                        <div class="expand-item" style="grid-column:1/-1;"><strong>Observações:</strong> {{ apolice.observacoes or '-' }}</div>
+                      </div>
+                    {% else %}
+                      <div class="expand-grid">
+                        <div class="expand-item"><strong>Endereço:</strong> {{ apolice.endereco or '-' }}</div>
+                        <div class="expand-item"><strong>Cidade:</strong> {{ apolice.cidade or '-' }}</div>
+                        <div class="expand-item"><strong>Seguradora:</strong> {{ apolice.seguradora or '-' }}</div>
+                        <div class="expand-item"><strong>Parcelas:</strong> {{ apolice.parcelas or '-' }}</div>
+                        <div class="expand-item"><strong>Primeiro Vencimento:</strong> {{ (apolice.primeiro_vencimento|string)[:10] if apolice.primeiro_vencimento else '-' }}</div>
+                        <div class="expand-item"><strong>Forma de Pagamento:</strong>
+                          {% set fp = apolice.forma_pagamento %}
+                          {% if fp == 'CartaoCredito' %}Cartão de Crédito
+                          {% elif fp == 'DebitoConta' %}Débito em Conta
+                          {% elif fp %}{{ fp }}{% else %}-{% endif %}
+                        </div>
+                      </div>
+                    {% endif %}
+                    <!-- 🔹 Observações + Anexar Arquivo + Anexados (3 colunas lado a lado) -->
+<div class="expand-grid observ-anexo">
+
+  <div class="expand-item observ-col">
+    <strong>Observações:</strong>
+    {{ apolice.observacoes or '-' }}
+  </div>
+
+  <div class="expand-item anexo-col">
+  <strong>Anexar Arquivo:</strong>
+  <input type="file" id="fileInput-{{ apolice.apolice_id }}" 
+         accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+         onchange="mostrarBotoesSalvar('{{ apolice.apolice_id }}')">
+
+  <div id="fileActions-{{ apolice.apolice_id }}" class="file-actions" style="display:none;">
+    <button class="btn-icon" style="background:#15803d;" 
+            onclick="salvarArquivo('{{ apolice.apolice_id }}')">
+      💾 Salvar
+    </button>
+    <button class="btn-icon" style="background:#b91c1c;" 
+            onclick="cancelarUpload('{{ apolice.apolice_id }}')">
+      ❌ Cancelar
+    </button>
+  </div>
+</div>
+
+<div class="expand-item anexados-col">
+  <strong>Anexados:</strong>
+  <div class="anexos-lista" id="anexos-{{ apolice.apolice_id }}">
+    {% if apolice.arquivo_anexo %}
+      <div class="anexo-item">
+        <a href="/{{ apolice.arquivo_anexo }}" target="_blank" class="anexo-nome">
+          {{ apolice.arquivo_anexo.split('/')[-1] }}
+        </a>
+        <button class="btn-del-anexo" title="Excluir anexo" onclick="excluirAnexo('{{ apolice.apolice_id }}')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="trash-icon">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+        </button>
+      </div>
+    {% else %}
+      <span class="anexo-vazio">Nenhum arquivo</span>
+    {% endif %}
+  </div>
+</div>
+
+
+                  </div>
+                  <div class="expand-item" style="grid-column:1/-1; text-align:right; margin-top:10px;">
+  <button type="button" class="btn-icon" 
+  onclick="abrirModalEnvioApolice('{{ apolice.apolice_id }}', '{{ apolice.nome }}', '{{ apolice.numero_apolice }}', '{{ apolice.cpf }}')">
+  <i class="fa-solid fa-paper-plane"></i> Enviar ao Segurado
+</button>
+
+</div>
+
+
+                </td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr><td colspan="9">Nenhuma apólice encontrada.</td></tr>
+              {% endif %}
+
+              <!-- Modal de Confirmação -->
+<div id="modalConfirmacao" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="fecharModal()">&times;</span>
+    <h3>Confirmar Envio</h3>
+    <p>
+      Tem certeza que deseja enviar a apólice para o segurado 
+      <strong id="nomeSegurado"></strong>?
+    </p>
+
+    <!-- Campo de CPF já preenchido -->
+    <label for="cpfConfirmacao"><strong>Confirme o CPF do segurado:</strong></label>
+    <input type="text" id="cpfConfirmacao" 
+           style="width:100%; padding:8px; margin:10px 0; border:1px solid #d1d5db; border-radius:8px;">
+
+    <div class="modal-actions">
+      <button class="btn-icon" onclick="confirmarEnvio()">✅ Confirmar</button>
+      <button class="btn-icon" style="background:#b91c1c;" onclick="fecharModal()">❌ Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <script>
+        let apoliceSelecionada = null;
+
+function abrirModalEnvioApolice(id, nome, numero, cpf) {
+  apoliceSelecionada = { id, nome, numero, cpf };
+
+  document.getElementById('nomeSegurado').textContent = nome;
+
+  // Preenche o input com o CPF da apólice (se existir)
+  const cpfInput = document.getElementById('cpfConfirmacao');
+  cpfInput.value = cpf && cpf.trim() !== "" ? cpf : "";
+
+  document.getElementById('modalConfirmacao').style.display = 'flex';
+}
+
+
+
+function fecharModal() {
+  document.getElementById('modalConfirmacao').style.display = 'none';
+  apoliceSelecionada = null;
+}
+
+function confirmarEnvio() {
+  if (!apoliceSelecionada) return;
+
+  // Aqui você pode chamar sua rota Flask/Python para processar o envio
+  fetch(`/enviar_apolice/${apoliceSelecionada.id}`, { method: "POST" })
+    .then(res => {
+      if (res.ok) {
+        alert(`Apólice ${apoliceSelecionada.numero} enviada com sucesso para ${apoliceSelecionada.nome}!`);
+      } else {
+        alert("Erro ao enviar apólice!");
+      }
+      fecharModal();
+    })
+    .catch(() => {
+      alert("Erro de conexão ao enviar apólice!");
+      fecharModal();
+    });
+}
+
+function confirmarEnvio() {
+  if (!apoliceSelecionada) return;
+
+  const cpfDigitado = document.getElementById("cpfConfirmacao").value.trim();
+  const cpfEsperado = apoliceSelecionada.cpf; // vai vir do backend
+
+  if (!cpfDigitado) {
+    alert("Por favor, digite o CPF do segurado.");
+    return;
+  }
+
+  if (cpfDigitado !== cpfEsperado) {
+    alert("❌ O CPF digitado não confere com o do segurado.");
+    return;
+  }
+
+  // Se passou na validação, envia
+ fetch(`/enviar_apolice/${apoliceSelecionada.id}`, { method: "POST" })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert(`✅ ${data.message}`);
+    } else {
+      alert(`❌ Erro: ${data.error || "Falha desconhecida"}`);
+    }
+    fecharModal();
+  })
+  .catch(err => {
+    alert("❌ Erro de conexão: " + err);
+    fecharModal();
+  });
+
+}
+
+
+      </script>
+
+      <script>
+        // Sidebar
+        const toggleBtn=document.getElementById('toggleSidebar');
+        const sidebar=document.querySelector('.sidebar');
+        toggleBtn?.addEventListener('click',()=>sidebar.classList.toggle('collapsed'));
+
+        // Expansão/colapso
+        document.addEventListener('click',(e)=>{
+          const btn=e.target.closest('.btn-toggle'); if(!btn) return;
+          const id=btn.getAttribute('data-target'); const row=document.getElementById(id); if(!row) return;
+          const open=row.style.display!=='none'; row.style.display=open?'none':''; btn.setAttribute('aria-expanded',String(!open));
+        });
+
+        /* Utilitários de data */
+        function parsePTBR(txt){
+          if(!txt) return null;
+          const m=txt.match(/(\d{2})\/(\d{2})\/(\d{4})(?:\D+(\d{2}):(\d{2}))?/);
+          if(!m) return null;
+          const d=parseInt(m[1],10), mo=parseInt(m[2],10)-1, y=parseInt(m[3],10);
+          const hh=m[4]?parseInt(m[4],10):0, mm=m[5]?parseInt(m[5],10):0;
+          return new Date(y,mo,d,hh,mm,0);
+        }
+        function getDateFromAttrs(tr,name){
+          const iso=tr.dataset[name]; const txt=tr.dataset[name+'Txt'];
+          if(iso){ const d=new Date(iso); if(!isNaN(d)) return d; }
+          const d2=parsePTBR(txt); return d2&&!isNaN(d2)?d2:null;
+        }
+        function diasEntre(a,b){ return Math.ceil((b-a)/86400000); }
+        function pct(a,b,c){ const t=b-a, p=c-a; return Math.max(0,Math.min(100,t>0?(p/t)*100:0)); }
+
+        /* Barra de vigência */
+        function renderVigencia(){
+          document.querySelectorAll('#tabelaApolices > tr[id^="row-"]').forEach(tr=>{
+            const ini=getDateFromAttrs(tr,'inicio'); const fim=getDateFromAttrs(tr,'termino'); if(!ini||!fim) return;
+            const hoje=new Date();
+            const restante=diasEntre(new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()), new Date(fim.getFullYear(),fim.getMonth(),fim.getDate()));
+            const perc=pct(ini,fim,hoje);
+            const tdTermino=tr.children[6]; if(!tdTermino||tdTermino.querySelector('.vigencia')) return;
+            const displayHTML=tdTermino.innerHTML; tdTermino.classList.remove('date-time');
+            const classe=restante<=7?'critico':restante<=30?'alerta':'ok';
+            tdTermino.innerHTML=`
+              <div class="date-time">${displayHTML}</div>
+              <div class="vigencia ${classe}">
+                <div class="vig-bar"><span style="width:${Math.round(perc)}%"></span></div>
+                <div class="vig-meta">${restante>0?`Faltam ${restante} dia${restante>1?'s':''}`:'Venceu'} • ${Math.round(perc)}%</div>
+              </div>`;
+          });
+        }
+
+        /* Filtros */
+        function applyFilters(){
+          const q=(document.getElementById('q')?.value||'').toLowerCase();
+          const st=document.getElementById('fStatus')?.value||'';
+          const tp=document.getElementById('fTipo')?.value||'';
+          const iniDeVal=document.getElementById('iniDe')?.value;
+          const iniAteVal=document.getElementById('iniAte')?.value;
+          const iniDe=iniDeVal?new Date(iniDeVal):null;
+          const iniAte=iniAteVal?new Date(iniAteVal):null;
+
+          document.querySelectorAll('#tabelaApolices > tr[id^="row-"]').forEach(tr=>{
+            const texto=tr.innerText.toLowerCase();
+            const okQ=!q||texto.includes(q);
+            const okSt=!st||tr.dataset.status===st;
+            const okTp=!tp||(tr.dataset.tipo||'').toLowerCase()===tp.toLowerCase();
+            let okData=true;
+            if(iniDe||iniAte){ const di=getDateFromAttrs(tr,'inicio'); okData=di&&(!iniDe||di>=iniDe)&&(!iniAte||di<=iniAte); }
+            const show=okQ&&okSt&&okTp&&okData;
+            tr.style.display=show?'':'none';
+            const exp=document.getElementById('exp-'+tr.id.replace('row-','')); if(exp) exp.style.display='none';
+          });
+          calcKPIs();
+        }
+        ['q','fStatus','fTipo','iniDe','iniAte'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input',applyFilters); });
+        document.getElementById('btnLimpar')?.addEventListener('click',()=>{ ['q','fStatus','fTipo','iniDe','iniAte'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';}); applyFilters(); });
+
+        /* KPIs */
+        function parseMoneyBR(str){
+          if(!str) return 0;
+          let s=String(str).replace(/[^\d.,-]/g,'').trim();
+          s=s.replace(/\.(?=\d{3}(?:\D|$))/g,''); s=s.replace(',', '.');
+          const v=parseFloat(s); return isNaN(v)?0:v;
+        }
+        function formatBR(v){ try{ return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}catch(e){ return 'R$ '+v.toFixed(2); } }
+        function calcKPIs(){
+          const rows=[...document.querySelectorAll('#tabelaApolices > tr[id^="row-"]')].filter(r=>r.style.display!=='none');
+          const total=rows.length; let ativas=0, pend=0, inat=0, vence30=0, premio=0;
+          const hoje=new Date();
+          rows.forEach(r=>{
+            const st=r.dataset.status; if(st==='Ativo') ativas++; else if(st==='Pendente') pend++; else inat++;
+            premio+=parseMoneyBR(r.children[4]?.innerText||'0');
+            const fim=getDateFromAttrs(r,'termino'); if(fim){ const diff=Math.ceil((fim-hoje)/86400000); if(diff>=0&&diff<=30) vence30++; }
+          });
+          const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
+          set('kpi-total', String(total));
+          set('kpi-ativas', String(ativas));
+          set('kpi-pendentes', String(pend));
+          set('kpi-inativas', String(inat));
+          set('kpi-30d', String(vence30));
+          set('kpi-premio', formatBR(premio));
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{ renderVigencia(); calcKPIs(); });
+      </script>
+      <script>
+function mostrarBotoesSalvar(id) {
+  document.getElementById(`fileActions-${id}`).style.display = 'block';
+}
+
+function cancelarUpload(id) {
+  const fileInput = document.getElementById(`fileInput-${id}`);
+  fileInput.value = "";
+  document.getElementById(`fileActions-${id}`).style.display = 'none';
+}
+
+function salvarArquivo(id) {
+  const fileInput = document.getElementById(`fileInput-${id}`);
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Por favor, selecione um arquivo antes de salvar.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("arquivo", file);
+
+  fetch(`/upload_arquivo_apolice/${id}`, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("✅ Arquivo salvo com sucesso!");
+      cancelarUpload(id);
+    } else {
+      alert("❌ Erro ao salvar o arquivo: " + (data.error || "erro desconhecido"));
+    }
+  })
+  .catch(err => {
+    alert("❌ Falha na conexão: " + err);
+  });
+}
+</script>
+<script>
+function salvarArquivo(id) {
+  const fileInput = document.getElementById(`fileInput-${id}`);
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Por favor, selecione um arquivo antes de salvar.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("arquivo", file);
+
+  fetch(`/upload_arquivo_apolice/${id}`, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("✅ Arquivo salvo com sucesso!");
+      cancelarUpload(id);
+
+      // 🔹 Atualiza a seção "Anexados"
+      const lista = document.getElementById(`anexos-${id}`);
+      if (lista) {
+        lista.innerHTML = `
+          <div class="anexo-item">
+            <a href="/${data.arquivo.caminho}" target="_blank" class="anexo-nome">
+              ${data.arquivo.nome}
+            </a>
+            <button class="btn-del-anexo" onclick="excluirAnexo('${id}')">🗑</button>
+          </div>
+        `;
+      }
+
+    } else {
+      alert("❌ Erro ao salvar o arquivo: " + (data.error || "erro desconhecido"));
+    }
+  })
+  .catch(err => {
+    alert("❌ Falha na conexão: " + err);
+  });
+}
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[id^='anexos-']").forEach(div => {
+    const apoliceId = div.id.replace("anexos-", "");
+    fetch(`/get_anexo/${apoliceId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) return;
+        const container = document.getElementById(`anexos-${apoliceId}`);
+        if (!container) return;
+
+        if (data.arquivo) {
+          container.innerHTML = `
+            <div class="anexo-item">
+              <a href="/${data.arquivo.caminho}" target="_blank" class="anexo-nome">
+                ${data.arquivo.nome}
+              </a>
+              <button class="btn-del-anexo" onclick="excluirAnexo('${apoliceId}')">🗑</button>
+            </div>`;
+        } else {
+          container.innerHTML = `<span class="anexo-vazio">Nenhum arquivo</span>`;
+        }
+      })
+      .catch(err => console.error("Erro ao buscar anexo:", err));
+  });
+});
+</script>
+<script>
+function excluirAnexo(apoliceId) {
+  if (!confirm("Deseja realmente excluir este arquivo?")) return;
+
+  fetch(`/excluir_anexo/${apoliceId}`, { method: "DELETE" })
+    .then(async res => {
+      const text = await res.text(); // Lê o texto da resposta
+      try {
+        const data = JSON.parse(text); // Tenta converter para JSON
+        if (data.success) {
+          alert("✅ Arquivo excluído com sucesso!");
+          document.getElementById(`anexos-${apoliceId}`).innerHTML =
+            data.html || '<span class="anexo-vazio">Nenhum arquivo</span>';
+        } else {
+          alert("❌ Erro ao excluir: " + (data.error || "erro desconhecido"));
+        }
+      } catch (err) {
+        console.error("Resposta inesperada:", text);
+        alert("❌ Erro: o servidor retornou uma resposta inválida.");
+      }
+    })
+    .catch(err => {
+      alert("❌ Falha de conexão: " + err);
+    });
+}
+</script>
+
+
+
+    </main>
+  </div>
+</body>
+</html>

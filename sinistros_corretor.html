@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana - Sinistros</title>
+  <link rel="stylesheet" href="{{ url_for('serve_css', filename='areacr.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+
+  <style>
+  :root{
+    --sv-green:#2e7d32;
+    --sv-green-600:#1e7a34;
+    --sv-green-50:#e9f5ee;
+    --sv-blue:#1e88e5;
+    --sv-red:#e53935;
+    --sv-slate:#111827;
+    --sv-gray:#6b7280;
+    --sv-border:#e5e7eb;
+    --sv-bg:#ffffff;
+  }
+
+  /* -------- Topbar: avatar + nome lado a lado -------- */
+  .topbar .user-info,.topbar-right .user-info{display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px;}
+  .topbar .user-info .small-avatar,.topbar .user-info .profile-avatar{
+    width:36px;height:36px;flex:0 0 36px;border-radius:50%;overflow:hidden;background:var(--sv-green-600);color:#fff;
+    font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;
+  }
+  .topbar .user-info .small-avatar img,.topbar .user-info .profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+  .topbar .user-info .user-name{white-space:nowrap;line-height:1;display:inline-block;font-weight:600;color:var(--sv-slate);}
+
+  /* -------- Header -------- */
+  .content-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 6px 0;}
+  .content-header h2{font-weight:700;color:var(--sv-slate);}
+
+  /* ================= KPIs – estilo profissional (como o print) ================= */
+  .kpis{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(220px,1fr));
+    gap:16px;
+    margin-top:12px;
+  }
+  .kpi-card{
+    background:#fff;
+    border:1px solid #e7ebf3;          /* borda suave */
+    border-radius:14px;
+    padding:18px;
+    min-height:96px;
+    box-shadow:0 4px 14px rgba(2,6,23,.05); /* sombra discreta */
+    transition:box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+  }
+  .kpi-card:hover{
+    border-color:#dfe4ee;
+    box-shadow:0 8px 20px rgba(2,6,23,.08);
+    transform:translateY(-1px);
+  }
+
+  /* Título com ícone pequeno à esquerda */
+  .kpi-title{
+    display:flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:800; letter-spacing:.06em;
+    text-transform:uppercase; color:#475569;   /* slate-600 */
+  }
+  /* usa Font Awesome já linkado na página */
+  .kpi-title::before{
+    font-family:"Font Awesome 6 Free";
+    font-weight:900;
+    font-size:14px;
+    color:#64748b;                         /* slate-500 */
+    line-height:1; display:inline-block;
+    width:14px; text-align:center;
+    content:"\f03a";                       /* default: list */
+  }
+  /* ícones por card (ordem dos 4 KPIs) */
+  .kpis .kpi-card:nth-child(1) .kpi-title::before{ content:"\f03a"; }  /* list */
+  .kpis .kpi-card:nth-child(2) .kpi-title::before{ content:"\f2f1"; }  /* arrows-rotate */
+  .kpis .kpi-card:nth-child(3) .kpi-title::before{ content:"\f15c"; }  /* file-lines */
+  .kpis .kpi-card:nth-child(4) .kpi-title::before{ content:"\f53a"; }  /* money-bill-wave */
+
+  .kpi-value{
+    font-size:28px;
+    font-weight:900;
+    color:#0f172a;                         /* slate-900 */
+    margin-top:8px;
+  }
+
+  /* input month dentro do 4º card */
+  .kpis .kpi-card:nth-child(4) input[type="month"]{
+    margin-top:12px;
+    width:100%;
+    font-size:12px;
+    padding:8px 10px;
+    border:1px solid var(--sv-border);
+    border-radius:10px;
+    background:#fff; color:#0f172a; outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .kpis .kpi-card:nth-child(4) input[type="month"]:focus{
+    border-color:#93c5fd;
+    box-shadow:0 0 0 3px rgba(147,197,253,.35);
+  }
+
+  /* -------- Form -------- */
+  .form-section{margin-top:18px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);border:1px solid var(--sv-border);}
+  .form-section h3{margin-bottom:12px;color:var(--sv-green-600);}
+  .form-grid{display:grid;grid-template-columns: repeat(4, minmax(160px,1fr));gap:12px;}
+  .form-grid .full{grid-column:1/-1;}
+  .form-section input,.form-section select,.form-section textarea{padding:10px;border-radius:8px;border:1px solid #d1d5db;width:100%;font-size:14px;background:#fff;}
+  .form-actions{margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:10px;cursor:pointer;padding:10px 16px;font-weight:600;}
+  .btn i{font-size:14px}
+  .btn-primary{background:var(--sv-green);color:#fff;}
+  .btn-secondary{background:#eef2ff;color:#1f2937;}
+  .btn-danger{background:var(--sv-red);color:#fff;}
+
+  /* -------- Stepper -------- */
+  .stepper{width:100%;display:flex;align-items:flex-start;gap:12px;flex-wrap:nowrap;overflow-x:auto;padding:6px 2px 2px;scrollbar-width:thin;}
+  .stepper::-webkit-scrollbar{height:6px}
+  .stepper::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+  .step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;flex:0 0 auto;text-align:center;}
+  .step .dot{width:14px;height:14px;border-radius:50%;border:2px solid #cbd5e1;background:#fff;}
+  .step .label{font-size:12px;font-weight:600;color:#334155;max-width:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .connector{height:2px;width:40px;align-self:center;margin-top:6px;background:#cbd5e1;border-radius:999px;}
+  .step.is-complete .dot{background:var(--sv-green);border-color:var(--sv-green);}
+  .step.is-active .dot{background:var(--sv-green-50);border-color:var(--sv-green);}
+  .connector.is-complete{background:var(--sv-green);}
+
+  /* -------- Dropzone -------- */
+  .dropzone{border:2px dashed #cbd5e1;border-radius:12px;padding:14px;background:#f8fafc;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;text-align:center}
+  .dropzone.is-drag{background:#eef2ff;border-color:#93c5fd;}
+  .dropzone small{color:#6b7280;}
+  .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:10px;}
+  .thumb{position:relative;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fff;}
+  .thumb img{width:100%;height:100px;object-fit:cover;display:block;}
+  .thumb button{position:absolute;top:6px;right:6px;background:#111827;color:#fff;border:none;border-radius:999px;width:22px;height:22px;line-height:22px;text-align:center;cursor:pointer;font-size:12px;opacity:.9;}
+  .thumb button:hover{opacity:1;}
+
+  /* -------- Filtros -------- */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px;background:#fff;border:1px solid var(--sv-border);border-radius:12px;padding:12px;}
+  .toolbar .field{display:flex;gap:8px;align-items:center;}
+  .toolbar input,.toolbar select{padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;background:#fff;}
+  .toolbar .spacer{flex:1}
+
+  /* -------- Tabela -------- */
+  .table-wrapper{margin-top:12px;background:#fff;border:1px solid var(--sv-border);border-radius:12px;overflow:auto;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;min-width:1100px;}
+  thead th{position:sticky;top:0;background:var(--sv-green-50);color:#064e3b;text-align:left;padding:12px;border-bottom:1px solid var(--sv-border);font-weight:700;}
+  tbody td{padding:12px;border-bottom:1px solid var(--sv-border);vertical-align:top;}
+  tbody tr:hover{background:#f8fafc;}
+  .actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .btn-icon{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--sv-border);background:#fff;color:#111;cursor:pointer;}
+  .btn-icon.primary{border-color:#bfdbfe;color:#1e3a8a;background:#eff6ff;}
+  .btn-icon.danger{border-color:#fecaca;color:#7f1d1d;background:#fef2f2;}
+
+  /* -------- Badges -------- */
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;white-space:nowrap;}
+  .badge i{font-size:11px;}
+  .badge--novo{background:#ecfeff;color:#0e7490;border-color:#a5f3fc;}
+  .badge--analise{background:#fff7ed;color:#9a3412;border-color:#fed7aa;}
+  .badge--docs{background:#fffbeb;color:#92400e;border-color:#fde68a;}
+  .badge--aguardando{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+  .badge--regulacao{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe;}
+  .badge--aprovado{background:#ecfdf5;color:#065f46;border-color:#a7f3d0;}
+  .badge--negado{background:#fef2f2;color:#991b1b;border-color:#fecaca;}
+  .badge--indenizado{background:#eefce8;color:#166534;border-color:#bbf7d0;}
+
+  details{margin-top:10px;}
+  details summary{cursor:pointer;font-weight:700;color:#334155;margin-bottom:8px;}
+
+  /* -------- Responsivo -------- */
+  @media (max-width:1100px){
+    .form-grid{grid-template-columns: repeat(2, minmax(160px,1fr));}
+    .kpis{grid-template-columns: repeat(2, minmax(220px,1fr));}
+  }
+  @media (max-width:640px){
+    .form-grid{grid-template-columns:1fr;}
+    .kpis{grid-template-columns:1fr;}
+    .connector{width:24px;}
+    .step{min-width:72px;}
+    .step .label{max-width:72px;}
+  }
+
+  /* Fallback do seletor de mês (caso use fora do card 4) */
+  #kpiMesRef{
+    margin-top:10px;width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--sv-border);
+    border-radius:10px;background:#fff;color:var(--sv-slate);outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  #kpiMesRef:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(147,197,253,.35);}
+  #kpiMesRef::-webkit-calendar-picker-indicator{cursor:pointer;}
+
+/* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 420px;
+  max-width: 95%;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  text-align: center;
+}
+.modal h3 {
+  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--sv-green);
+}
+.modal p { margin-bottom: 14px; }
+.modal .form-group { margin: 14px 0; text-align: left; }
+.modal .form-group input {
+  width: 100%; padding: 10px;
+  border: 1px solid var(--sv-border);
+  border-radius: 8px;
+}
+.modal .form-actions {
+  display: flex; justify-content: center; gap: 10px; margin-top: 16px;
+}
+.btn-confirm {
+  background: #16a34a; color:#fff; border:none;
+  padding:10px 18px; border-radius:8px; font-weight:600;
+}
+.btn-cancel {
+  background: #dc2626; color:#fff; border:none;
+  padding:10px 18px; border-radius:8px; font-weight:600;
+}
+.modal-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; font-size: 22px;
+  cursor: pointer; color: #666;
+}
+
+/* ===== Alerta de Sucesso ===== */
+.alert-success {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: var(--sv-green);
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  z-index: 10000;
+  animation: fadeIn .3s ease forwards;
+}
+
+.alert-success i {
+  font-size: 18px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* === Estilos do padrão de uploads (mesmo de Propostas) === */
+.upload-box{
+  position:relative;border:2px dashed var(--sv-border);border-radius:12px;background:#fff;
+  padding:14px;min-height:90px;display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s ease, background .2s ease;
+}
+.upload-box.dragover{ border-color:var(--sv-green); background:var(--sv-green-50); }
+.upload-box input[type="file"]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+.upload-hint{ text-align:center; color:#475569; display:flex; flex-direction:column; gap:6px; }
+.upload-hint i{ font-size:22px; color:var(--sv-green); }
+
+.upload-list{ margin:8px 0 0; padding-left:18px; color:#334155; }
+.upload-list li{ margin:4px 0; font-size:13px; }
+
+.thumbs{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.thumbs .thumb{
+  width:84px; height:84px; border:1px solid var(--sv-border); border-radius:10px; overflow:hidden;
+  position:relative; background:#f8fafc; box-shadow:0 2px 6px rgba(0,0,0,.04);
+}
+.thumbs .thumb img{ width:100%; height:100%; object-fit:cover; }
+.thumbs .thumb .remove{
+  position:absolute; top:4px; right:4px; background:#fff; border:1px solid var(--sv-border);
+  border-radius:8px; padding:2px 6px; font-size:12px; cursor:pointer;
+}
+
+/* Botão "x" centralizado nos thumbs */
+.thumbs .thumb .remove,
+.thumbs .thumb .remove-existing-foto-sin{
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 22px; height: 22px;
+  box-sizing: border-box;          /* conta a borda no cálculo */
+  border: 1px solid var(--sv-border);
+  border-radius: 50%;
+  background: #fff;
+  color: #111 !important;          /* seu estilo global do .thumb button força branco */
+  font-weight: 700;
+  font-size: 14px;
+
+  /* Centralização perfeita */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  transition: transform .12s ease;
+}
+.thumbs .thumb .remove:hover,
+.thumbs .thumb .remove-existing-foto-sin:hover{
+  transform: scale(1.06);
+}
+
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left"><h2>Area<span> Corretor</span></h2></div>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('area_corretor') }}"><span class="icon">🏠</span> Dashboard</a></li>
+          <li><a href="{{ url_for('visualizar_clientes') }}"><span class="icon">👥</span> Clientes</a></li>
+          <li><a href="{{ url_for('relatorio') }}"><span class="icon">📊</span> Cotações</a></li>
+          <li><a href="{{ url_for('apolices') }}"><span class="icon">📄</span> Apólices</a></li>
+          <li><a href="{{ url_for('propostas') }}"><span class="icon">📑</span> Propostas</a></li>
+          <li><a href="{{ url_for('sinistros') }}"><span class="icon">⚠️</span> Sinistros</a></li>
+          <li><a href="{{ url_for('calendario') }}"><span class="icon">📆</span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+
+          <div class="user-info" id="userInfo">
+            <div class="profile-avatar small-avatar" title="Meu Perfil">
+              {% if corretor_foto %}
+                <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+              {% elif session.get('corretor_foto') %}
+                <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+              {% else %}
+                <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+              {% endif %}
+            </div>
+            <span class="user-name">{{ corretor_nome }}</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-header"><h2>Acompanhamento de Sinistros</h2></div>
+
+      <!-- KPIs -->
+      <section class="kpis">
+        <div class="kpi-card"><div class="kpi-title">Sinistros Totais</div><div class="kpi-value" id="kpiTotal">—</div></div>
+        <div class="kpi-card"><div class="kpi-title">Em Andamento</div><div class="kpi-value" id="kpiAndamento">—</div></div>
+        <div class="kpi-card"><div class="kpi-title">Pendentes de Docs</div><div class="kpi-value" id="kpiDocs">—</div></div>
+        <div class="kpi-card">
+  <div class="kpi-title">Indenizados (mês)</div>
+  <div class="kpi-value" id="kpiIndenizadosMes">—</div>
+  <input type="month" id="kpiMesRef" style="margin-top:8px;width:100%;font-size:12px;">
+</div>
+
+      </section>
+
+      <!-- Formulário -->
+      <section class="form-section">
+        <h3 id="form-title">Cadastro/edição de sinistro</h3>
+        <form id="form-sinistro" action="{{ url_for('adicionar_sinistro') }}" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="id_sinistro" id="id_sinistro">
+
+          <!-- === Hidden para controlar anexos existentes/remoções (igual Propostas) === -->
+<input type="hidden" name="existing_documentos_json" id="existing_documentos_json">
+<input type="hidden" name="existing_fotos_json" id="existing_fotos_json">
+<input type="hidden" name="remove_documentos_json" id="remove_documentos_json">
+<input type="hidden" name="remove_fotos_json" id="remove_fotos_json">
+
+
+          <div class="form-grid">
+            <div>
+              <label for="cliente">Cliente</label>
+              <input type="text" name="cliente" id="cliente" placeholder="Nome do Cliente" required>
+            </div>
+            <div>
+            <label for="cpf_cliente">CPF do Cliente</label>
+             <input 
+             type="text" 
+             name="cpf_cliente" 
+             id="cpf_cliente" 
+             placeholder="000.000.000-00" 
+            required>
+            </div>
+            <div>
+              <label for="numero_apolice">Número de Apólice</label>
+              <input type="text" name="numero_apolice" id="numero_apolice" placeholder="Ex.: 1234567890" />
+            </div>
+            <div>
+  <label for="seguradora">Seguradora</label>
+  <select name="seguradora" id="seguradora" required>
+    <option value="" disabled selected>Selecione...</option>
+    <option>Allianz</option>
+    <option>Bradesco Seguros</option>
+    <option>HDI Seguros</option>
+    <option>Itaú Seguros</option>
+    <option>Liberty Seguros</option>
+    <option>Mapfre</option>
+    <option>Porto Seguro</option>
+    <option>Sompo Seguros</option>
+    <option>SulAmérica</option>
+    <option>Tokio Marine</option>
+    <option>Zurich</option>
+    <option>Outra</option>
+  </select>
+</div>
+            <div>
+             <label for="valor_estimado">Valor Estimado</label>
+             <input type="number" step="0.01" name="valor_estimado" id="valor_estimado" placeholder="Ex.: 5000.00" />
+            </div>
+            <div>
+              <label for="data_ocorrencia">Data da ocorrência</label>
+              <input type="date" name="data_ocorrencia" id="data_ocorrencia" required>
+            </div>
+            <div>
+              <label for="tipo">Tipo</label>
+              <select name="tipo" id="tipo" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option>Automóvel</option>
+                <option>Residencial</option>
+                <option>Vida</option>
+                <option>Empresarial</option>
+                <option>Outros</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label for="local">Local da ocorrência</label>
+              <input type="text" name="local" id="local" placeholder="Endereço, cidade/UF ou referência" />
+            </div>
+
+            <div class="full">
+              <label for="descricao">Descrição</label>
+              <textarea name="descricao" id="descricao" rows="2" placeholder="Descreva brevemente o ocorrido"></textarea>
+            </div>
+
+            <div class="full">
+              <label for="anotacoes">Anotações internas</label>
+              <textarea name="anotacoes" id="anotacoes" rows="2" placeholder="Observações, prazos, documentos a solicitar"></textarea>
+            </div>
+
+            <!-- STATUS EM LARGURA TOTAL (COMPRIDO) -->
+            <div class="full">
+              <label for="status">Status</label>
+              <select name="status" id="status" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option>Novo</option>
+                <option>Em análise</option>
+                <option>Documentação pendente</option>
+                <option>Aguardando seguradora</option>
+                <option>Em regulação</option>
+                <option>Aprovado</option>
+                <option>Negado</option>
+                <option>Indenizado/Encerrado</option>
+              </select>
+              <!-- Fluxo (stepper) -->
+              <div class="stepper" id="stepper"></div>
+            </div>
+
+           <!-- ====== ANEXAR ARQUIVOS (PDF, DOCX, XLSX, etc.) ====== -->
+<div class="full">
+  <label for="documentos_sinistro">Arquivos (PDF, DOCX, XLSX...)</label>
+  <div class="upload-box" id="dropDocsSinistro">
+    <input
+      type="file"
+      id="documentos_sinistro"
+      name="documentos"
+      multiple
+      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,.zip,.rar,.7z,.odt,.ods"
+    >
+    <div class="upload-hint">
+      <i class="fa-solid fa-file-arrow-up"></i>
+      <span>Arraste e solte ou clique para selecionar</span>
+      <small>PDF, DOCX, XLSX, PPTX, ZIP…</small>
+    </div>
+  </div>
+  <ul class="upload-list" id="listaDocsSinistro"></ul>
+</div>
+
+<!-- ====== ANEXAR FOTOS (igual Propostas) ====== -->
+<div class="full">
+  <label for="fotos">Fotos (JPG, PNG, WEBP)</label>
+  <div class="upload-box" id="dropFotosSinistro">
+    <input type="file" id="fotos" name="fotos" multiple accept="image/*">
+    <div class="upload-hint">
+      <i class="fa-solid fa-image"></i>
+      <span>Arraste e solte ou clique para selecionar</span>
+      <small>Imagens: JPG, PNG, WEBP</small>
+    </div>
+  </div>
+  <div class="thumbs" id="previewFotos"></div>
+</div>
+
+
+            <!-- Marcos do processo -->
+            <div class="full">
+              <details>
+                <summary>Marcos do processo (opcional)</summary>
+                <div class="form-grid" style="margin-top:10px;">
+                  <div><label for="dt_abertura">Abertura</label><input type="date" id="dt_abertura" name="dt_abertura"></div>
+                  <div><label for="dt_docs">Envio de documentos</label><input type="date" id="dt_docs" name="dt_docs"></div>
+                  <div><label for="dt_seguradora">Retorno seguradora</label><input type="date" id="dt_seguradora" name="dt_seguradora"></div>
+                  <div><label for="dt_regulacao">Regulação</label><input type="date" id="dt_regulacao" name="dt_regulacao"></div>
+                  <div><label for="dt_decisao">Decisão</label><input type="date" id="dt_decisao" name="dt_decisao"></div>
+                  <div><label for="dt_pagamento">Pagto/Encerramento</label><input type="date" id="dt_pagamento" name="dt_pagamento"></div>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btnSalvar" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            <button type="button" class="btn btn-secondary cancelar-edicao" onclick="cancelarEdicao()" style="display:none;"><i class="fa-solid fa-rotate-left"></i> Cancelar edição</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Filtros -->
+      <div class="toolbar">
+        <div class="field"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="filterBusca" placeholder="Buscar por cliente, apólice, local, tipo, descrição..."></div>
+        <div class="field">
+          <label>Status</label>
+          <select id="filterStatus">
+            <option value="">Todos</option>
+            <option>Novo</option><option>Em análise</option><option>Documentação pendente</option>
+            <option>Aguardando seguradora</option><option>Em regulação</option><option>Aprovado</option>
+            <option>Negado</option><option>Indenizado/Encerrado</option>
+          </select>
+        </div>
+        <div class="field"><label>Período</label><input type="date" id="filterDe"><span>—</span><input type="date" id="filterAte"></div>
+        <div class="spacer"></div>
+        <button class="btn btn-secondary" id="btnLimparFiltros"><i class="fa-solid fa-broom"></i> Limpar</button>
+        <button class="btn btn-secondary" id="btnExportarCsv"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
+      </div>
+
+      <!-- Tabela -->
+      <div class="table-wrapper">
+        <table id="tabela-sinistros">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Nº Apólice</th>
+              <th>Seguradora</th>
+              <th>Data de Ocorrência</th>
+              <th>Tipo</th>
+              <th>Local</th>
+              <th>Descrição</th>
+              <th>Anotações</th>
+              <th>Status</th>
+              <th style="width:220px">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for s in sinistros_corretor %}
+            <tr
+  data-cliente="{{ s['cliente']|e }}"
+  data-cpf="{{ s['cpf_cliente']|e }}"
+  data-numero="{{ s.get('numero_apolice','')|e }}"
+  data-seguradora="{{ s.get('seguradora','')|e }}"
+  data-data="{{ s['data_ocorrencia']|e }}"
+  data-pagamento="{{ s.get('dt_pagamento','')|e }}"
+  data-tipo="{{ s['tipo']|e }}"
+  data-local="{{ s.get('local','')|e }}"
+  data-descricao="{{ s['descricao']|e }}"
+  data-anotacoes="{{ s['anotacoes']|e }}"
+  data-status="{{ s['status']|e }}"
+>
+
+              <td>{{ s['cliente'] }}</td>
+              <td>{{ s.get('numero_apolice','') }}</td>
+              <td>{{ s.get('seguradora','') }}</td>
+              <td>{{ s['data_ocorrencia'] }}</td>
+              <td>{{ s['tipo'] }}</td>
+              <td>{{ s.get('local','') }}</td>
+              <td>{{ s['descricao'] }}</td>
+              <td>{{ s['anotacoes'] }}</td>
+              <td class="cell-status">{{ s['status'] }}</td>
+              <td>
+                <div class="actions">
+                  <button class="btn-icon primary" onclick='editarSinistro({{ s|tojson }})'><i class="fa-solid fa-pen"></i> Editar</button>
+                  <form action="{{ url_for('excluir_sinistro') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este sinistro?');" style="display:inline;">
+                    <input type="hidden" name="id_sinistro" value="{{ s['id'] }}">
+                    <button type="submit" class="btn-icon danger"><i class="fa-solid fa-trash"></i> Excluir</button>
+                  </form>
+
+                  
+<button type="button" class="btn-icon white"
+        onclick="abrirModalConfirmarSinistro('{{ s['id'] }}','{{ s['cliente'] }}','{{ s['cpf'] }}')">
+  <i class="fa-solid fa-paper-plane"></i> Enviar ao Segurado
+</button>
+
+<!-- Modal Confirmação Sinistro -->
+<div class="modal" id="modalConfirmarSinistro" style="display:none;">
+  <div class="modal-content">
+    <button class="modal-close" onclick="fecharModalConfirmarSinistro()">&times;</button>
+    <h3>Confirmar Envio</h3>
+    <p>Tem certeza que deseja enviar o <b>sinistro</b> para o segurado <strong id="nomeSeguradoSinistro"></strong>?</p>
+
+    <form id="formConfirmarSinistro" method="POST" action="{{ url_for('enviar_sinistro_segurado') }}">
+      <input type="hidden" name="id_sinistro" id="idSinistroHidden">
+      
+      <div class="form-group">
+        <label for="cpfConfirmarSinistro">Confirme o CPF do segurado:</label>
+        <input type="text" id="cpfConfirmarSinistro" name="cpf_confirmacao" placeholder="000.000.000-00" required>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-confirm"><i class="fa-solid fa-check"></i> Confirmar</button>
+        <button type="button" class="btn btn-cancel" onclick="fecharModalConfirmarSinistro()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+
+          <!-- Alerta de sucesso -->
+<div id="alertSuccess" class="alert-success" style="display:none;">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="alertMessage">Sinistro enviado com sucesso ao segurado!</span>
+</div>
+
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+<script>
+  // Exibe alerta de sucesso quando a URL contém ?sucesso=true
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sucesso') === 'true') {
+      const alertBox = document.getElementById('alertSuccess');
+      if (alertBox) {
+        alertBox.style.display = 'flex';
+        setTimeout(() => {
+          alertBox.style.animation = 'fadeOut .3s ease forwards';
+          setTimeout(() => alertBox.remove(), 300);
+        }, 4000); // desaparece após 4 segundos
+      }
+    }
+  });
+</script>
+
+
+<script>
+function abrirModalConfirmarSinistro(id, cliente, cpf){
+  document.getElementById('idSinistroHidden').value = id;
+  document.getElementById('nomeSeguradoSinistro').textContent = cliente;
+  document.getElementById('cpfConfirmarSinistro').value = cpf || "";
+  document.getElementById('modalConfirmarSinistro').style.display = 'flex';
+}
+function fecharModalConfirmarSinistro(){
+  document.getElementById('modalConfirmarSinistro').style.display = 'none';
+}
+</script>
+
+
+ <script>
+/* =========================
+   Modal: Enviar Sinistro
+========================= */
+function abrirModalConfirmarSinistro(id, cliente, cpf){
+  document.getElementById('idSinistroHidden').value = id;
+  document.getElementById('nomeSeguradoSinistro').textContent = cliente;
+  document.getElementById('cpfConfirmarSinistro').value = cpf || "";
+  document.getElementById('modalConfirmarSinistro').style.display = 'flex';
+}
+function fecharModalConfirmarSinistro(){
+  document.getElementById('modalConfirmarSinistro').style.display = 'none';
+}
+
+/* =========================
+   Base pública de uploads
+========================= */
+// (mantém o que você já tinha)
+window.STATIC_UPLOADS_URL = window.STATIC_UPLOADS_URL || "{{ url_for('static', filename='uploads/') }}";
+
+/* =========================
+   Utils
+========================= */
+function parseDateFlexible(v){
+  if(!v) return null;
+  v = String(v).trim();
+  let m = v.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if(m){
+    const y=+m[1], mo=+m[2]-1, d=+m[3];
+    const hh=+(m[4]||0), mm=+(m[5]||0), ss=+(m[6]||0);
+    return new Date(y, mo, d, hh, mm, ss); // local time
+  }
+  let b = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(b) return new Date(+b[3], +b[2]-1, +b[1]);
+  const d = new Date(v);
+  return isNaN(d) ? null : d;
+}
+function normStatus(s){
+  return String(s||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .replace(/\s*\/\s*/g,'/')
+    .replace(/\s*-\s*/g,'-')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+/* Helpers opcionais para imagens absolutas/relativas */
+function buildImageUrl(p){
+  if(!p) return '';
+  if(/^https?:\/\//i.test(p)) return p;
+  if(p.startsWith('/')) return p;
+  const base = (window.STATIC_UPLOADS_URL || '/static/uploads/');
+  return base.replace(/\/+$/,'/') + p.replace(/^\/+/, '');
+}
+function renderExistingImages(list){
+  const preview = document.getElementById('previewFotos');
+  if(!preview) return;
+  (list || []).forEach(p=>{
+    const primary = buildImageUrl(p);
+    const fallback = primary.replace('/static/uploads/', '/uploads/');
+    const card = document.createElement('div');
+    card.className = 'thumb is-existing';
+    card.innerHTML = `<img src="${primary}" alt="anexo" onerror="this.onerror=null; this.src='${fallback}'">`;
+    preview.appendChild(card);
+    if (window.console) console.log('[anexo]', {p, primary, fallback});
+  });
+}
+
+/* =========================
+   Badges
+========================= */
+const STATUS_MAP = [
+  {k:'Novo', cls:'badge--novo', icon:'fa-star'},
+  {k:'Em análise', cls:'badge--analise', icon:'fa-magnifying-glass'},
+  {k:'Documentação pendente', cls:'badge--docs', icon:'fa-file'},
+  {k:'Aguardando seguradora', cls:'badge--aguardando', icon:'fa-building'},
+  {k:'Em regulação', cls:'badge--regulacao', icon:'fa-scale-balanced'},
+  {k:'Aprovado', cls:'badge--aprovado', icon:'fa-check'},
+  {k:'Negado', cls:'badge--negado', icon:'fa-xmark'},
+  {k:'Indenizado/Encerrado', cls:'badge--indenizado', icon:'fa-money-bill'}
+];
+function statusToBadgeHtml(text){
+  if(!text) return '';
+  const key = normStatus(text);
+  const found = STATUS_MAP.find(s => {
+    const sk = normStatus(s.k);
+    return key.includes(sk) || sk.includes(key);
+  });
+  if(!found) return `<span class="badge">${text}</span>`;
+  return `<span class="badge ${found.cls}"><i class="fa-solid ${found.icon}"></i>${text}</span>`;
+}
+
+/* =========================
+   Stepper
+========================= */
+const STEPS = [
+  "Novo","Em análise","Documentação pendente","Aguardando seguradora",
+  "Em regulação","Aprovado","Indenizado/Encerrado","Negado"
+];
+const SHORT = {
+  "Documentação pendente":"Docs pend.",
+  "Aguardando seguradora":"Aguard. segur.",
+  "Indenizado/Encerrado":"Indenizado"
+};
+function shortLabel(s){ return SHORT[s] || s; }
+
+function renderStepper(current){
+  const cont = document.getElementById('stepper');
+  if(!cont) return;
+  cont.innerHTML = "";
+  const curIdx = STEPS.findIndex(s => normStatus(s) === normStatus(current||''));
+  for (let i=0;i<STEPS.length;i++){
+    const s = STEPS[i];
+    const step = document.createElement('div');
+    step.className = 'step' + (i<curIdx?' is-complete': i===curIdx?' is-active':'');
+    step.innerHTML = `<span class="dot"></span><span class="label" title="${s}">${shortLabel(s)}</span>`;
+    cont.appendChild(step);
+    if (i < STEPS.length - 1){
+      const conn = document.createElement('div');
+      conn.className = 'connector' + (i<curIdx ? ' is-complete' : '');
+      cont.appendChild(conn);
+    }
+  }
+}
+
+/* Auto preenche dt_pagamento */
+function handleStatusChange(e){
+  const vNorm = normStatus(e.target.value);
+  if (vNorm.includes('indenizado') || vNorm.includes('encerrado')) {
+    const el = document.getElementById('dt_pagamento');
+    if (el && !el.value) {
+      const n = new Date();
+      el.value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+    }
+  }
+  renderStepper(e.target.value);
+}
+(document.getElementById('status')||{}).addEventListener?.('change', handleStatusChange);
+
+/* =========================
+   KPIs / Badges por linha
+========================= */
+const mesRef = document.getElementById('kpiMesRef');
+function getRefDateFromSelector(){
+  if(mesRef && mesRef.value){
+    const [y,m] = mesRef.value.split('-').map(Number);
+    return new Date(y, m-1, 1);
+  }
+  return new Date();
+}
+
+function refreshBadgesAndKpis(refDate){
+  const rows=[...document.querySelectorAll('#tabela-sinistros tbody tr')];
+  let total=0,andamento=0,docs=0,indenizadosMes=0;
+
+  const base = refDate instanceof Date ? refDate : new Date();
+  const month=base.getMonth(), year=base.getFullYear();
+
+  rows.forEach(tr=>{
+    total++;
+    const statusCell=tr.querySelector('.cell-status');
+    const raw=(statusCell?.textContent||'').trim();
+    statusCell.innerHTML=statusToBadgeHtml(raw);
+
+    const stKey = normStatus(tr.dataset.status || raw || '');
+    if(['em analise','aguardando seguradora','em regulacao','novo'].includes(stKey)) andamento++;
+    if(stKey==='documentacao pendente') docs++;
+
+    const isIndenizado = stKey.includes('indenizado') || stKey.includes('encerrado');
+    const dPag = parseDateFlexible(tr.dataset.pagamento);
+    const dOcc = parseDateFlexible(tr.dataset.data);
+    const ref = dPag || (isIndenizado ? new Date() : dOcc);
+
+    if (isIndenizado && ref && ref.getMonth()===month && ref.getFullYear()===year){
+      indenizadosMes++;
+    }
+  });
+
+  (document.getElementById('kpiTotal')||{}).textContent = String(total||'0');
+  (document.getElementById('kpiAndamento')||{}).textContent = String(andamento||'0');
+  (document.getElementById('kpiDocs')||{}).textContent = String(docs||'0');
+  (document.getElementById('kpiIndenizadosMes')||{}).textContent = String(indenizadosMes||'0');
+}
+
+/* =========================
+   Filtros
+========================= */
+function applyFilters(){
+  const q=(document.getElementById('filterBusca')?.value||'').toLowerCase();
+  const fStatus=normStatus(document.getElementById('filterStatus')?.value||'');
+  const de=parseDateFlexible(document.getElementById('filterDe')?.value);
+  const ate=parseDateFlexible(document.getElementById('filterAte')?.value);
+  const rows=[...document.querySelectorAll('#tabela-sinistros tbody tr')];
+
+  rows.forEach(tr=>{
+    const cliente=(tr.dataset.cliente||'').toLowerCase();
+    const numero=(tr.dataset.numero||'').toLowerCase();
+    const tipo=(tr.dataset.tipo||'').toLowerCase();
+    const local=(tr.dataset.local||'').toLowerCase();
+    const descricao=(tr.dataset.descricao||'').toLowerCase();
+    const anot=(tr.dataset.anotacoes||'').toLowerCase();
+    const statusKey=normStatus(tr.dataset.status||'');
+    const data=parseDateFlexible(tr.dataset.data);
+    let ok=true;
+
+    if(q){ ok=[cliente,numero,tipo,local,descricao,anot,statusKey].some(v=>v.includes(q)); }
+    if(ok && fStatus){ ok = statusKey === fStatus; }
+    if(ok && (de||ate) && data){
+      if(de && data<de) ok=false;
+      if(ate){ const end=new Date(ate); end.setHours(23,59,59,999); if(data>end) ok=false; }
+    }
+    tr.style.display=ok?'':'none';
+  });
+
+  refreshBadgesAndKpis(getRefDateFromSelector());
+}
+(document.getElementById('filterBusca')||{}).addEventListener?.('input', applyFilters);
+(document.getElementById('filterStatus')||{}).addEventListener?.('change', applyFilters);
+(document.getElementById('filterDe')||{}).addEventListener?.('change', applyFilters);
+(document.getElementById('filterAte')||{}).addEventListener?.('change', applyFilters);
+(document.getElementById('btnLimparFiltros')||{}).addEventListener?.('click', ()=>{
+  ['filterBusca','filterStatus','filterDe','filterAte'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  applyFilters();
+});
+
+/* =========================
+   Exportar CSV
+========================= */
+(document.getElementById('btnExportarCsv')||{}).addEventListener?.('click', ()=>{
+  const rows=[...document.querySelectorAll('#tabela-sinistros tr')].filter(tr=>tr.style.display!=='none');
+  const data=rows.map(tr=>[...tr.children].map(td=>`"${(td.innerText||'').replaceAll('"','""')}"`).join(',')).join('\n');
+  const blob=new Blob([data],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sinistros.csv';
+  document.body.appendChild(a);a.click();a.remove();
+});
+
+/* =========================
+   Edição / Cancelar
+========================= */
+function fillSelectIfNeeded(selectEl, value){
+  if(!value || !selectEl) return;
+  const exists=[...selectEl.options].some(o=>(o.value||o.textContent)===value);
+  if(!exists){const opt=document.createElement('option');opt.value=value;opt.textContent=value;selectEl.appendChild(opt);}
+  selectEl.value=value;
+}
+
+/* ---------- Estado de anexos (igual ao de Propostas) ---------- */
+let EDIT_MODE_SIN = false;
+let CURRENT_DOCS_SIN = [];
+let CURRENT_FOTOS_SIN = [];
+let REM_DOCS_SIN = [];
+let REM_FOTOS_SIN = [];
+
+function setEditModeSin(flag){
+  EDIT_MODE_SIN = !!flag;
+  if(!EDIT_MODE_SIN){
+    CURRENT_DOCS_SIN = [];
+    CURRENT_FOTOS_SIN = [];
+    REM_DOCS_SIN = [];
+    REM_FOTOS_SIN = [];
+    const ids=['existing_documentos_json','existing_fotos_json','remove_documentos_json','remove_fotos_json'];
+    ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    const list=document.getElementById('listaDocsSinistro'); if(list) list.innerHTML='';
+    const prev=document.getElementById('previewFotos'); if(prev) prev.innerHTML='';
+  }
+}
+function _parseJsonSafe(x){ try{ if(!x) return []; if(Array.isArray(x)) return x; return JSON.parse(x); }catch{ return []; } }
+function _syncRemovalsHiddenSin(){
+  const hD=document.getElementById('remove_documentos_json');
+  const hF=document.getElementById('remove_fotos_json');
+  if(hD) hD.value = JSON.stringify(REM_DOCS_SIN);
+  if(hF) hF.value = JSON.stringify(REM_FOTOS_SIN);
+}
+
+/* ---------- Grupos (existentes / novos) ---------- */
+function ensureDocsGroupsSin(){
+  const host=document.getElementById('listaDocsSinistro'); if(!host) return {};
+  if(!EDIT_MODE_SIN){ host.innerHTML=''; return {exist:null, novos:host}; }
+  if(!host.querySelector('.group-existentes')){
+    host.innerHTML = `
+      <li class="group-title" style="margin:6px 0;color:#334155;font-weight:700;">Já anexados</li>
+      <div class="group-existentes"></div>
+      <li class="group-title" style="margin:10px 0 6px;color:#334155;font-weight:700;">Novos a enviar</li>
+      <div class="group-novos"></div>`;
+  }
+  return { exist: host.querySelector('.group-existentes'), novos: host.querySelector('.group-novos') };
+}
+function ensureFotosGroupsSin(){
+  const host=document.getElementById('previewFotos'); if(!host) return {};
+  if(!EDIT_MODE_SIN){ host.innerHTML=''; return {exist:null, novos:host}; }
+  if(!host.querySelector('.group-existentes')){
+    host.innerHTML = `
+      <div class="group-title" style="flex-basis:100%;margin:6px 0;color:#334155;font-weight:700;">Já anexados</div>
+      <div class="group-existentes" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <div class="group-title" style="flex-basis:100%;margin:10px 0 6px;color:#334155;font-weight:700;">Novos a enviar</div>
+      <div class="group-novos" style="display:flex;flex-wrap:wrap;gap:8px;"></div>`;
+  }
+  return { exist: host.querySelector('.group-existentes'), novos: host.querySelector('.group-novos') };
+}
+
+/* ---------- Render EXISTENTES ---------- */
+function renderExistingDocsSin(docs){
+  if(!EDIT_MODE_SIN) return;
+  const g=ensureDocsGroupsSin(); if(!g.exist) return;
+  g.exist.innerHTML='';
+  const arr=_parseJsonSafe(docs);
+  CURRENT_DOCS_SIN=arr.slice();
+  arr.forEach((d,idx)=>{
+    let href='', name='', mimetype='', sizeKB='';
+    if(typeof d==='string'){ href=d.startsWith('/')?d:'/'+d; name=href.split('/').pop(); }
+    else if(d && typeof d==='object'){
+      const raw=d.path||d.filename||d.url||'';
+      href = raw ? (raw.startsWith('/')?raw:'/'+raw) : '';
+      name = d.original||d.name||(href?href.split('/').pop():'');
+      mimetype = d.mimetype||'';
+      if(d.size) sizeKB = ` • ${(Number(d.size)/1024).toFixed(0)} KB`;
+    }
+    if(!href) return;
+    const li=document.createElement('li');
+    li.style.margin='4px 0'; li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px';
+    li.innerHTML = `
+      <a href="${href}" target="_blank" rel="noopener">${name}</a>
+      <small style="color:#64748b;">${mimetype}${sizeKB}</small>
+      <button type="button" class="remove-existing-doc-sin" data-idx="${idx}"
+        style="margin-left:6px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:2px 6px;cursor:pointer;">x</button>`;
+    g.exist.appendChild(li);
+  });
+  g.exist.querySelectorAll('.remove-existing-doc-sin').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const idx=+e.currentTarget.dataset.idx;
+      const item=CURRENT_DOCS_SIN[idx];
+      if(item){ REM_DOCS_SIN.push(item); _syncRemovalsHiddenSin(); }
+      e.currentTarget.closest('li')?.remove();
+    });
+  });
+}
+function renderExistingFotosSin(fotos){
+  if(!EDIT_MODE_SIN) return;
+  const g=ensureFotosGroupsSin(); if(!g.exist) return;
+  g.exist.innerHTML='';
+  const arr=_parseJsonSafe(fotos);
+  CURRENT_FOTOS_SIN=arr.slice();
+  arr.forEach((f,idx)=>{
+    let src='';
+    if(typeof f==='string'){ src=f.startsWith('/')?f:'/'+f; }
+    else if(f && typeof f==='object'){ const raw=f.path||f.filename||f.url||''; src=raw?(raw.startsWith('/')?raw:'/'+raw):''; }
+    if(!src) return;
+    const box=document.createElement('div');
+    box.className='thumb';
+    box.innerHTML = `
+      <a href="${src}" target="_blank" rel="noopener"><img src="${src}" alt=""></a>
+      <button type="button" class="remove-existing-foto-sin" data-idx="${idx}"
+        style="position:absolute;top:4px;right:4px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:2px 6px;cursor:pointer;">x</button>`;
+    g.exist.appendChild(box);
+  });
+  g.exist.querySelectorAll('.remove-existing-foto-sin').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const idx=+e.currentTarget.dataset.idx;
+      const item=CURRENT_FOTOS_SIN[idx];
+      if(item){ REM_FOTOS_SIN.push(item); _syncRemovalsHiddenSin(); }
+      e.currentTarget.closest('.thumb')?.remove();
+    });
+  });
+}
+
+/* ---------- Drag/Drop util ---------- */
+function setupDropArea(areaEl, inputEl, onFiles){
+  const over = e=>{ e.preventDefault(); areaEl.classList.add('dragover'); };
+  const leave= ()=> areaEl.classList.remove('dragover');
+  const drop  = e=>{ e.preventDefault(); areaEl.classList.remove('dragover'); const files=[...(e.dataTransfer?.files||[])]; if(files.length) onFiles(files); };
+  areaEl.addEventListener('dragover', over);
+  areaEl.addEventListener('dragenter', over);
+  areaEl.addEventListener('dragleave', leave);
+  areaEl.addEventListener('drop', drop);
+  inputEl.addEventListener('change', e=> onFiles([...(e.target.files||[])]));
+}
+
+/* ---------- Controllers: NOVOS documentos/fotos ---------- */
+(function documentosSinistroController(){
+  const drop  = document.getElementById('dropDocsSinistro');
+  const input = document.getElementById('documentos_sinistro');
+  const host  = document.getElementById('listaDocsSinistro');
+  if(!drop || !input || !host) return;
+
+  const dt = new DataTransfer();
+  function renderNovos(){
+    const groups = ensureDocsGroupsSin();
+    const cont = groups.novos || host;
+    if(!cont) return;
+    cont.innerHTML = '';
+    for(let i=0;i<dt.files.length;i++){
+      const f = dt.files[i];
+      const li = document.createElement('li');
+      li.style.margin='4px 0'; li.style.display='flex'; li.style.alignItems='center'; li.style.gap='6px';
+      li.innerHTML = `
+        <span>${f.name} (${(f.size/1024).toFixed(0)} KB)</span>
+        <button type="button" class="remove-new-doc-sin" data-idx="${i}"
+          style="border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:2px 6px;cursor:pointer;">x</button>`;
+      cont.appendChild(li);
+    }
+    cont.querySelectorAll('.remove-new-doc-sin').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const idx=+e.currentTarget.dataset.idx;
+        const ndt=new DataTransfer();
+        for(let j=0;j<dt.files.length;j++){ if(j!==idx) ndt.items.add(dt.files[j]); }
+        input.files=ndt.files; dt.items.clear(); for(let j=0;j<ndt.files.length;j++) dt.items.add(ndt.files[j]);
+        renderNovos();
+      });
+    });
+  }
+  setupDropArea(drop, input, (files)=>{ files.forEach(f=> dt.items.add(f)); input.files=dt.files; renderNovos(); });
+
+  // Se estiver em edição, mostra existentes
+  renderExistingDocsSin(document.getElementById('existing_documentos_json')?.value);
+  renderNovos();
+})();
+
+(function fotosSinistroController(){
+  const drop  = document.getElementById('dropFotosSinistro');
+  const input = document.getElementById('fotos');      // mantém o mesmo name/id do backend
+  const host  = document.getElementById('previewFotos');
+  if(!drop || !input || !host) return;
+
+  const dt = new DataTransfer();
+  function renderNovas(){
+    const groups = ensureFotosGroupsSin();
+    const cont = groups.novos || host;
+    if(!cont) return;
+    cont.innerHTML = '';
+    for(let i=0;i<dt.files.length;i++){
+      const f = dt.files[i]; if(!f.type.startsWith('image/')) continue;
+      const url = URL.createObjectURL(f);
+      const box = document.createElement('div');
+      box.className='thumb';
+      box.innerHTML = `<img src="${url}" alt=""><button type="button" class="remove" data-idx="${i}">x</button>`;
+      cont.appendChild(box);
+    }
+    cont.querySelectorAll('.remove').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        const idx=+e.currentTarget.dataset.idx;
+        const ndt=new DataTransfer();
+        for(let j=0;j<dt.files.length;j++){ if(j!==idx) ndt.items.add(dt.files[j]); }
+        input.files=ndt.files; dt.items.clear(); for(let j=0;j<ndt.files.length;j++) dt.items.add(ndt.files[j]);
+        renderNovas();
+      });
+    });
+  }
+  setupDropArea(drop, input, (files)=>{ files.forEach(f=>{ if(f.type.startsWith('image/')) dt.items.add(f); }); input.files=dt.files; renderNovas(); });
+
+  // Se estiver em edição, mostra existentes
+  renderExistingFotosSin(document.getElementById('existing_fotos_json')?.value);
+  renderNovas();
+})();
+
+/* ---------- Editar / Cancelar (campos + anexos) ---------- */
+window.editarSinistro=function (obj){
+  setEditModeSin(true);
+
+  // Básicos
+  const setV = (id, val)=>{ const el=document.getElementById(id); if(el!=null) el.value = val ?? ''; };
+  setV('id_sinistro', obj.id);
+  setV('cliente', obj.cliente);
+  setV('numero_apolice', obj.numero_apolice);
+  setV('local', obj.local);
+  setV('cpf_cliente', obj.cpf_cliente || obj.cpf || '');
+  setV('valor_estimado', (obj.valor_estimado ?? ''));
+
+  const toInputDate = (d)=> d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : '';
+  const dOcc=parseDateFlexible(obj.data_ocorrencia);
+  const elOcc=document.getElementById('data_ocorrencia'); if(elOcc) elOcc.value = toInputDate(dOcc);
+
+  fillSelectIfNeeded(document.getElementById('tipo'), obj.tipo);
+  fillSelectIfNeeded(document.getElementById('seguradora'), obj.seguradora);
+  setV('descricao', obj.descricao);
+  setV('anotacoes', obj.anotacoes);
+  fillSelectIfNeeded(document.getElementById('status'), obj.status);
+
+  ['dt_abertura','dt_docs','dt_seguradora','dt_regulacao','dt_decisao','dt_pagamento'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      const d=parseDateFlexible(obj[id]);
+      el.value = toInputDate(d);
+    }
+  });
+
+  // ---- EXISTENTES (docs/fotos) ----
+  const prev = document.getElementById('previewFotos'); if (prev) prev.innerHTML = '';
+
+  let fotosExist = [];
+  let docsExist  = [];
+  try{ fotosExist = Array.isArray(obj.fotos_json)? obj.fotos_json : (obj.fotos_json ? JSON.parse(obj.fotos_json) : []);}catch{}
+  try{ if(!fotosExist.length && obj.imagens){ fotosExist = Array.isArray(obj.imagens)?obj.imagens:JSON.parse(obj.imagens); } }catch{}
+  try{ docsExist  = Array.isArray(obj.documentos_json)? obj.documentos_json : (obj.documentos_json ? JSON.parse(obj.documentos_json) : []);}catch{}
+
+  const hF=document.getElementById('existing_fotos_json');  if(hF) hF.value = JSON.stringify(fotosExist);
+  const hD=document.getElementById('existing_documentos_json'); if(hD) hD.value = JSON.stringify(docsExist);
+
+  REM_DOCS_SIN = []; REM_FOTOS_SIN = []; _syncRemovalsHiddenSin();
+
+  renderExistingFotosSin(fotosExist);
+  renderExistingDocsSin(docsExist);
+  // -------------------------------
+
+  renderStepper(obj.status||'');
+
+  const form=document.getElementById('form-sinistro');
+  if(form) form.action="{{ url_for('atualizar_sinistro') }}";
+
+  const t=document.getElementById('form-title'); if(t) t.innerText="Editar sinistro";
+  const btnSalvar=document.getElementById('btnSalvar'); if(btnSalvar) btnSalvar.innerHTML='<i class="fa-solid fa-arrows-rotate"></i> Atualizar';
+  const canc=document.querySelector('.cancelar-edicao'); if(canc) canc.style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+window.cancelarEdicao=function (){
+  const form=document.getElementById('form-sinistro');
+  form?.reset();
+  const setV = (id, v)=>{ const el=document.getElementById(id); if(el!=null) el.value=v||''; };
+  setV('id_sinistro','');
+
+  if(form) form.action="{{ url_for('adicionar_sinistro') }}";
+  const t=document.getElementById('form-title'); if(t) t.innerText="Cadastro/edição de sinistro";
+  const btnSalvar=document.getElementById('btnSalvar'); if(btnSalvar) btnSalvar.innerHTML='<i class="fa-solid fa-floppy-disk"></i> Salvar';
+  const canc=document.querySelector('.cancelar-edicao'); if(canc) canc.style.display='none';
+
+  renderStepper('');
+  const prev=document.getElementById('previewFotos'); if(prev) prev.innerHTML='';
+  const list=document.getElementById('listaDocsSinistro'); if(list) list.innerHTML='';
+
+  const ids=['existing_documentos_json','existing_fotos_json','remove_documentos_json','remove_fotos_json'];
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+
+  setEditModeSin(false);
+};
+
+/* =========================
+   Inicialização
+========================= */
+if(mesRef && !mesRef.value){
+  const now = new Date();
+  mesRef.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+mesRef?.addEventListener('change', ()=> refreshBadgesAndKpis(getRefDateFromSelector()));
+refreshBadgesAndKpis(getRefDateFromSelector());
+applyFilters();
+renderStepper((document.getElementById('status')?.value)||'');
+
+// ---------- Sidebar toggle ----------
+  const toggleBtn = document.getElementById('toggleSidebar');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('collapsed');
+  });
+  
+</script>
+
+
+
+
+</body>
+</html>

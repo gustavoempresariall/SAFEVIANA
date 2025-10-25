@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana — Solicitar Cotações</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+    :root{
+      --sv-green:#2e7d32; --sv-green-dark:#1e6028; --sv-accent:#10b981;
+      --sv-border:#e5e7eb; --sv-light:#f9fafb; --sv-text:#111827;
+      --sv-shadow:0 10px 30px rgba(0,0,0,.08);
+      --sv-gradient:linear-gradient(135deg,#2e7d32 0%,#10b981 100%);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;background:var(--sv-light);color:var(--sv-text)}
+
+    /* ===== LAYOUT (sidebar/topbar) ===== */
+    .container{display:flex;min-height:100vh}
+    .sidebar{
+      width:200px;background:#fff;border-right:1px solid var(--sv-border);
+      padding:20px 10px;display:flex;flex-direction:column;justify-content:space-between;
+      position:fixed;inset:0 auto 0 0;z-index:1000;box-shadow:var(--sv-shadow);transition:width .3s;
+    }
+    .sidebar.collapsed{width:60px;padding:20px 6px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;color:#111827;margin-bottom:18px;white-space:nowrap}
+    .logo i{font-size:1.35rem;color:var(--sv-green)}
+    .sidebar.collapsed .logo span{display:none}
+
+    .sidebar nav ul{list-style:none;margin:0;padding:0}
+    .sidebar nav li{margin:10px 0}
+    .sidebar nav a{
+      display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;
+      text-decoration:none;color:#374151;font-weight:600;transition:.2s;
+    }
+    .sidebar nav a i{width:20px;text-align:center}
+    .sidebar nav a:hover{background:var(--sv-green);color:#fff}
+    .sidebar nav a.active{background:linear-gradient(135deg,#2e7d32 0%,#2e7d32 60%,#10b981 100%);color:#fff;box-shadow:0 6px 16px rgba(46,125,50,.25)}
+    .sidebar.collapsed nav a{justify-content:center}
+    .sidebar.collapsed nav a span{display:none}
+
+    .admin-title{font-size:.78rem;color:#6b7280;margin:10px 8px}
+    .sidebar.collapsed .admin-title{display:none}
+    .bottom-section ul{list-style:none;margin:6px 0 0;padding:0}
+    .bottom-section li{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;cursor:pointer}
+    .bottom-section li:hover{background:var(--sv-green);color:#fff}
+    .logout-btn{
+      width:100%;margin-top:8px;padding:10px;border:0;border-radius:12px;cursor:pointer;
+      background:var(--sv-gradient);color:#fff;font-weight:700;box-shadow:0 8px 20px rgba(16,185,129,.35);
+    }
+    .sidebar.collapsed .bottom-section li span,.sidebar.collapsed .logout-btn span{display:none}
+
+    .main{flex:1;display:flex;flex-direction:column;margin-left:200px}
+    .topbar{
+      position:fixed;left:200px;right:0;top:0;z-index:900;background:#fff;border-bottom:1px solid var(--sv-border);
+      padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sv-shadow)
+    }
+    .hamburger{border:0;background:transparent;font-size:1.4rem;cursor:pointer;margin-right:8px}
+    .topbar h2{font-size:1.25rem;margin:0}
+    .topbar h2 span{color:var(--sv-green)}
+    .topbar input{padding:8px 12px;border:1px solid var(--sv-border);border-radius:10px;width:230px}
+
+    .user-info{display:flex;align-items:center;gap:8px;font-weight:600}
+    .profile-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid var(--sv-green);display:flex;align-items:center;justify-content:center;background:#fff}
+    .profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .profile-avatar .initials{text-transform:uppercase;color:var(--sv-green);font-weight:800;font-size:.9rem;letter-spacing:.5px}
+
+    .content{padding:22px;margin-top:72px}
+
+    /* ===== HERO ===== */
+    .hero{
+      position:relative;overflow:hidden;border-radius:16px;padding:22px;background:var(--sv-gradient);color:#fff;
+      box-shadow:var(--sv-shadow);
+    }
+    .hero h1{margin:0 0 6px;font-size:clamp(1.1rem,1.6vw,1.4rem)}
+    .hero p{margin:0;opacity:.95}
+    .hero .badges{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .chip{background:rgba(255,255,255,.14);backdrop-filter:blur(6px);padding:6px 10px;border-radius:999px;font-size:.8rem;border:1px solid rgba(255,255,255,.25)}
+
+    /* ===== QUOTES ===== */
+    .section-title{font-size:1.05rem;margin:18px 0 10px;display:flex;align-items:center;gap:8px;color:#222}
+    .section-title i{color:#fff;background:var(--sv-green);width:26px;height:26px;border-radius:8px;display:grid;place-items:center}
+
+    .quote-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .quote-card{position:relative;background:#fff;border:1px solid var(--sv-border);border-radius:16px;padding:18px;text-align:center;
+      transition:transform .25s, box-shadow .25s, border-color .25s; box-shadow:var(--sv-shadow); cursor:pointer; isolation:isolate;}
+    .quote-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(46,125,50,.18); border-color:rgba(46,125,50,.25)}
+    .quote-icon{width:52px;height:52px;margin:2px auto 10px;border-radius:14px;background:linear-gradient(145deg,#f4faf6,#fff);
+      border:1px solid var(--sv-border); display:grid;place-items:center; box-shadow:inset 0 1px 0 #fff, 0 8px 16px rgba(0,0,0,.05)}
+    .quote-icon i{font-size:1.35rem;color:var(--sv-green)}
+    .quote-card h3{margin:4px 0 2px;font-size:1rem}
+    .quote-card p{margin:0;color:#6b7280;font-size:.9rem}
+    .quote-cta{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;border:1px solid var(--sv-green);
+      color:var(--sv-green);background:#fff;font-weight:800;text-decoration:none;transition:.2s}
+    .quote-card:hover .quote-cta{background:var(--sv-green);color:#fff;box-shadow:0 8px 18px rgba(46,125,50,.25)}
+
+    /* ===== TRUST / FAQ ===== */
+    .trust-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px}
+    .trust-item{background:#fff;border:1px solid var(--sv-border);border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;box-shadow:var(--sv-shadow)}
+    .trust-item i{color:var(--sv-accent)}
+
+    .faq{margin-top:18px}
+    .faq details{background:#fff;border:1px solid var(--sv-border);border-radius:14px;margin:8px 0;box-shadow:var(--sv-shadow);transition:.2s}
+    .faq summary{padding:12px 14px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+    .faq summary::after{content:'\f078';font-family:"Font Awesome 6 Free";font-weight:900;color:var(--sv-accent);transition:transform .25s}
+    .faq[open] summary::after{transform:rotate(180deg)}
+    .faq .answer{padding:0 14px 12px;color:#374151;font-size:.95rem}
+
+    /* ===== MODAL ===== */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(17,24,39,.55);z-index:1200;padding:18px}
+    .modal.open{display:flex}
+    .modal-card{
+      width:min(720px, 96vw);
+      background:#fff;border-radius:16px;border:1px solid var(--sv-border);
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;display:flex;flex-direction:column;max-height:90vh;
+    }
+    .modal-header{
+      padding:14px 16px;background:var(--sv-gradient);color:#fff;
+      display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;z-index:1;
+    }
+    .modal-body{padding:16px;overflow:auto}
+    .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .modal-body label{font-weight:700;font-size:.9rem}
+    .modal-body input,.modal-body select{width:100%;padding:10px;border:1px solid var(--sv-border);border-radius:10px;font-size:.95rem}
+    .modal-footer{padding:14px 16px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--sv-border);background:#fafafa;position:sticky;bottom:0;z-index:1}
+    .btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .btn.primary{background:var(--sv-gradient);color:#fff}
+    .btn.secondary{background:#f3f4f6;color:#111827;border:1px solid var(--sv-border)}
+    .btn.link{background:transparent;color:var(--sv-green);padding:8px}
+
+    /* ===== FIX centralização ícone topo quando colapsa ===== */
+    .sidebar .logo{width:100%}
+    .sidebar .logo i{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#f3f7f4;margin:0}
+    .sidebar.collapsed .logo{justify-content:center;gap:0;padding-inline:0}
+    .sidebar.collapsed .logo i{margin-inline:auto}
+    .sidebar.collapsed nav ul li a{justify-content:center;padding:12px;border-radius:14px}
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px){
+      .main{margin-left:60px}
+      .topbar{left:60px}
+    }
+    @media (max-width: 640px){
+      .topbar input{display:none}
+      .grid2{grid-template-columns:1fr}
+    }
+
+    /* ===== Seletor de Corretor ===== */
+    .broker-wrap{margin-top:12px}
+    .broker-title{font-weight:800;font-size:.95rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    .broker-title i{color:#fff;background:var(--sv-green);width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:.8rem}
+    .broker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+    .broker-card{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:#fff;border:1px solid var(--sv-border);border-radius:12px;padding:10px;box-shadow:var(--sv-shadow);cursor:pointer;transition:.2s;position:relative}
+    .broker-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(46,125,50,.18);border-color:rgba(46,125,50,.25)}
+    .broker-card input[type="radio"]{position:absolute;inset:10px;width:auto;height:auto;opacity:0}
+    .broker-card .check{position:absolute;right:10px;top:10px;font-size:.9rem;color:#9ca3af}
+    .broker-card input[type="radio"]:checked ~ .check{color:var(--sv-green)}
+    .broker-avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;border:2px solid var(--sv-green);display:flex;align-items:center;justify-content:center;background:#fff;font-weight:800;color:var(--sv-green)}
+    .broker-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .broker-info strong{display:block;font-size:.98rem}
+    .broker-info small{display:block;color:#6b7280;line-height:1.2}
+    .broker-info small i{width:14px;text-align:center;margin-right:6px}
+
+    /* destaque do card selecionado */
+    .quote-card.active{outline:2px solid var(--sv-green);outline-offset:2px}
+
+    /* caixa de info do tipo (header) */
+    .tipo-info{margin:10px 0 6px;padding:10px 12px;border-radius:12px;background:#f7fbf8;border:1px solid #e5f0e7;font-size:.92rem}
+
+    /* esconde/mostra campos extras por tipo */
+    .field-extra{transition:.2s}
+    .field-extra.hidden{display:none}
+
+    /* ===== Card de confirmação (passo 2) ===== */
+    .confirm-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .confirm-head i{background:var(--sv-green);color:#fff;width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
+    .confirm-head .muted{opacity:.9;font-size:.92rem}
+    .lead{font-size:1rem;margin:10px 0}
+    .confirm-list{list-style:none;padding:0;margin:10px 0 6px 0}
+    .confirm-list li{display:flex;gap:10px;align-items:flex-start;margin:6px 0}
+    .confirm-list li i{color:var(--sv-accent);margin-top:2px}
+    .small{font-size:.9rem}
+    .muted{color:#6b7280}
+
+    /* Modal: estrutura com rolagem interna */
+.modal-card{
+  width:min(720px, 96vw);
+  background:#fff;
+  border-radius:16px;
+  border:1px solid var(--sv-border);
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  overflow:hidden;                 /* ok manter hidden aqui */
+  display:flex;                    /* <-- vira flex container */
+  flex-direction:column;
+  max-height:90vh;                 /* <-- limita à altura da viewport */
+}
+
+/* Cabeçalho/rodapé fixos enquanto o corpo rola (opcional) */
+.modal-header{
+  padding:14px 16px;
+  background:var(--sv-gradient);
+  color:#fff;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:1; /* <-- fica “grudado” no topo */
+}
+
+.modal-footer{
+  padding:14px 16px;
+  display:flex; gap:10px; justify-content:flex-end;
+  border-top:1px solid var(--sv-border);
+  background:#fafafa;
+  position:sticky; bottom:0; z-index:1; /* <-- opcional: grudar embaixo */
+}
+
+/* O corpo do modal é quem rola */
+.modal-body{
+  padding:16px;
+  overflow:auto;                   /* <-- rolagem acontece aqui */
+}
+
+/* O seletor de corretor deve ocupar a largura toda da grid do formulário */
+.broker-wrap{ margin-top:12px; grid-column:1 / -1; }  /* <-- pega as 2 colunas */
+
+/* (opcional) Para telas menores, garante uma boa experiência */
+@media (max-width: 640px){
+  .modal-card{ max-height:92vh; }
+  .broker-grid{ grid-template-columns:1fr; } /* uma coluna de corretores no mobile */
+
+  /* destaque do card selecionado */
+.quote-card.active{ outline:2px solid var(--sv-green); outline-offset:2px; }
+
+/* caixa de info do tipo */
+.tipo-info{
+  margin:10px 0 6px; padding:10px 12px; border-radius:12px;
+  background:#f7fbf8; border:1px solid #e5f0e7; font-size:.92rem;
+}
+
+/* esconde/mostra campos extras por tipo */
+.field-extra{ transition:.2s; }
+.field-extra.hidden{ display:none; }
+
+/* o seletor de corretor ocupa as 2 colunas do formulário */
+.broker-wrap{ grid-column:1 / -1; }
+
+}
+
+/* ===== Acompanhamento de solicitações (fora do modal) ===== */
+.acomp-section{background:#fff;border:1px solid var(--sv-border);border-radius:16px;padding:14px;box-shadow:var(--sv-shadow);margin-top:14px}
+.acomp-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.acomp-actions input, .acomp-actions select{padding:8px 10px;border:1px solid var(--sv-border);border-radius:10px}
+
+.acomp-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.acomp-item{
+  display:grid;grid-template-columns:1.2fr 1fr;gap:12px;
+  background:#fff;border:1px solid var(--sv-border);border-radius:14px;padding:12px;align-items:center
+}
+.acomp-item:hover{box-shadow:0 10px 20px rgba(46,125,50,.10);border-color:rgba(46,125,50,.25)}
+.acomp-info .line1{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acomp-info .line1 strong{font-size:1rem}
+.token-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+  background:#f3f4f6;color:#111827;border:1px solid var(--sv-border);font-weight:700;font-size:.85rem
+}
+.token-badge i{color:var(--sv-green)}
+.acomp-info .line2{color:#6b7280;font-size:.92rem;margin-top:4px}
+.small{font-size:.9rem}.muted{color:#6b7280}
+
+.acomp-status{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+@media (max-width: 820px){
+  .acomp-item{grid-template-columns:1fr}
+  .acomp-status{align-items:flex-start}
+}
+
+/* Steps 1-3 */
+.status-steps{display:flex;align-items:center;gap:10px}
+.status-steps .step{display:flex;align-items:center;gap:8px}
+.status-steps .dot{
+  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  border:2px solid var(--sv-border);background:#fff;color:#9ca3af;font-size:.8rem;font-weight:800
+}
+.status-steps .label{font-weight:700;color:#6b7280;font-size:.9rem;white-space:nowrap}
+.status-steps .bar{flex:1;height:2px;background:var(--sv-border);min-width:32px}
+
+/* cores por etapa (via data-step) */
+.status-steps[data-step="1"] .step:nth-child(1) .dot{background:var(--sv-green);color:#fff;border-color:var(--sv-green)}
+.status-steps[data-step="2"] .step:nth-child(-n+1) .dot{background:var(--sv-green);color:#fff;border-color:var(--sv-green)}
+.status-steps[data-step="2"] .bar:nth-of-type(1){background:var(--sv-accent)}
+.status-steps[data-step="3"] .step .dot{background:var(--sv-green);color:#fff;border-color:var(--sv-green)}
+.status-steps[data-step="3"] .bar{background:var(--sv-accent)}
+
+/* ===== WhatsApp do Corretor ===== */
+.whatsapp-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.whatsapp-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.whatsapp-btn {
+  background: #25d366;
+  border-color: #25d366;
+  color: #fff !important;
+  font-weight: 700;
+}
+.whatsapp-btn:hover {
+  background: #1ebe5d;
+  border-color: #1ebe5d;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(37, 211, 102, 0.35);
+}
+
+@media (max-width: 820px){
+  .whatsapp-wrap {
+    align-items: flex-start; /* no mobile, gruda à esquerda */
+  }
+}
+
+/* quando step=2, pinte também o segundo ponto */
+.status-steps[data-step="2"] .step:nth-child(3) .dot {
+  background: var(--sv-green);
+  color: #fff;
+  border-color: var(--sv-green);
+}
+
+  /* Hover claro só para o item Suporte */
+  .bottom-section li.support-item:hover {
+    background: #f3f4f6 !important;   /* cinza/branco */
+    color: var(--sv-green) !important; /* texto/ícone verdes */
+  }
+  .bottom-section li.support-item:hover .support-link { 
+    color: var(--sv-green) !important; 
+  }
+  .bottom-section li.support-item:hover .support-link i {
+    color: var(--sv-green) !important;
+  }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo"><i class="fa-solid fa-user-shield"></i><span>Área do Cliente</span></div>
+       <nav>
+  <ul>
+    <li>
+      <a href="{{ url_for('area_cliente') }}" class="{% if ACTIVE_MENU == 'dashboard' %}active{% endif %}">
+        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('dadosclientes') }}" class="{% if ACTIVE_MENU == 'meus_dados' %}active{% endif %}">
+        <i class="fa-solid fa-user"></i> <span>Meus Dados</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cotacoes_clientes') }}" class="{% if ACTIVE_MENU == 'cotacoes' %}active{% endif %}">
+        <i class="fa-solid fa-file-signature"></i> <span>Solicitar Cotações</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('acompanhamento_ap_cliente') }}" class="{% if ACTIVE_MENU == 'apolices' %}active{% endif %}">
+        <i class="fa-solid fa-file-contract"></i> <span>Minhas Apólices</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('cliente_propostas_html') }}" class="{% if ACTIVE_MENU == 'propostas' %}active{% endif %}">
+        <i class="fa-solid fa-clipboard-list"></i> <span>Minhas Propostas</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('sinistros_segurado') }}" class="{% if ACTIVE_MENU == 'sinistros' %}active{% endif %}">
+        <i class="fa-solid fa-car-crash"></i> <span>Meus Sinistros</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+    </div>
+    <div class="bottom-section">
+      <p class="admin-title">ADMINISTRAÇÃO</p>
+      <ul>
+  <li class="support-item">
+    <a class="support-link"
+       href="https://wa.me/5518988076390?text=Ol%C3%A1!%20Preciso%20de%20suporte."
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;width:100%;
+              padding:8px;border-radius:8px;">
+      <i class="fa-solid fa-circle-question"></i>
+      <span>Suporte</span>
+    </a>
+  </li>
+</ul>
+
+      <a href="index.html"><button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i><span> Sair</span></button></a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar" id="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="toggleSidebar">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+      </div>
+      <input type="text" placeholder="Buscar apólices, propostas…">
+
+      <!-- BLOCO USUÁRIO -->
+      <div class="user-info" id="userInfo">
+  <div class="profile-avatar small-avatar" id="topbarAvatar" title="Meu Perfil">
+    {# tenta pegar da instância 'cliente'; senão, usa 'cliente_foto' #}
+    {% set foto_norm = (cliente.foto_de_perfil|replace('\\','/')|replace('static/','')) if cliente and cliente.foto_de_perfil
+                       else (cliente_foto|replace('static/','') if cliente_foto else None) %}
+    {% if foto_norm %}
+      <img src="{{ url_for('static', filename=foto_norm) }}" alt="Foto de Perfil">
+    {% else %}
+      {# === mesmas iniciais da outra página: primeira letra do nome + primeira do segundo token === #}
+      {% set name_str = (cliente.nome if cliente else (cliente_nome or '')) | trim %}
+      {% set parts = name_str.split() %}
+      {% set first  = parts[0][:1] if parts else '' %}
+      {% set second = (parts[1][:1] if parts|length > 1 else (parts[0][1:2] if parts and parts[0]|length>1 else '')) %}
+      <span class="initials">{{ (first ~ second).upper() }}</span>
+    {% endif %}
+  </div>
+  <span class="user-name">{{ cliente.nome if cliente else (cliente_nome or '') }}</span>
+</div>
+
+    </header>
+
+    <section class="content">
+      <!-- HERO -->
+      <div class="hero">
+        <h1>Solicite sua cotação de forma rápida e segura</h1>
+        <p>Compare seguradoras, escolha coberturas e receba atendimento do seu corretor SafeViana.</p>
+        <div class="badges">
+          <span class="chip"><i class="fa-solid fa-lock"></i> Seus dados estão protegidos</span>
+          <span class="chip"><i class="fa-regular fa-clock"></i> Resposta em até 24h</span>
+          <span class="chip"><i class="fa-solid fa-shield-heart"></i> Corretora autorizada</span>
+        </div>
+      </div>
+
+      <!-- TIPOS DE SEGURO -->
+      <h3 class="section-title"><i class="fa-regular fa-file-lines"></i> Escolha o tipo de seguro</h3>
+      <div class="quote-grid" id="quoteGrid">
+        <article class="quote-card" data-tipo="Auto">
+          <div class="quote-icon"><i class="fa-solid fa-car"></i></div>
+          <h3>Seguro Auto</h3>
+          <p>Proteção completa para seu veículo</p>
+          <button class="quote-cta" aria-label="Iniciar cotação de Auto">Iniciar cotação <i class="fa-solid fa-arrow-right"></i></button>
+        </article>
+
+        <article class="quote-card" data-tipo="Residencial">
+          <div class="quote-icon"><i class="fa-solid fa-house"></i></div>
+          <h3>Seguro Residencial</h3>
+          <p>Segurança para seu lar</p>
+          <button class="quote-cta">Iniciar cotação <i class="fa-solid fa-arrow-right"></i></button>
+        </article>
+
+        <article class="quote-card" data-tipo="Vida">
+          <div class="quote-icon"><i class="fa-solid fa-heart"></i></div>
+          <h3>Seguro de Vida</h3>
+          <p>Tranquilidade para sua família</p>
+          <button class="quote-cta">Iniciar cotação <i class="fa-solid fa-arrow-right"></i></button>
+        </article>
+
+        <article class="quote-card" data-tipo="Empresarial">
+          <div class="quote-icon"><i class="fa-solid fa-briefcase"></i></div>
+          <h3>Seguro Empresarial</h3>
+          <p>Proteção para seu negócio</p>
+          <button class="quote-cta">Iniciar cotação <i class="fa-solid fa-arrow-right"></i></button>
+        </article>
+      </div>
+
+      <!-- TRUST -->
+      <div class="trust-bar">
+        <div class="trust-item"><i class="fa-solid fa-handshake"></i><div><strong>Atendimento humano</strong><br><small>Corretor acompanha tudo</small></div></div>
+        <div class="trust-item"><i class="fa-solid fa-scale-balanced"></i><div><strong>Comparação transparente</strong><br><small>Várias seguradoras</small></div></div>
+        <div class="trust-item"><i class="fa-solid fa-bolt"></i><div><strong>Rápido</strong><br><small>Solicite em minutos</small></div></div>
+      </div>
+
+      <h3 class="section-title"><i class="fa-solid fa-route"></i> Acompanhamento de solicitações</h3>
+<section class="acomp-section">
+
+  <!-- Ações rápidas (opcional) -->
+  <div class="acomp-actions">
+    <input type="search" id="buscaToken" placeholder="Buscar por token (ex.: SV-2025-000123)">
+    <select id="filtroStatus">
+      <option value="">Todos os status</option>
+      <option value="recebida">Recebida</option>
+      <option value="em_analise">Em análise</option>
+      <option value="enviada_seguradora">Enviada à seguradora</option>
+    </select>
+  </div>
+
+  <ul class="acomp-list" id="acompList">
+    {% set lista = cotacoes_recentes or [] %}
+    {% if not lista %}
+      <li class="acomp-item" aria-live="polite">
+        <div class="acomp-info">
+          <div class="line1"><strong>Nenhuma solicitação ainda</strong></div>
+          <div class="line2">Envie sua primeira cotação acima para visualizar o andamento aqui.</div>
+        </div>
+        <div class="acomp-status">
+          <a class="quote-cta" href="#" onclick="document.querySelector('.quote-card .quote-cta')?.click();return false;">
+            Nova cotação <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </li>
+    {% endif %}
+
+    {% for q in lista %}
+      {% set st = (q.status or '').lower() %}
+{% set step = 1 if st == 'recebida'
+           else 2 if st in ['em_analise', 'em análise']
+           else 3 %}
+
+      <li class="acomp-item" data-token="{{ q.token|e }}" data-status="{{ q.status|e }}">
+        <div class="acomp-info">
+          <div class="line1">
+            <strong>{{ q.tipo or '—' }}</strong>
+            <span class="token-badge" title="Token da cotação">
+              <i class="fa-solid fa-ticket"></i> {{ q.token or 'SV-—' }}
+            </span>
+          </div>
+          <div class="line2">
+            Enviada em <span>{{ q.criado_em or '—' }}</span>
+            • Corretor: <span>{{ q.corretor_nome or 'A definir' }}</span>
+          </div>
+        </div>
+
+       <div class="acomp-status">
+  <div class="status-steps" data-step="{{ step }}">
+    <div class="step"><span class="dot">1</span><span class="label">Recebida</span></div>
+    <div class="bar"></div>
+    <div class="step"><span class="dot">2</span><span class="label">Em análise</span></div>
+    <div class="bar"></div>
+    <div class="step"><span class="dot">3</span><span class="label">Enviada à seguradora</span></div>
+  </div>
+
+  {% if q.corretor_telefone %}
+<div class="whatsapp-wrap">
+  <small class="whatsapp-label">WhatsApp do corretor</small>
+  <a class="quote-cta whatsapp-btn" target="_blank"
+     href="https://wa.me/55{{ q.corretor_telefone|replace('(','')|replace(')','')|replace('-','')|replace(' ','') }}?text=Ol%C3%A1%20{{ q.corretor_nome|urlencode }},%20gostaria%20de%20adiantar%20a%20minha%20cota%C3%A7%C3%A3o%20{{ q.token|urlencode }}."
+     title="Falar com {{ q.corretor_nome }} no WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i> Conversar
+  </a>
+</div>
+{% endif %}
+
+
+          
+         
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+
+
+      <!-- FAQ -->
+      <div class="faq">
+        <details class="faq"><summary>Preciso enviar documentos agora?</summary><div class="answer">Não. Primeiro coletamos dados básicos. Seu corretor orienta o envio de documentos, se necessário.</div></details>
+        <details class="faq"><summary>Posso falar com um corretor?</summary><div class="answer">Sim. Após solicitar a cotação, você será atendido pelo seu corretor SafeViana pelo canal que preferir.</div></details>
+        <details class="faq"><summary>Quanto custa?</summary><div class="answer">Você recebe propostas de diferentes seguradoras. A comparação é gratuita e sem compromisso.</div></details>
+      </div>
+
+      <p style="text-align:center;margin-top:12px;color:#6b7280">Seus dados estão seguros conosco • Resposta em até 24h</p>
+    </section>
+  </main>
+</div>
+
+<!-- Modal Cotação Rápida -->
+<div class="modal" id="quoteModal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-head-left">
+        <h3 id="modalTitle">
+          <i class="fa-solid fa-file-signature"></i>
+          Cotação Rápida — <span id="modalTipo">Auto</span>
+        </h3>
+        <p id="tipoInfo" class="modal-subinfo"></p>
+      </div>
+      <button class="btn link" id="closeModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- PASSO 1: FORM -->
+    <form class="modal-body" id="quickForm" method="GET" action="solicitar_cotacoes.html">
+      <input type="hidden" name="tipo" id="inputTipo" value="Auto">
+      <div class="grid2">
+        <div><label for="nome">Nome completo</label><input id="nome" name="nome" placeholder="Seu nome" required></div>
+        <div><label for="email">E-mail</label><input id="email" type="email" name="email" placeholder="voce@email.com" required></div>
+        <div><label for="telefone">Telefone</label><input id="telefone" name="telefone" placeholder="(00) 00000-0000" required></div>
+        <div><label for="cep">CEP</label><input id="cep" name="cep" placeholder="00000-000" required></div>
+        <div class="field-extra" id="fieldExtra1"><label id="extraLabel1" for="extra1">Placa do veículo</label><input id="extra1" name="extra1" placeholder="ABC1D23"></div>
+        <div class="field-extra" id="fieldExtra2"><label id="extraLabel2" for="extra2">Ano/modelo</label><input id="extra2" name="extra2" placeholder="2022"></div>
+
+        <!-- Seletor de Corretor -->
+<div class="broker-wrap">
+  <p class="broker-title"><i class="fa-solid fa-user-tie"></i> Escolha seu corretor</p>
+
+  <div class="broker-grid" id="brokerGrid">
+    {% set lista = corretores or [] %}
+    {% for c in lista %}
+    <label class="broker-card" data-nome="{{ c.nome|e }}">
+      <!-- Radio invisível cobrindo o card -->
+      <input type="radio" name="corretor_id" value="{{ c.id }}"
+             {% if c.id == (cliente_corretor_id or (lista[0].id if lista else None)) %}checked{% endif %}>
+
+      <!-- Avatar com foto ou iniciais -->
+      <div class="broker-avatar">
+        {% if c.foto %}
+          <img src="{{ url_for('static', filename=c.foto) }}"
+               alt="Foto de {{ c.nome|e }}"
+               onerror="this.replaceWith(document.createElement('span'));">
+        {% else %}
+          <span class="init-slot"></span>
+        {% endif %}
+      </div>
+
+      <!-- Dados do corretor -->
+      <div class="broker-info">
+        <strong>{{ c.nome }}</strong>
+        <small><i class="fa-solid fa-envelope"></i>{{ c.email }}</small>
+        <small><i class="fa-solid fa-phone"></i>{{ c.telefone }}</small>
+      </div>
+
+      <span class="check"><i class="fa-solid fa-circle-check"></i></span>
+    </label>
+    {% endfor %}
+
+    {% if not lista %}
+      <div style="padding:12px;border:1px dashed var(--sv-border);border-radius:12px;background:#fff;color:#6b7280">
+        Nenhum corretor disponível no momento. <br>Selecione “atendimento automático” ou tente novamente mais tarde.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Opção: atendimento automático -->
+  <label class="broker-card" style="margin-top:10px">
+    <input type="radio" name="corretor_id" value="auto" {% if not lista %}checked{% endif %}>
+    <div class="broker-avatar"><i class="fa-solid fa-people-group" aria-hidden="true"></i></div>
+    <div class="broker-info">
+      <strong>Qualquer corretor disponível</strong>
+      <small>Distribuição automática pela equipe SafeViana</small>
+    </div>
+    <span class="check"><i class="fa-solid fa-circle-check"></i></span>
+  </label>
+</div>
+      </div>
+    </form>
+
+    <!-- PASSO 2: CONFIRMAÇÃO (dentro do modal) -->
+    <div class="modal-body" id="confirmBody" style="display:none">
+      <div class="confirm-head">
+        <i class="fa-solid fa-check"></i>
+        <div>
+          <strong>Prossiga para enviar a cotação ao corretor!</strong>
+          <div class="muted">Seguro <span id="confTipo">—</span></div>
+        </div>
+      </div>
+
+      <p class="lead">
+        Em até <strong>24 horas úteis</strong> um de nossos corretores entrará em contato.
+        Corretor selecionado: <strong id="confCorretor">—</strong>.
+      </p>
+
+      <ul class="confirm-list">
+        <li><i class="fa-solid fa-shield-halved"></i> Seus dados são protegidos (LGPD)</li>
+        <li><i class="fa-solid fa-handshake-angle"></i> Atendimento humano e acompanhado</li>
+        <li><i class="fa-solid fa-scale-balanced"></i> Comparação transparente entre seguradoras</li>
+      </ul>
+
+      <p class="small muted">
+        Horário comercial: seg–sex, 9h às 18h. Acompanhe o andamento em <em>Minhas Propostas</em> e <em>Minhas Apólices</em>.
+      </p>
+    </div>
+
+    <div class="modal-footer" id="modalFooter">
+      <button class="btn primary" type="submit" form="quickForm" id="btnContinuar">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<script>document.body.dataset.active = 'cotacoes';</script>
+
+
+<script>
+/* =========================
+   Área do Cliente – Cotações
+   ========================= */
+
+/* ---- Helpers DOM ---- */
+const $  = (s, el=document)=> el.querySelector(s);
+const $$ = (s, el=document)=> [...el.querySelectorAll(s)];
+
+/* ---- Constantes de rotas ---- */
+const URL_API_POST = "/api/cliente/cotacoes2";                         // cria a cotação
+const URL_COTACOES = "{{ url_for('cotacoes_clientes') }}";  
+        // página correta de cotações do cliente
+
+/* ---- Referências principais ---- */
+const sidebar      = $('#sidebar');
+const main         = $('.main');
+const topbar       = $('#topbar');
+const modal        = $('#quoteModal');
+const closeModalBtn= $('#closeModal');
+const formEl       = $('#quickForm');
+const modalFooter  = $('#modalFooter');
+const confirmBody  = $('#confirmBody');
+const btnContinuar = $('#btnContinuar');
+const modalTipo    = $('#modalTipo');
+const inputTipo    = $('#inputTipo');
+const extra1       = $('#extra1');
+const extra2       = $('#extra2');
+const extraLabel1  = $('#extraLabel1');
+const extraLabel2  = $('#extraLabel2');
+const fieldExtra1  = $('#fieldExtra1');
+const fieldExtra2  = $('#fieldExtra2');
+
+/* ---- Máscaras simples ---- */
+function maskTel(input){
+  let v = input.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>6) input.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+  else if(v.length>2) input.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
+  else input.value = v;
+}
+function maskCEP(input){
+  let v = input.value.replace(/\D/g,'').slice(0,8);
+  input.value = v.length>5 ? `${v.slice(0,5)}-${v.slice(5)}` : v;
+}
+
+/* ---- Tipos e campos extras ---- */
+const TYPE_CONFIG = {
+  "Auto": {
+    info: "Informe os dados básicos do veículo. Seu corretor pode solicitar o CRLV depois.",
+    fields: [
+      { id:"extra1", label:"Placa do veículo", placeholder:"ABC1D23", type:"text", visible:true },
+      { id:"extra2", label:"Ano/modelo",       placeholder:"2022",    type:"number", visible:true }
+    ]
+  },
+  "Residencial": {
+    info: "CEP e valor aproximado do imóvel ajudam a montar a cotação.",
+    fields: [
+      { id:"extra1", label:"CEP do imóvel",              placeholder:"00000-000", type:"text", visible:true },
+      { id:"extra2", label:"Valor aproximado do imóvel", placeholder:"400.000",   type:"text", visible:true }
+    ]
+  },
+  "Vida": {
+    info: "Com data de nascimento e capital desejado já dá para começar.",
+    fields: [
+      { id:"extra1", label:"Data de nascimento",              placeholder:"dd/mm/aaaa", type:"text", visible:true },
+      { id:"extra2", label:"Capital segurado desejado (R$)",  placeholder:"200.000",    type:"text", visible:true }
+    ]
+  },
+  "Empresarial": {
+    info: "CNPJ e ramo de atividade são essenciais para iniciar.",
+    fields: [
+      { id:"extra1", label:"CNPJ",              placeholder:"00.000.000/0001-00", type:"text", visible:true },
+      { id:"extra2", label:"Ramo de atividade", placeholder:"Comércio, Indústria…", type:"text", visible:true }
+    ]
+  }
+};
+
+function setFieldsByType(tipo){
+  const cfg = TYPE_CONFIG[tipo] || TYPE_CONFIG["Auto"];
+  const infoBox = $('#tipoInfo');
+  if (infoBox) infoBox.textContent = cfg.info;
+
+  if (extra1) extra1.value = "";
+  if (extra2) extra2.value = "";
+
+  if (cfg.fields[0].visible) {
+    fieldExtra1.classList.remove('hidden');
+    extraLabel1.textContent = cfg.fields[0].label;
+    extra1.placeholder = cfg.fields[0].placeholder;
+    extra1.type = cfg.fields[0].type;
+  } else { fieldExtra1.classList.add('hidden'); }
+
+  if (cfg.fields[1].visible) {
+    fieldExtra2.classList.remove('hidden');
+    extraLabel2.textContent = cfg.fields[1].label;
+    extra2.placeholder = cfg.fields[1].placeholder;
+    extra2.type = cfg.fields[1].type;
+  } else { fieldExtra2.classList.add('hidden'); }
+}
+
+/* ---- Abrir/fechar modal ---- */
+function openModalFor(tipo){
+  $$('.quote-card').forEach(c => c.classList.remove('active'));
+  const sel = document.querySelector(`.quote-card[data-tipo="${tipo}"]`);
+  if (sel) sel.classList.add('active');
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  modalTipo.textContent = tipo;
+  inputTipo.value = tipo;
+  setFieldsByType(tipo);
+}
+function closeModal(){
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  // reseta para estado do passo 1
+  confirmBody.style.display = 'none';
+  formEl.style.display = 'block';
+  modalFooter.innerHTML = '';
+  modalFooter.appendChild(btnContinuar);
+  btnContinuar.style.display = 'inline-block';
+}
+
+/* ---- Sidebar collapse ---- */
+$('#toggleSidebar')?.addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+  if (sidebar.classList.contains('collapsed')) {
+    main.style.marginLeft = '60px';
+    topbar.style.left = '60px';
+  } else {
+    main.style.marginLeft = '200px';
+    topbar.style.left = '200px';
+  }
+});
+
+/* ---- Eventos de abertura dos cards ---- */
+$$('.quote-card').forEach(card=>{
+  card.addEventListener('click', (e)=>{
+    if(e.target.closest('.quote-cta')) e.preventDefault();
+    openModalFor(card.dataset.tipo);
+  });
+  card.querySelector('.quote-cta')?.addEventListener('click', (e)=>{
+    e.preventDefault();
+    openModalFor(card.closest('.quote-card').dataset.tipo);
+  });
+});
+closeModalBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+
+/* ---- Máscaras ---- */
+$('#telefone')?.addEventListener('input', ()=>maskTel($('#telefone')));
+$('#cep')?.addEventListener('input', ()=>maskCEP($('#cep')));
+
+/* ---- Máscaras condicionais para extra1 ---- */
+extra1?.addEventListener('input', ()=>{
+  const t = modalTipo.textContent;
+  if (t === 'Auto') {
+    let v = extra1.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);
+    extra1.value = v;
+  } else if (t === 'Residencial') {
+    let v = extra1.value.replace(/\D/g,'').slice(0,8);
+    extra1.value = v.length>5 ? `${v.slice(0,5)}-${v.slice(5)}` : v;
+  } else if (t === 'Vida') {
+    let v = extra1.value.replace(/\D/g,'').slice(0,8);
+    if (v.length>4) extra1.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+    else if (v.length>2) extra1.value = `${v.slice(0,2)}/${v.slice(2)}`;
+    else extra1.value = v;
+  } else if (t === 'Empresarial') {
+    let v = extra1.value.replace(/\D/g,'').slice(0,14);
+    if (v.length>12) extra1.value = `${v.slice(0,2)}.${v.slice(2,5)}.${v.slice(5,8)}/${v.slice(8,12)}-${v.slice(12)}`;
+    else if (v.length>8) extra1.value = `${v.slice(0,2)}.${v.slice(2,5)}.${v.slice(5,8)}/${v.slice(8)}`;
+    else if (v.length>5) extra1.value = `${v.slice(0,2)}.${v.slice(2,5)}.${v.slice(5)}`;
+    else if (v.length>2) extra1.value = `${v.slice(0,2)}.${v.slice(2)}`;
+    else extra1.value = v;
+  }
+});
+
+/* ---- Iniciais dos corretores (quando não tem foto) ---- */
+(function initBrokerInitials(){
+  $$('.broker-card').forEach(card=>{
+    const name = (card.getAttribute('data-nome') || '').trim();
+    const avatar = card.querySelector('.broker-avatar');
+    if(!avatar) return;
+    const hasImg = avatar.querySelector('img');
+    const initSlot = avatar.querySelector('.init-slot');
+    if(!hasImg && initSlot){
+      const parts = name.split(/\s+/).filter(Boolean);
+      const initials = parts.length === 1 ? parts[0].slice(0,2).toUpperCase()
+                                          : (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+      initSlot.textContent = initials || 'SV';
+    }
+  });
+})();
+
+/* ---- Toast simples ---- */
+function toast(msg, ok=true){
+  let t = document.createElement('div');
+  t.textContent = msg;
+  t.style.position = 'fixed';
+  t.style.zIndex = '2000';
+  t.style.right = '16px';
+  t.style.bottom = '16px';
+  t.style.padding = '10px 12px';
+  t.style.borderRadius = '10px';
+  t.style.fontWeight = '700';
+  t.style.color = ok ? '#065f46' : '#991b1b';
+  t.style.background = ok ? '#d1fae5' : '#fee2e2';
+  t.style.border = `1px solid ${ok ? '#34d399' : '#fecaca'}`;
+  t.style.boxShadow = '0 8px 20px rgba(0,0,0,.15)';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+/* ---- Util: corretor escolhido (id, nome, telefone) ---- */
+function getCorretorSelecionado(){
+  const r = document.querySelector('input[name="corretor_id"]:checked');
+  if(!r) return { id:null, nome:'um corretor', telefone:null };
+  const label = r.closest('label.broker-card');
+  const nome  = label?.getAttribute('data-nome')
+              || label?.querySelector('.broker-info strong')?.textContent?.trim()
+              || 'um corretor';
+  const telEl = label?.querySelector('.broker-info small .fa-phone')?.parentElement;
+  const telefone = telEl ? (telEl.textContent || '').replace(/\s+/g,' ').trim() : null;
+  return { id: r.value, nome, telefone };
+}
+
+/* ---- Passo 2 (Confirmação) ---- */
+function showConfirmStep(){
+  $('#confTipo').textContent = modalTipo.textContent;
+  $('#confCorretor').textContent = getCorretorSelecionado().nome;
+
+  formEl.style.display = 'none';
+  confirmBody.style.display = 'block';
+
+  modalFooter.innerHTML = `
+    <button class="btn secondary" type="button" id="voltarForm">Voltar</button>
+    <button class="btn primary"   type="button" id="finishBtn">Concluir Solicitação</button>
+  `;
+
+  $('#voltarForm').onclick = ()=>{
+    confirmBody.style.display = 'none';
+    formEl.style.display = 'block';
+    modalFooter.innerHTML = '';
+    modalFooter.appendChild(btnContinuar);
+    btnContinuar.style.display = 'inline-block';
+  };
+
+  $('#finishBtn').onclick = enviarSolicitacao;
+}
+
+/* ---- Submit passo 1: ir para confirmação ---- */
+formEl.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  showConfirmStep();
+});
+
+/* ---- POST para criar cotação ---- */
+async function enviarSolicitacao(){
+  const payload = {
+    tipo:      $('#inputTipo')?.value?.trim(),
+    nome:      $('#nome')?.value?.trim(),
+    email:     $('#email')?.value?.trim(),
+    telefone:  $('#telefone')?.value?.trim(),
+    cep:       $('#cep')?.value?.trim(),
+    extra1:    $('#extra1')?.value?.trim() || null,
+    extra2:    $('#extra2')?.value?.trim() || null,
+    corretor_id: (()=>{
+      const sel = getCorretorSelecionado().id;
+      return sel === 'auto' ? null : sel;
+    })()
+  };
+
+  // validação simples
+  if(!payload.tipo || !payload.nome || !payload.email || !payload.telefone || !payload.cep){
+    toast('Preencha os campos obrigatórios.', false);
+    return;
+  }
+
+  try{
+    // desabilita botões enquanto envia
+    $('#finishBtn').disabled = true;
+
+    const res = await fetch(URL_API_POST, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'same-origin',
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    let data;
+    try{ data = JSON.parse(text); }catch(_){ throw new Error('Falha ao interpretar resposta'); }
+
+    if(!res.ok || !data.ok){
+      throw new Error(data.error || 'Não foi possível enviar a solicitação.');
+    }
+
+    // sucesso
+    toast('Solicitação enviada! Você pode acompanhar em Cotações.');
+    // Atualiza a lista de acompanhamento na página
+    addAcompanhamentoItem({
+      tipo: payload.tipo,
+      status: 'recebida',
+      corretor_telefone: getCorretorSelecionado().telefone || data.corretor_telefone || null
+    });
+
+    // Feedback no modal + fechar
+    confirmBody.innerHTML = `
+      <div style="background:linear-gradient(135deg,#2e7d32 0%,#10b981 100%);color:#fff;padding:14px 16px;border-radius:12px;margin-bottom:12px">
+        <strong><i class="fa-solid fa-circle-check"></i> Solicitação enviada com sucesso!</strong>
+      </div>
+      <p class="lead">Obrigado! Em breve seu corretor entrará em contato.</p>
+    `;
+    modalFooter.innerHTML = `<a class="btn primary" href="${URL_COTACOES}">Ver minhas cotações</a>`;
+    setTimeout(closeModal, 1400);
+
+  }catch(err){
+    console.error(err);
+    toast(err.message || 'Erro ao enviar solicitação.', false);
+    // reabilita
+    $('#finishBtn').disabled = false;
+  }
+}
+
+/* ---- Acompanhamento: inserir item novo rapidamente ---- */
+function addAcompanhamentoItem(item){
+  const ul = $('#acompList');
+  if(!ul) return;
+
+  // remove placeholder “Nenhuma solicitação…”, se existir
+  const placeholder = ul.querySelector('.acomp-item[aria-live="polite"]');
+  if (placeholder) placeholder.remove();
+
+  const li = document.createElement('li');
+  li.className = 'acomp-item';
+  li.setAttribute('data-status', item.status || 'recebida');
+
+  const statusLabel = (item.status || 'recebida')
+    .replace(/_/g,' ')
+    .replace(/\b\w/g, m => m.toUpperCase());
+
+  li.innerHTML = `
+    <div class="acomp-info">
+      <div class="line1">
+        <strong>${item.tipo || '-'}</strong>
+      </div>
+      <div class="line2">
+        Status: <strong>${statusLabel}</strong>
+        ${item.corretor_telefone ? ` • Telefone do corretor: <strong>${item.corretor_telefone}</strong>` : ''}
+      </div>
+    </div>
+    <div class="acomp-status">
+      <a class="quote-cta" href="${URL_COTACOES}">
+        Ver na página de Cotações <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  `;
+  ul.prepend(li);
+}
+
+/* ---- Filtros do acompanhamento (já existentes no HTML) ---- */
+(function initAcompFiltros(){
+  const list  = $('#acompList');
+  const busca = $('#buscaToken');
+  const filtro= $('#filtroStatus');
+  if(!list || !busca || !filtro) return;
+
+  function apply(){
+    const t = (busca.value || '').trim().toLowerCase();
+    const s = (filtro.value || '').trim();
+    list.querySelectorAll('.acomp-item').forEach(li=>{
+      const token  = (li.getAttribute('data-token')||'').toLowerCase();
+      const status = li.getAttribute('data-status')||'';
+      const okToken  = !t || token.includes(t);
+      const okStatus = !s || status===s;
+      li.style.display = (okToken && okStatus) ? '' : 'none';
+    });
+  }
+  busca.addEventListener('input', apply);
+  filtro.addEventListener('change', apply);
+})();
+
+/* ---- Abrir modal no card escolhido (fallback) ---- */
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.quote-cta[data-open]');
+  if(btn){
+    e.preventDefault();
+    openModalFor(btn.getAttribute('data-open'));
+  }
+});
+
+async function refreshCotacoes() {
+  try {
+    const res = await fetch("/api/cliente/cotacoes/list");
+    const data = await res.json();
+    if (data.ok) {
+      renderCotacoes(data.items);
+    }
+  } catch (err) {
+    console.error("Erro ao atualizar cotações:", err);
+  }
+}
+
+// Atualiza a cada 15 segundos
+setInterval(refreshCotacoes, 15000);
+
+/* ======================================================
+   Atualização automática da lista de cotações
+   ====================================================== */
+async function atualizarAcompanhamento() {
+  try {
+    const res = await fetch("/api/cliente/cotacoes/list", {
+      method: "GET",
+      credentials: "same-origin"
+    });
+    const data = await res.json();
+
+    if (!data.ok) return;
+
+    const ul = document.getElementById("acompList");
+    if (!ul) return;
+
+    // limpa lista atual
+    ul.innerHTML = "";
+
+    // se não houver cotações
+    if (!data.cotacoes || data.cotacoes.length === 0) {
+      ul.innerHTML = `
+        <li class="acomp-item" aria-live="polite">
+          <div class="acomp-info">
+            <div class="line1"><strong>Nenhuma solicitação ainda</strong></div>
+            <div class="line2">Envie sua primeira cotação acima para visualizar o andamento aqui.</div>
+          </div>
+          <div class="acomp-status">
+            <a class="quote-cta" href="#" onclick="document.querySelector('.quote-card .quote-cta')?.click();return false;">
+              Nova cotação <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </li>`;
+      return;
+    }
+
+    // renderiza cotações
+    data.cotacoes.forEach(q => {
+      const st = (q.status || "").toLowerCase();
+const step = st === "recebida" ? 1
+           : (st === "em_analise" || st === "em análise") ? 2
+           : 3;
+
+
+      const li = document.createElement("li");
+      li.className = "acomp-item";
+      li.setAttribute("data-token", q.token);
+      li.setAttribute("data-status", q.status);
+
+      li.innerHTML = `
+        <div class="acomp-info">
+          <div class="line1">
+            <strong>${q.tipo}</strong>
+            <span class="token-badge" title="Token da cotação">
+              <i class="fa-solid fa-ticket"></i> ${q.token}
+            </span>
+          </div>
+          <div class="line2">
+            Enviada em <span>${q.criado_em}</span>
+            • Corretor: <span>${q.corretor_nome}</span>
+          </div>
+        </div>
+
+        <div class="acomp-status">
+          <div class="status-steps" data-step="${step}">
+            <div class="step"><span class="dot">1</span><span class="label">Recebida</span></div>
+            <div class="bar"></div>
+            <div class="step"><span class="dot">2</span><span class="label">Em análise</span></div>
+            <div class="bar"></div>
+            <div class="step"><span class="dot">3</span><span class="label">Enviada à seguradora</span></div>
+          </div>
+
+          ${q.corretor_telefone ? `
+            <a class="quote-cta whatsapp-btn" target="_blank"
+               href="https://wa.me/55${q.corretor_telefone.replace(/\D/g,'')}?text=Ol%C3%A1%20${encodeURIComponent(q.corretor_nome)},%20gostaria%20de%20adiantar%20a%20minha%20cota%C3%A7%C3%A3o%20${encodeURIComponent(q.token)}."
+               title="Falar com ${q.corretor_nome} no WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </a>` : ""}
+        </div>
+      `;
+      ul.appendChild(li);
+    });
+
+  } catch (err) {
+    console.error("Falha ao atualizar acompanhamento:", err);
+  }
+}
+
+// primeira execução
+atualizarAcompanhamento();
+
+// repete a cada 30 segundos
+setInterval(atualizarAcompanhamento, 30000);
+
+</script>
+
+<script>
+/* ===== SV • Marcar menu ativo (super simples) ===== */
+(function () {
+  // pegue a chave informada em data-active
+  const key = (document.body.dataset.active || "").toLowerCase();
+
+  // mapeia cada chave para um PEDACINHO do href usado na sua sidebar
+  const hrefPart = {
+    dashboard: "area_cliente",
+    meus_dados: "dados_cliente",
+    cotacoes: "cotacoes_clientes",
+    apolices: "acompanhamento_ap_cliente",
+    propostas: "acompanhamento_pp_cliente",
+    sinistros: "acompanhamento_sn_cliente"
+  }[key];
+
+  // se não tiver chave válida, não faz nada
+  if (!hrefPart) return;
+
+  // procura os links da sua sidebar e marca o que contém o trecho no href
+  const links = document.querySelectorAll("#sidebar nav a, .sidebar nav a");
+  let marcado = false;
+  links.forEach(a => {
+    const href = (a.getAttribute("href") || "").toLowerCase();
+    if (!marcado && href.includes(hrefPart)) {
+      a.classList.add("active");
+      a.setAttribute("aria-current","page");
+      marcado = true;
+    }
+  });
+
+  // estilo mínimo para o ativo (usa sua paleta)
+  if (!document.getElementById("sv-active-style")) {
+    const s = document.createElement("style");
+    s.id = "sv-active-style";
+    s.textContent = `
+      .sidebar nav a.active{
+        background:linear-gradient(135deg,#2e7d32 0%,#2e7d32 60%,#10b981 100%);
+        color:#fff; border-radius:12px;
+        box-shadow:0 6px 16px rgba(46,125,50,.25);
+      }
+      .sidebar nav a.active i{ color:#fff; }
+    `;
+    document.head.appendChild(s);
+  }
+})();
+</script>
+
+<script>
+/* ============================================================
+   SV • Substituição da função showConfirmStep (SEM travar a página)
+   ============================================================ */
+function showConfirmStep(){
+  // Se "auto" estiver marcado, escolhe um corretor real a partir do DOM
+  const sel = document.querySelector('input[name="corretor_id"]:checked');
+  if (sel && sel.value === 'auto') {
+    const chosen = (function(){
+      // Mapeia todos os corretores renderizados (exceto o 'auto')
+      const radios = [...document.querySelectorAll('#brokerGrid label.broker-card input[type="radio"][name="corretor_id"]')]
+        .filter(r => r.value !== 'auto');
+
+      const items = radios.map(r => {
+        const card = r.closest('label.broker-card');
+        const carga   = Number(card.getAttribute('data-carga') || '0');
+        const online  = (card.getAttribute('data-online') || 'true') === 'true';
+        const nome    = card.getAttribute('data-nome')
+                       || card.querySelector('.broker-info strong')?.textContent?.trim()
+                       || 'Corretor';
+        const telEl   = card.querySelector('.broker-info .fa-phone')?.parentElement;
+        const telefone= telEl ? (telEl.textContent || '').replace(/\s+/g,' ').trim() : null;
+        return { id: r.value, card, carga, online, nome, telefone };
+      });
+
+      if (!items.length) return null;
+
+      // 1) preferir online
+      const base = items.some(x => x.online) ? items.filter(x => x.online) : items;
+
+      // 2) menor carga
+      const minCarga = Math.min(...base.map(b => isFinite(b.carga) ? b.carga : 0));
+      const least = base.filter(b => (isFinite(b.carga) ? b.carga : 0) === minCarga);
+
+      // 3) desempate por posição no DOM
+      return least[0] || base[0];
+    })();
+
+    if (chosen) {
+      const input = document.querySelector(`input[name="corretor_id"][value="${CSS.escape(chosen.id)}"]`);
+      if (input) {
+        input.checked = true;
+        // feedback visual simples no check do card
+        document.querySelectorAll('.broker-card .check').forEach(el => el.style.color = '#9ca3af');
+        const check = input.closest('.broker-card')?.querySelector('.check');
+        if (check) check.style.color = getComputedStyle(document.documentElement).getPropertyValue('--sv-green') || '#2e7d32';
+      }
+    }
+    // se não tiver nenhum corretor no DOM, mantém 'auto' e o backend decide
+  }
+
+  // --- Atualiza textos de confirmação (igual ao seu fluxo) ---
+  document.getElementById('confTipo').textContent = document.getElementById('modalTipo').textContent;
+  const label = document.querySelector('input[name="corretor_id"]:checked')?.closest('label.broker-card');
+  const nomeSel = label?.getAttribute('data-nome')
+                || label?.querySelector('.broker-info strong')?.textContent?.trim()
+                || 'um corretor';
+  document.getElementById('confCorretor').textContent = nomeSel;
+
+  // --- Troca para a tela de confirmação (igual ao seu fluxo) ---
+  formEl.style.display = 'none';
+  confirmBody.style.display = 'block';
+  modalFooter.innerHTML = `
+    <button class="btn secondary" type="button" id="voltarForm">Voltar</button>
+    <button class="btn primary"   type="button" id="finishBtn">Concluir Solicitação</button>
+  `;
+  document.getElementById('voltarForm').onclick = ()=>{
+    confirmBody.style.display = 'none';
+    formEl.style.display = 'block';
+    modalFooter.innerHTML = '';
+    modalFooter.appendChild(btnContinuar);
+    btnContinuar.style.display = 'inline-block';
+  };
+  document.getElementById('finishBtn').onclick = enviarSolicitacao;
+}
+</script>
+
+
+</body>
+</html>

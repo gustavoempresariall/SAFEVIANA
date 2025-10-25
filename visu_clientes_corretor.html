@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana</title>
+  <link rel="stylesheet" href="css/areacr.css" />
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+
+  <style>
+/* ===== Topbar (avatar + nome) ===== */
+.topbar .user-info,
+.topbar-right .user-info { display:flex!important; flex-direction:row!important; align-items:center!important; gap:8px; }
+.topbar .user-info .small-avatar,
+.topbar .user-info .profile-avatar {
+  width:36px;height:36px;flex:0 0 36px;border-radius:50%;overflow:hidden;background:#1e7a34;color:#fff;
+  font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;
+}
+.topbar .user-info .small-avatar img,
+.topbar .user-info .profile-avatar img { width:100%;height:100%;object-fit:cover;display:block;border-radius:50%; }
+.topbar .user-info .user-name { white-space:nowrap;line-height:1;display:inline-block;font-weight:600;color:#111827; }
+
+/* ===== Util ===== */
+.muted { color:#6b7280; font-size:.92em; }
+
+/* ===== Cabeçalho da página ===== */
+.clientes-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:8px 0 10px}
+.clientes-header h3{margin:0}
+
+/* ===== KPIs ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:10px 0 16px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.kpi-label{font-size:.9rem;color:#6b7280;margin-bottom:6px}
+.kpi-value{font-size:1.35rem;font-weight:800;color:#111827}
+
+/* ===== Filtros ===== */
+.filtros{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px; margin:8px 0 12px
+}
+.filtros-controls{display:flex; flex-wrap:wrap; gap:10px}
+.filtros input,.filtros select,.filtros button{height:36px;border:1px solid #e5e7eb;border-radius:8px;padding:0 10px;background:#fff}
+.filtros input[type="search"]{min-width:260px}
+.filtros button{background:#15803d;color:#fff;font-weight:600;cursor:pointer}
+.chk{display:inline-flex;align-items:center;gap:6px;padding:0 6px}
+
+/* ===== Tabela de clientes (container) ===== */
+.clientes-tabela{
+  overflow-x:hidden; border:1px solid #e5e7eb; border-radius:12px; background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.04);
+}
+.clientes-tabela::-webkit-scrollbar{ display:none; }
+
+.clientes-tabela table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+}
+.clientes-tabela th, .clientes-tabela td{
+  vertical-align:middle;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  padding:12px 14px;
+  border-bottom:1px solid #f1f5f9;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Zebra + hover */
+.clientes-tabela tbody tr:nth-child(odd){ background:#fcfcfd; }
+.clientes-tabela tbody tr:hover{ background:#f7fafc; }
+
+/* Cantos arredondados reais */
+.clientes-tabela thead tr:first-child th:first-child { border-top-left-radius:12px; }
+.clientes-tabela thead tr:first-child th:last-child  { border-top-right-radius:12px; }
+.clientes-tabela tbody tr:last-child td:first-child  { border-bottom-left-radius:12px; }
+.clientes-tabela tbody tr:last-child td:last-child   { border-bottom-right-radius:12px; }
+
+/* Larguras da tabela (22 + 12 + 38 + 10 + 18 = 100%) */
+.clientes-tabela th:nth-child(1), .clientes-tabela td:nth-child(1){ width:22%; } /* Nome   */
+.clientes-tabela th:nth-child(2), .clientes-tabela td:nth-child(2){ width:12%; } /* Tipo   */
+.clientes-tabela th:nth-child(3), .clientes-tabela td:nth-child(3){ width:38%; } /* Contato*/
+.clientes-tabela th:nth-child(4), .clientes-tabela td:nth-child(4){ width:10%; text-align:center; } /* Status */
+.clientes-tabela th:nth-child(5), .clientes-tabela td:nth-child(5){ width:18%; min-width:260px; } /* Ações */
+
+@media (max-width:1024px){
+  .clientes-tabela th:nth-child(3), .clientes-tabela td:nth-child(3){ width:auto; }
+  .clientes-tabela th:nth-child(5), .clientes-tabela td:nth-child(5){ min-width:220px; }
+}
+
+/* ===== Avatar ===== */
+.avatar{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9999px;background:#eaf7ef;color:#14532d;font-weight:800;margin-right:8px;border:1px solid #cce9d6}
+.nome{font-weight:600}
+
+/* ===== Contato (email + telefone + whatsapp) ===== */
+.contact{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+.contact .email{ color:#111827; }
+.contact .phone{ color:#374151; }
+.contact .sep{ color:#9ca3af; }
+
+/* WhatsApp – chip */
+.btn-whats{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:8px 14px; border-radius:9999px;
+  background:linear-gradient(180deg,#25d366 0%, #1ebe57 100%);
+  color:#fff; font-weight:700; letter-spacing:.2px;
+  text-decoration:none !important; border:1px solid #17a34a !important;
+  box-shadow:0 2px 6px rgba(37,211,102,.25), inset 0 0 0 1px rgba(255,255,255,.15);
+  transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+}
+.btn-whats:hover{ transform:translateY(-1px); box-shadow:0 6px 14px rgba(37,211,102,.30); filter:saturate(1.08); }
+.btn-whats:active{ transform:translateY(0); }
+.btn-whats:focus-visible{ outline:0; box-shadow:0 0 0 3px rgba(37,211,102,.45); }
+.btn-whats .icon-wa{ width:18px; height:18px; border-radius:50%; background:#fff; color:#25d366; display:grid; place-items:center; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); }
+.btn-whats .icon-wa svg{ width:12px; height:12px; display:block; }
+.btn-whats .wa-label{ white-space:nowrap; }
+
+/* ===== Chips de status (fallback) ===== */
+.status{display:inline-block;padding:6px 10px;border-radius:9999px;font-weight:700;line-height:1}
+.status.ativo{background:#d1fae5;color:#065f46}
+.status.pendente{background:#fde68a;color:#92400e}
+.status.inativo{background:#e5e7eb;color:#374151}
+
+/* ===== AÇÕES ===== */
+.td-actions { white-space:nowrap; }
+.actions-flex{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.actions-col{ display:flex; flex-direction:column; gap:8px; }
+.btn-editar{ background:#1d4ed8; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:600; }
+.btn-editar:hover{ background:#1e40af; }
+.btn-excluir{ background:#dc2626; color:#fff; padding:8px 12px; border-radius:8px; border:0; font-weight:600; cursor:pointer; }
+.btn-excluir:hover{ background:#b91c1c; }
+.btn-toggle{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:36px; height:36px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; color:#111827;
+  cursor:pointer; font-size:16px; line-height:1; transition:background .15s ease;
+}
+.btn-toggle:hover{ background:#f3f4f6; }
+.chev{ display:inline-block; font-size:18px; transition:transform .2s ease; }
+.btn-toggle[aria-expanded="true"] .chev{ transform:rotate(180deg); }
+
+/* ===== Bloco expansível ===== */
+tr.expand-row{ background:#f9fafb; }
+tr.expand-row td{ padding:16px 20px; border-top:0; }
+.expand-card{
+  background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+.expand-title{ font-weight:700; color:#111827; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+
+/* ===== Subtabela de apólices ===== */
+.mini-apolices{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+}
+.mini-apolices th, .mini-apolices td{
+  padding:12px 14px; vertical-align:middle; overflow-wrap:anywhere;
+  border-bottom:1px solid #f1f5f9; font-variant-numeric: tabular-nums;
+}
+.mini-apolices thead th{ background:#f8fafc; color:#0f172a; font-weight:700; }
+.mini-apolices th:nth-child(1), .mini-apolices td:nth-child(1){ width:13%; white-space:nowrap; }
+.mini-apolices th:nth-child(2), .mini-apolices td:nth-child(2){ width:27%; }
+.mini-apolices th:nth-child(3), .mini-apolices td:nth-child(3){ width:26%; }
+.mini-apolices th:nth-child(4), .mini-apolices td:nth-child(4){ width:12%; text-align:right; white-space:nowrap; }
+.mini-apolices th:nth-child(5), .mini-apolices td:nth-child(5){ width:12%; text-align:right; white-space:nowrap; }
+.mini-apolices th:nth-child(6), .mini-apolices td:nth-child(6){ width:6%;  text-align:center; white-space:nowrap; }
+.mini-apolices th:nth-child(7), .mini-apolices td:nth-child(7){ width:4%;  text-align:center; white-space:nowrap; }
+.tipo-wrap{ display:flex; flex-direction:column; gap:2px; }
+.tipo-wrap strong{ font-weight:700; white-space:nowrap; }
+
+/* ===== Botão "Adicionar Cliente" ===== */
+.btn-adicionar{
+  --btn-bg: #15803d; --btn-bg-hover: #166534; --btn-bg-active: #14532d; --btn-border: #0f3d21; --ring: rgba(34,197,94,.28);
+  display:inline-flex; align-items:center; gap:10px; padding:10px 16px; border-radius:10px; border:1px solid var(--btn-border);
+  background:var(--btn-bg); color:#fff !important; font-weight:600; line-height:1; text-decoration:none;
+  box-shadow:0 1px 2px rgba(16,24,40,.05), 0 6px 14px rgba(21,128,61,.18);
+  transition: background .18s ease, box-shadow .18s ease, transform .06s ease;
+}
+.btn-adicionar:hover{ background:var(--btn-bg-hover); transform:translateY(-1px); box-shadow:0 2px 4px rgba(16,24,40,.06), 0 10px 20px rgba(21,128,61,.22); }
+.btn-adicionar:active{ background:var(--btn-bg-active); transform:translateY(0); box-shadow:0 1px 2px rgba(16,24,40,.06), 0 6px 12px rgba(21,128,61,.18); }
+.btn-adicionar:focus-visible{ outline:0; box-shadow:0 0 0 4px var(--ring), 0 1px 2px rgba(16,24,40,.05), 0 6px 14px rgba(21,128,61,.18); }
+.btn-adicionar::before{ content:"+"; display:inline-grid; place-items:center; width:20px; height:20px; border-radius:6px; background:rgba(255,255,255,.14); font-weight:700; line-height:1; }
+
+@media (max-width:640px){
+  .clientes-header{ gap:12px; flex-wrap:wrap; }
+  .filtros{ gap:12px }
+  .btn-adicionar{ width:100%; justify-content:center; }
+}
+
+/* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+/* AJUSTE DA PAGINA COM O SEDBAR */
+
+/* ======= Alinhamento horizontal único para a página ======= */
+:root{
+  /* ajuste se quiser mais/menos largura útil */
+  --content-max: 1200px;
+}
+
+/* garanta que o main expanda e permita centralizar os filhos */
+.main-content{
+  width: 100%;
+}
+
+/* todos os blocos principais com a mesma largura e centralizados */
+.main-content > .clientes-header,
+.main-content > .kpi-grid,
+.main-content > .filtros,
+.main-content > .clientes-tabela{
+  max-width: var(--content-max);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+/* quando a sidebar fecha, não mude nada: mantém centralizado igual */
+.sidebar.collapsed ~ .main-content > .clientes-header,
+.sidebar.collapsed ~ .main-content > .kpi-grid,
+.sidebar.collapsed ~ .main-content > .filtros,
+.sidebar.collapsed ~ .main-content > .clientes-tabela{
+  max-width: var(--content-max);
+}
+
+/* só para dar o mesmo “respiro” lateral dos cards/tabela  */
+.main-content > .clientes-header,
+.main-content > .kpi-grid,
+.main-content > .filtros{
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* garanta que grids não “estourem” ao expandir */
+.kpi-grid,
+.filtros{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left"><h2>Area<span> Corretor</span></h2></div>
+      <nav>
+        <ul>
+          <li><a href="area_corretor"><span class="icon"></span> Dashboard</a></li>
+          <li><a href="visu_clientes_corretor.html" class="active"><span class="icon"></span> Clientes</a></li>
+          <li><a href="relatorio_corretor.html"><span class="icon"></span> Cotações</a></li>
+          <li><a href="apolices_corretor.html"><span class="icon"></span> Apólices</a></li>
+          <li><a href="propostas_corretor.html"><span class="icon"></span> Propostas</a></li>
+          <li><a href="sinistros_corretor.html"><span class="icon"></span> Sinistros</a></li>
+          <li><a href="calendario_corretor.html"><span class="icon"></span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+        
+          <div class="user-info" id="userInfo">
+            <div class="profile-avatar small-avatar" title="Meu Perfil">
+              {% if corretor_foto %}
+                <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+              {% elif session.get('corretor_foto') %}
+                <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+              {% else %}
+                <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+              {% endif %}
+            </div>
+            <span class="user-name">{{ corretor_nome }}</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="clientes-header">
+        <h3>Meus Clientes</h3>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-value" id="kpi-total">0</div></div>
+        <div class="kpi"><div class="kpi-label">Ativos</div><div class="kpi-value" id="kpi-ativos">0</div></div>
+        <div class="kpi"><div class="kpi-label">Inativos</div><div class="kpi-value" id="kpi-inativos">0</div></div>
+        <div class="kpi"><div class="kpi-label">Com WhatsApp</div><div class="kpi-value" id="kpi-wa">0</div></div>
+        <div class="kpi"><div class="kpi-label">Sem Contato</div><div class="kpi-value" id="kpi-semcontato">0</div></div>
+      </div>
+
+      <!-- Filtros (com botão Adicionar à direita) -->
+      <div class="filtros">
+        <div class="filtros-controls">
+          <input id="q" type="search" placeholder="Buscar nome, e-mail, telefone..." />
+          <select id="fStatus">
+            <option value="">Status</option><option>Ativo</option><option>Inativo</option><option>Pendente</option>
+          </select>
+          <select id="fTipo">
+            <option value="">Tipo</option><option>fisica</option><option>juridica</option>
+          </select>
+          <label class="chk"><input id="fWA" type="checkbox"> Com WhatsApp</label>
+          <button type="button" id="fClear">Limpar</button>
+        </div>
+
+        <a href="clientes_corretor.html" class="btn-adicionar">Adicionar Cliente</a>
+      </div>
+
+      <div class="clientes-tabela">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Contato</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if clientes %}
+            {% for cliente in clientes %}
+            <!-- linha principal -->
+            <tr id="row-{{ cliente.id }}">
+              <td>
+                {% set partes = (cliente.nome or '').split() %}
+                <span class="avatar">{{ (partes[0][0] ~ (partes|length>1 and partes[-1][0] or '') ).upper() }}</span>
+                <span class="nome">{{ cliente.nome }}</span>
+              </td>
+              <td>{{ cliente.tipo_pessoa }}</td>
+              <td>
+                <div class="contact">
+                  <span class="email">{{ cliente.email or '-' }}</span>
+                  <span class="sep">|</span>
+                  <span class="phone">{{ cliente.telefone or '-' }}</span>
+
+                  {% if cliente.telefone_wa %}
+                    <a class="btn-whats"
+                       href="https://wa.me/{{ cliente.telefone_wa }}"
+                       target="_blank" rel="noopener">
+                      <span class="icon-wa">
+                        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                          <path d="M19.1 17.6c-.3-.2-1.8-.9-2.1-1s-.5-.2-.8.2-.9 1-1.1 1.2-.4.2-.7.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.6s.2-.3.3-.5a2 2 0 0 0 .2-.4.6.6 0 0 0 0-.6c0-.2-.8-2-1.1-2.7s-.6-.6-.8-.6h-.7a1.3 1.3 0 0 0-1 .5 4 4 0 0 0-1.3 3.1A7.1 7.1 0 0 0 8 17a12.6 12.6 0 0 0 5 4 11.5 11.5 0 0 0 5.7 1.6 4.9 4.9 0 0 0 3.2-1.1 3.6 3.6 0 0 0 1.2-2.9c0-.8-.2-.9-.4-1.1z"/>
+                          <path d="M27.1 4.9A14 14 0 0 0 2.5 21.5L2 30l8.7-2.3A14 14 0 0 0 27.1 4.9zm-6.1 20.6a11.5 11.5 0 0 1-5.7-1.5A12.9 12.9 0 0 1 8 19.4a9.1 9.1 0 0 1-2.2-6.3 6.6 6.6 0 0 1 2.1-5 3.4 3.4 0 0 1 2.5-1h.2c.6 0 1.1.2 1.5.9s1.4 3.4 1.5 3.6.2.5 0 .8-.3.5-.5.7a.7.7 0 0 0-.2.5c0 .1 0 .3.1.4a9.2 9.2 0 0 0 1.3 1.9 8.1 8.1 0 0 0 2.5 2 1 1 0 0 0 .5.1.7.7 0 0 0 .6-.3l.9-1c.2-.2.4-.3.7-.2s3.3 1.6 3.6 1.7.6.3.7.5a3.4 3.4 0 0 1 0 2.1 3.4 3.4 0 0 1-1.1 1.7 5.4 5.4 0 0 1-3.6 1.1z"/>
+                        </svg>
+                      </span>
+                      <span class="wa-label">WhatsApp</span>
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                {% if (cliente.status or '').lower() == 'ativo' %}
+                  <span class="status ativo">Ativo</span>
+                {% elif (cliente.status or '').lower() == 'pendente' %}
+                  <span class="status pendente">Pendente</span>
+                {% elif (cliente.status or '').lower() == 'inativo' %}
+                  <span class="status inativo">Inativo</span>
+                {% else %}
+                  <span class="status">-</span>
+                {% endif %}
+              </td>
+
+              <!-- AÇÕES -->
+              <td class="td-actions">
+                <div class="actions-flex">
+                  <div class="actions-col">
+                    <a href="{{ url_for('editar_cliente', id=cliente.id) }}" class="btn-editar">✏️ Editar</a>
+                    <form action="{{ url_for('excluir_cliente', id=cliente.id) }}" method="post">
+                      <button type="submit" class="btn-excluir">🗑️ Excluir</button>
+                    </form>
+                  </div>
+
+                  <button class="btn-toggle"
+                          type="button"
+                          aria-expanded="false"
+                          aria-controls="exp-{{ cliente.id }}"
+                          data-target="exp-{{ cliente.id }}">
+                    <span class="chev">▾</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- linha expansível: apólices do cliente -->
+            <tr id="exp-{{ cliente.id }}" class="expand-row" style="display:none;">
+              <td colspan="5">
+                <div class="expand-card">
+                  <div class="expand-title">Apólices de {{ cliente.nome }}</div>
+
+                  {% set lista = cliente.apolices or [] %}
+                  {% if lista and lista|length > 0 %}
+                  <table class="mini-apolices">
+                    <thead>
+                      <tr>
+                        <th style="width:15%">Nº Apólice</th>
+                        <th style="width:20%">Tipo</th>
+                        <th style="width:30%">Vigência</th>
+                        <th style="width:9%">Valor</th>
+                        <th style="width:10%">Vencimento</th>
+                        <th style="width:10%">Status</th>
+                        <th style="width:9%">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for ap in lista %}
+                      <tr>
+                        <td>{{ ap.numero_apolice or '-' }}</td>
+                        <td>
+                          <div class="tipo-wrap">
+                            <div><strong>{{ ap.tipo_apolice or '-' }}</strong></div>
+                            {% if ap.detalhe_curto %}<div class="muted">{{ ap.detalhe_curto }}</div>{% endif %}
+                          </div>
+                        </td>
+                        <td>
+                          {% set di = ap.data_inicio_fmt or ap.data_inicio %}
+                          {% set df = ap.data_termino_fmt or ap.data_termino %}
+                          {{ (di or '') | replace(' ', ' às ', 1) }}
+                          {% if di or df %} — {% endif %}
+                          {{ (df or '') | replace(' ', ' às ', 1) }}
+                        </td>
+                        <td>R$ {{ "%.2f"|format(ap.valor_apolice or 0) }}</td>
+                        <td>
+                          {{ ap.primeiro_vencimento_fmt or '-' }}
+                          {% if ap.parcelas %}<span class="muted"> · {{ ap.parcelas }}x</span>{% endif %}
+                        </td>
+                        <td>
+                          {% set st = (ap.status or '') %}
+                          {% if st in ['Ativo','Ativa'] %}
+                            <span class="status ativo">Ativo</span>
+                          {% elif st == 'Pendente' %}
+                            <span class="status pendente">Pendente</span>
+                          {% else %}
+                            <span class="status inativo">{{ 'Inativo' if st in ['Cancelada','Vencida','Inativo'] else (st or '-') }}</span>
+                          {% endif %}
+                        </td>
+                        <td class="mini-actions">
+                          <a href="{{ url_for('detalhes_cliente', id=ap.id or ap.apolice_id) }}">Ver</a>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  {% else %}
+                    <div class="expand-item">Sem apólices cadastradas para este cliente.</div>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr><td colspan="5">Nenhum cliente encontrado.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.querySelector('.sidebar');
+    toggleBtn?.addEventListener('click', () => { sidebar.classList.toggle('collapsed'); });
+
+    // Expansão/colapso por cliente
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-toggle');
+      if (!btn) return;
+      const id = btn.getAttribute('data-target');
+      const row = document.getElementById(id);
+      if (!row) return;
+      const isOpen = row.style.display !== 'none';
+      row.style.display = isOpen ? 'none' : '';
+      btn.setAttribute('aria-expanded', String(!isOpen));
+    });
+
+    /* ===== KPIs ===== */
+    function recalcKPIs(){
+      const rows=[...document.querySelectorAll('tbody tr[id^="row-"]')].filter(r=>r.style.display!=='none');
+      let tot=0, at=0, ina=0, wa=0, sem=0;
+      rows.forEach(r=>{
+        if(r.querySelector('td')){
+          tot++;
+          const st = (r.querySelector('td:nth-child(4) .status')?.textContent||'').toLowerCase();
+          if(st.includes('ativo')) at++; else if(st.includes('inativo')) ina++;
+          const hasWa = !!r.querySelector('.btn-whats');
+          if(hasWa) wa++;
+          const email = (r.querySelector('.contact .email')?.textContent||'').trim();
+          const phone = (r.querySelector('.contact .phone')?.textContent||'').trim();
+          const isDash = (v)=>!v || v==='-';
+          if(isDash(email) && isDash(phone)) sem++;
+        }
+      });
+      const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+      set('kpi-total',tot); set('kpi-ativos',at); set('kpi-inativos',ina); set('kpi-wa',wa); set('kpi-semcontato',sem);
+    }
+
+    /* ===== Filtros ===== */
+    function applyClientFilters(){
+      const q=(document.getElementById('q')?.value||'').toLowerCase();
+      const st=(document.getElementById('fStatus')?.value||'').toLowerCase();
+      const tp=(document.getElementById('fTipo')?.value||'').toLowerCase();
+      const onlyWA=!!document.getElementById('fWA')?.checked;
+
+      document.querySelectorAll('tbody tr[id^="row-"]').forEach(tr=>{
+        const txt=tr.innerText.toLowerCase();
+        const okQ=!q||txt.includes(q);
+        const stTxt=(tr.querySelector('td:nth-child(4) .status')?.textContent||'').toLowerCase();
+        const okSt=!st||stTxt.includes(st);
+        const tipo=(tr.querySelector('td:nth-child(2)')?.textContent||'').toLowerCase().trim();
+        const okTp=!tp||tipo===tp;
+        const hasWa=!!tr.querySelector('.btn-whats');
+        const okWa=!onlyWA||hasWa;
+
+        const show=(okQ&&okSt&&okTp&&okWa);
+        tr.style.display= show ? '' : 'none';
+
+        // Fecha a linha expandida se estiver aberta
+        const exp = document.getElementById('exp-'+tr.id.replace('row-',''));
+        if(exp) exp.style.display = 'none';
+      });
+      recalcKPIs();
+    }
+
+    ['q','fStatus','fTipo','fWA'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){
+        el.addEventListener('input', applyClientFilters);
+        el.addEventListener('change', applyClientFilters);
+      }
+    });
+    document.getElementById('fClear')?.addEventListener('click',()=>{
+      ['q','fStatus','fTipo','fWA'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(!el) return;
+        if(el.type==='checkbox') el.checked=false; else el.value='';
+      });
+      applyClientFilters();
+    });
+
+    document.addEventListener('DOMContentLoaded', ()=>{ recalcKPIs(); });
+  </script>
+
+
+  
+</body>
+</html>

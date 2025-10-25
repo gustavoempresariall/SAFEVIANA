@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana - Calendário</title>
+  <!-- FullCalendar 6.x -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+<link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+<!-- Locale PT-BR -->
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.14/locales/pt-br.global.min.js"></script>
+
+  <link rel="stylesheet" href="css/areacr.css" />
+  <style>
+    /* Estilos específicos apenas para o calendário */
+    :root {
+      --primary: #2e7d32; /* Verde principal */
+      --primary-light: #4caf50; /* Verde claro */
+      --primary-dark: #1b5e20; /* Verde escuro */
+      --border: #e2e8f0;
+      --white: #ffffff;
+      --gray-100: #f7fafc;
+    }
+
+    .content-wrapper {
+      padding: 20px;
+    }
+
+    /* Calendar Layout */
+    .calendar-layout {
+      display: flex;
+      gap: 25px;
+      height: calc(100vh - 160px);
+    }
+
+    .calendar-container {
+      flex: 2;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .calendar-title {
+      display: flex;
+      gap: 10px;
+    }
+
+    .calendar-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .btn i {
+      margin-right: 6px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .btn-outline:hover {
+      background-color: rgba(46, 125, 50, 0.1);
+    }
+
+    /* Calendar Grid */
+    .calendar-body {
+      flex-grow: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .calendar-grid {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      height: calc(100% - 60px);
+    }
+
+    .calendar-grid th {
+      padding: 12px 5px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    .calendar-grid td {
+      padding: 5px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 13px;
+      height: 80px;
+      vertical-align: top;
+      border: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .calendar-grid td:hover {
+      background-color: var(--gray-100);
+    }
+
+    .calendar-day {
+      text-align: right;
+      padding: 2px 5px;
+      font-size: 13px;
+      position: absolute;
+      top: 2px;
+      right: 2px;
+    }
+
+    .calendar-event {
+      margin-top: 12px; /* Ajuste para evitar sobreposição com o balãozinho */
+      position: relative;
+      z-index: 2;
+    }
+
+    .calendar-event .event-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      background: #333;
+      color: #fff;
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 8px;
+      position: absolute;
+      top: 110%; /* abaixo do evento */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      white-space: normal;
+      min-width: 180px;
+      max-width: 250px;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .calendar-event:hover .event-tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .event-indicator {
+      width: 6px;
+      height: 6px;
+      background-color: var(--primary); /* Usa a cor verde definida no tema */
+      border-radius: 50%; /* Faz o balãozinho ser circular */
+      position: absolute;
+      top: 5px; /* Ajuste no posicionamento */
+      left: 5px; /* Ajuste no posicionamento */
+      z-index: 1;
+    }
+
+    .other-month {
+      background-color: var(--gray-100);
+      opacity: 0.6;
+    }
+
+    .today {
+      background-color: rgba(46, 125, 50, 0.05);
+    }
+
+    .today .calendar-day {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Appointments Sidebar */
+    .appointments-sidebar {
+      flex: 1;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .appointments-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .appointments-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .appointments-count {
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .appointments-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .appointment-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .appointment-item:hover {
+      background: #f0f0f0;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .appointment-time {
+      font-size: 13px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .appointment-time:before {
+      content: "⏰";
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .appointment-title {
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: #333;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .appointment-title:before {
+      content: "📌";
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .appointment-client {
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: #666;
+      display: flex;
+      align-items: center;
+    }
+
+    .appointment-client:before {
+      content: "👤";
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .appointment-phone {
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: #666;
+      display: flex;
+      align-items: center;
+    }
+
+    .appointment-phone:before {
+      content: "📞";
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .appointment-status {
+      font-size: 13px;
+      color: #555;
+      display: flex;
+      align-items: center;
+    }
+
+    .appointment-status:before {
+      content: "✅";
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .appointment-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .action-btn i {
+      margin-right: 6px;
+      font-size: 12px;
+    }
+
+    .edit-btn {
+      background: rgba(46, 125, 50, 0.1);
+      color: var(--primary);
+    }
+
+    .edit-btn:hover {
+      background: rgba(46, 125, 50, 0.2);
+    }
+
+    .delete-btn {
+      background: rgba(211, 47, 47, 0.1);
+      color: #d32f2f;
+    }
+
+    .delete-btn:hover {
+      background: rgba(211, 47, 47, 0.2);
+    }
+
+    .no-appointments {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--white);
+      border-radius: 8px;
+      width: 500px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(20px);
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+
+    .modal-footer {
+      padding: 15px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .calendar-layout {
+        flex-direction: column;
+        height: auto;
+      }
+      
+      .calendar-container,
+      .appointments-sidebar {
+        flex: none;
+        width: 100%;
+      }
+      
+      .appointments-sidebar {
+        margin-top: 25px;
+      }
+    }
+
+    /* Avatar + nome lado a lado no topo */
+    .topbar .user-info,
+    .topbar-right .user-info {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 8px;
+    }
+
+    /* Tamanho e alinhamento do avatar */
+    .topbar .user-info .small-avatar,
+    .topbar .user-info .profile-avatar {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #1e7a34; /* sua cor */
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Imagem do avatar */
+    .topbar .user-info .small-avatar img,
+    .topbar .user-info .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+
+    /* Nome sem quebrar linha estranha */
+    .topbar .user-info .user-name {
+      white-space: nowrap;
+      line-height: 1;
+      display: inline-block;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    /* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+/* ...seus estilos... */
+  #fullCalendar { flex: 1; min-height: 420px; }
+  /* Permite quebra de linha nos títulos dos eventos */
+  .fc-daygrid-event { white-space: normal; }
+  
+
+
+/* ===== Cartões dos eventos no mês ===== */
+/* base: remove o azul do tema e deixa borda suave */
+.fc .fc-daygrid-event {
+  border: 1px solid transparent;
+}
+
+/* ====== cores por status ====== */
+.fc .status-confirmed .fc-event-main {
+  background: #16a34a;      /* verde */
+  color: #fff;
+}
+.fc .status-confirmed { border-color: #15803d; }
+
+.fc .status-pending .fc-event-main {
+  background: #f59e0b;      /* laranja */
+  color: #1f2937;
+}
+.fc .status-pending { border-color: #d97706; }
+
+.fc .status-completed .fc-event-main {
+  background: #64748b;      /* cinza/azulado */
+  color: #fff;
+}
+.fc .status-completed { border-color: #475569; }
+
+.fc .status-canceled .fc-event-main {
+  background: #ef4444;      /* vermelho */
+  color: #fff;
+  text-decoration: line-through;
+  opacity: .85;
+}
+.fc .status-canceled { border-color: #b91c1c; }
+
+/* melhora leitura de hora+título dentro do bloco */
+.fc .fc-daygrid-event .fc-event-time,
+.fc .fc-daygrid-event .fc-event-title {
+  font-weight: 600;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+      <div class="topbar-left">
+        <h2>Area<span> Corretor</span></h2>
+      </div>
+      
+      <nav>
+        <ul>
+          <li><a href="area_corretor"><span class="icon">🏠</span> Dashboard</a></li>
+          <li><a href="visu_clientes_corretor.html"><span class="icon">👥</span> Clientes</a></li>
+          <li><a href="relatorio_corretor.html"><span class="icon">📊</span> Cotações</a></li>
+          <li><a href="apolices_corretor.html"><span class="icon">📄</span> Apólices</a></li>
+          <li><a href="propostas_corretor.html"><span class="icon">📑</span> Propostas</a></li>
+          <li><a href="sinistros_corretor.html"><span class="icon">⚠️</span> Sinistros</a></li>
+          <li><a href="calendario_corretor.html" class="active"><span class="icon">📆</span> Calendário</a></li>
+        </ul>
+      </nav>
+      
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+          
+          <div class="user-info" id="userInfo">
+  <div class="profile-avatar small-avatar" title="Meu Perfil">
+    {% if corretor_foto %}
+      <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+    {% elif session.get('corretor_foto') %}
+      <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+    {% else %}
+      <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+    {% endif %}
+  </div>
+  <span class="user-name">{{ corretor_nome }}</span>
+</div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="content-wrapper">
+        <div class="calendar-layout">
+          <!-- Calendar -->
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <div class="calendar-title">
+                <select class="form-control" id="monthSelect">
+                  <option value="0">Janeiro</option>
+                  <option value="1">Fevereiro</option>
+                  <option value="2">Março</option>
+                  <option value="3">Abril</option>
+                  <option value="4">Maio</option>
+                  <option value="5">Junho</option>
+                  <option value="6">Julho</option>
+                  <option value="7">Agosto</option>
+                  <option value="8">Setembro</option>
+                  <option value="9">Outubro</option>
+                  <option value="10">Novembro</option>
+                  <option value="11">Dezembro</option>
+                </select>
+                <select class="form-control" id="yearSelect">
+                  <!-- Filled by JS -->
+                </select>
+              </div>
+              <div class="calendar-actions">
+                <button class="btn btn-outline" id="todayBtn">Hoje</button>
+                <button class="btn btn-outline" id="prevMonthBtn">‹</button>
+                <button class="btn btn-outline" id="nextMonthBtn">›</button>
+                <button class="btn btn-primary" id="newAppointmentBtn">Novo Compromisso</button>
+              </div>
+            </div>
+            
+            <div class="calendar-body">
+              <div id="fullCalendar"></div>
+               
+            </div>
+          </div>
+          
+          <!-- Appointments Sidebar -->
+          <div class="appointments-sidebar">
+            <div class="appointments-header">
+              <div class="appointments-title">Próximos Compromissos</div>
+              <div class="appointments-count" id="appointmentsCount">0</div>
+            </div>
+            
+            <div class="appointments-list" id="appointmentsList">
+              <div class="no-appointments">
+                Nenhum compromisso agendado
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Appointment Modal -->
+  <div class="modal-overlay" id="appointmentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Novo Compromisso</h3>
+        <button class="close-btn" id="closeModalBtn">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="appointmentForm">
+          <div class="form-group">
+            <label class="form-label" for="title">Título do Compromisso</label>
+            <input type="text" class="form-control" id="title" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="client">Nome do Cliente</label>
+            <input type="text" class="form-control" id="client" required>
+          </div>
+          
+          <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="phone">Telefone</label>
+              <input type="tel" class="form-control" id="phone" required>
+            </div>
+            
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="email">E-mail</label>
+              <input type="email" class="form-control" id="email">
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="insuranceType">Tipo de Seguro</label>
+              <select class="form-control" id="insuranceType">
+                <option value="">Selecione...</option>
+                <option value="auto">Automóvel</option>
+                <option value="home">Residencial</option>
+                <option value="life">Vida</option>
+                <option value="health">Empresarial</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="status">Status</label>
+              <select class="form-control" id="status">
+                <option value="pending">Pendente</option>
+                <option value="confirmed">Confirmado</option>
+                <option value="canceled">Cancelado</option>
+                <option value="completed">Concluído</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="date">Data</label>
+              <input type="date" class="form-control" id="date" required>
+            </div>
+            
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="time">Horário</label>
+              <input type="time" class="form-control" id="time" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="notes">Observações</label>
+            <textarea class="form-control" id="notes" rows="3"></textarea>
+          </div>
+        </form>
+        <!-- Debug: mostra JSON cru da API ao editar (oculto por padrão) -->
+        <pre id="apiDebug" style="display:none;background:#f4f4f4;padding:10px;border-radius:6px;max-height:180px;overflow:auto;font-size:12px;margin-top:10px"></pre>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelBtn">Cancelar</button>
+        <button class="btn btn-primary" id="saveBtn">Salvar Compromisso</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ====== DOM ======
+  const fcEl = document.getElementById('fullCalendar');
+
+  const monthSelect = document.getElementById('monthSelect');
+  const yearSelect  = document.getElementById('yearSelect');
+  const prevBtn = document.getElementById('prevMonthBtn');
+  const nextBtn = document.getElementById('nextMonthBtn');
+  const todayBtn = document.getElementById('todayBtn');
+
+  const newBtn = document.getElementById('newAppointmentBtn');
+  const modal = document.getElementById('appointmentModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const form = document.getElementById('appointmentForm');
+
+  const appointmentsList = document.getElementById('appointmentsList');
+  const appointmentsCount = document.getElementById('appointmentsCount');
+
+  const $ = (id) => document.getElementById(id);
+
+  // ====== STATE ======
+  let fc = null;
+  let isEditing = false;
+  let currentEditId = null;
+
+  // ====== Utils ======
+  const hhmm = (v) => {
+  if (!v) return '00:00';
+  const s = String(v).trim();
+  // aceita "20:00" ou "20:00:00" ou datetimes como "2025-10-22T14:30:00" ou "22/10/2025 14:30"
+  // tenta extrair a primeira ocorrência HH:MM
+  const m1 = s.match(/(\d{2}):(\d{2})/);
+  if (m1) return `${m1[1]}:${m1[2]}`;
+  // tenta extrair hora em formato HHMM ou HMM
+  const m2 = s.match(/\b(\d{1,2})(\d{2})\b/);
+  if (m2) return `${String(m2[1]).padStart(2,'0')}:${m2[2]}`;
+  return '00:00';
+};
+
+// Converte para YYYY-MM-DD sem usar UTC (evita mudar para o dia anterior)
+function toYMD(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  // já no formato YYYY-MM-DD ou ISO
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  // formatos com barra DD/MM/YYYY
+  const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  // datetimes com espaço ou T: extrai parte de data e cria Date local
+  const isoDatePart = s.split('T')[0] || s.split(' ')[0];
+  const d = new Date(s);
+  if (!isNaN(d)) {
+    // usa componentes locais para evitar off-by-one por timezone
+    const y = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${mm}-${dd}`;
+  }
+  // fallback: se extraiu algo com formato de data
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDatePart)) return isoDatePart;
+  return '';
+}
+
+  // Extrai date (YYYY-MM-DD) e time (HH:MM) de possíveis combinações em row
+  function extractDateTime(row) {
+    const out = { date: '', time: '00:00' };
+    if (!row) return out;
+    const rawDate = row.date || row.start || row.datetime || '';
+    const rawTime = row.time || '';
+
+    // tenta a combinação explicitamente
+    const timeFromBoth = rawTime || rawDate;
+    const t = hhmm(timeFromBoth);
+    if (t) out.time = t;
+
+    const d = toYMD(rawDate) || toYMD(row.start) || '';
+    if (d) out.date = d;
+
+    // se ainda não achou a data, tenta buscar em outros campos
+    if (!out.date && row.data) out.date = toYMD(row.data);
+    if (!out.date && row.dt) out.date = toYMD(row.dt);
+
+    return out;
+  }
+
+  function mapRowToEvent(row) {
+    // /api/compromissos devolve: id,title,client,phone,email,insuranceType,status,date,time,notes
+    // Permite linhas sem date mas com start/datetime
+    if (!row) return null;
+    const { date, time } = extractDateTime(row);
+    if (!date) return null; // não sabemos em que dia colocar
+    const start = `${date}T${time}`;
+    return {
+      id: row.id,
+      title: row.title || 'Sem título',
+      start,
+      allDay: false,
+      extendedProps: {
+        client: row.client,
+        phone: row.phone,
+        email: row.email,
+        insuranceType: row.insuranceType,
+        status: row.status,
+        notes: row.notes
+      }
+    };
+  }
+
+  // ====== Calendar ======
+  function initCalendar() {
+    if (!fcEl || !window.FullCalendar) {
+      console.error('FullCalendar não encontrado. Confira os scripts no <head>.');
+      return;
+    }
+
+    fc = new FullCalendar.Calendar(fcEl, {
+      locale: 'pt-br',
+      height: '100%',
+      headerToolbar: false,
+      firstDay: 0,
+      dayMaxEventRows: 3,
+      eventDisplay: 'block',
+      eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+
+      // adiciona uma classe CSS baseada no status do evento
+eventClassNames: (arg) => {
+  const st = (arg.event.extendedProps?.status || '').toLowerCase();
+  return st ? [`status-${st}`] : [];
+},
+
+// (opcional) deixa o evento como bloco para o fundo colorido pegar melhor
+eventDisplay: 'block',
+
+
+      // Carrega TUDO de /api/compromissos e o FullCalendar mostra o que cabe no mês atual
+      events: async (_info, success, failure) => {
+        try {
+          const resp = await fetch('/api/compromissos');
+          if (!resp.ok) throw new Error(await resp.text());
+          const rows = await resp.json();
+          const events = (rows || []).map(mapRowToEvent).filter(Boolean);
+          success(events);
+        } catch (err) {
+          console.error('Erro carregando /api/compromissos:', err);
+          failure(err);
+        }
+      },
+
+      dateClick: (info) => openModalWithDate(new Date(info.dateStr)),
+      eventClick: (info) => info.event && editAppointment(info.event),
+
+      // Garante título + hora simples e quebra de linha permitida pelo seu CSS
+      eventContent: (arg) => {
+        const timeText = arg.timeText ? arg.timeText + ' ' : '';
+        return { html: `<div class="fc-event-title">${timeText}${arg.event.title}</div>` };
+      }
+    });
+
+    fc.render();
+    syncUIFromCalendar();
+  }
+
+  // ====== Próximos Compromissos (NÃO mexe na rota) ======
+  async function loadUpcoming() {
+    try {
+      const r = await fetch('/api/compromissos/proximos');
+      if (!r.ok) throw new Error(await r.text());
+      const list = await r.json();
+      renderUpcoming(list);
+    } catch (e) {
+      console.error('Erro ao buscar próximos:', e);
+      renderUpcoming([]);
+    }
+  }
+
+  function renderUpcoming(list) {
+    if (!appointmentsList || !appointmentsCount) return;
+    appointmentsList.innerHTML = '';
+    if (!list || list.length === 0) {
+      appointmentsList.innerHTML = '<div class="no-appointments">Nenhum compromisso agendado</div>';
+      appointmentsCount.textContent = '0';
+      return;
+    }
+
+    list.forEach(appt => {
+      const phone = appt.phone || appt.telefone || 'Sem telefone';
+      const div = document.createElement('div');
+      div.className = 'appointment-item';
+      div.innerHTML = `
+        <div class="appointment-time">${(appt.formatted_date || appt.date || '').toString()} às ${hhmm(appt.time)}</div>
+        <div class="appointment-title">${appt.title || 'Sem título'}</div>
+        <div class="appointment-client">${appt.client || 'Sem cliente'}</div>
+        <div class="appointment-phone">${phone}</div>
+        <div class="appointment-status">${appt.status || 'Sem status'}</div>
+        <div class="appointment-actions">
+          <button class="action-btn edit-btn" data-id="${appt.id}">✏️ Editar</button>
+          <button class="action-btn delete-btn" data-id="${appt.id}">🗑️ Excluir</button>
+        </div>`;
+      appointmentsList.appendChild(div);
+    });
+    appointmentsCount.textContent = String(list.length);
+
+    appointmentsList.querySelectorAll('.edit-btn').forEach(b => {
+  b.onclick = (e) => {
+    const id = String(e.currentTarget.dataset.id);
+
+    // encontra o item correspondente que foi renderizado na lista
+    const item = (list || []).find(x => String(x.id) === id) || {};
+
+    // normaliza data (pode vir como 'formatted_date' DD/MM/YYYY) e hora
+    const dYMD = normalizeDateForInput(item.formatted_date || item.date);
+    const tHM  = normalizeTimeForInput(item.time);
+
+    // monta um "evento fake" no formato que o calendário usa
+    const fakeEvent = {
+      id,
+      title: item.title || '',
+      start: (dYMD && tHM) ? new Date(`${dYMD}T${tHM}:00`) : null,
+      extendedProps: {
+        client: item.client || '',
+        phone:  item.phone || item.telefone || '',
+        email:  item.email || '',
+        insuranceType: item.insuranceType || '',
+        status: (item.status || '').toLowerCase(),
+        notes:  item.notes || ''
+      }
+    };
+
+    // chama a MESMA função de editar (a sua já aceita objeto ou id)
+    editAppointment(fakeEvent);
+  };
+});
+
+    appointmentsList.querySelectorAll('.delete-btn').forEach(b => b.onclick = e => deleteAppointment(e.currentTarget.dataset.id));
+
+    
+  }
+
+  // ====== Modal / CRUD ======
+  function openModal() {
+    isEditing = false; currentEditId = null; form.reset();
+    modalTitle.textContent = 'Novo Compromisso';
+    saveBtn.textContent = 'Salvar Compromisso';
+    // usa data/hora local para evitar problemas de timezone ao usar toISOString()
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const nextHour = new Date(now.getTime() + 60*60*1000);
+    const hh = String(nextHour.getHours()).padStart(2,'0');
+    $('date').value = localDate;
+    $('time').value = `${hh}:00`;
+    // esconder debug (caso estivesse visível)
+    const dbg = document.getElementById('apiDebug'); if (dbg) { dbg.style.display = 'none'; dbg.textContent = ''; }
+    modal.classList.add('active'); document.body.style.overflow = 'hidden';
+  }
+
+  function openModalWithDate(d) {
+    isEditing = false; currentEditId = null; form.reset();
+    modalTitle.textContent = 'Novo Compromisso';
+    saveBtn.textContent = 'Salvar Compromisso';
+    // preenche com data local do objeto Date fornecido
+    const localDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    $('date').value = localDate;
+    $('time').value = '09:00';
+    const dbg = document.getElementById('apiDebug'); if (dbg) { dbg.style.display = 'none'; dbg.textContent = ''; }
+    modal.classList.add('active'); document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    // limpar debug ao fechar
+    const dbg = document.getElementById('apiDebug'); if (dbg) { dbg.style.display = 'none'; dbg.textContent = ''; }
+    modal.classList.remove('active'); document.body.style.overflow = '';
+  }
+
+  async function editAppointment(evOrId) {
+  // aceita objeto do FC ou id
+  const isEventObj = evOrId && typeof evOrId === 'object' && 'id' in evOrId;
+  const ev = isEventObj ? evOrId : null;
+  const id = isEventObj ? ev.id : evOrId;
+
+  let a = {};
+  try {
+    const r = await fetch(`/api/compromissos/${id}`);
+    if (!r.ok) throw new Error(await r.text());
+    a = await r.json(); // esperado: { date: "YYYY-MM-DD", time: "HH:MM", ... }
+  } catch (e) {
+    console.warn('Falha no GET, vou usar os dados do evento do calendário como fallback.', e);
+  }
+
+  // 1) Formatos exatos para <input type="date"> e <input type="time">
+  const dateApi = normalizeDateForInput(a.date);
+  const timeApi = normalizeTimeForInput(a.time); 
+
+  // 2) Fallback a partir do evento já renderizado no FullCalendar
+  let dateEv = '';
+  let timeEv = '';
+  if (ev && ev.start instanceof Date) {
+    const d = ev.start; // Date local
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    dateEv = `${yyyy}-${mm}-${dd}`;
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    timeEv = `${hh}:${mi}`;
+  }
+
+  isEditing = true;
+  currentEditId = id;
+  modalTitle.textContent = 'Editar Compromisso';
+  saveBtn.textContent = 'Atualizar Compromisso';
+
+  $('title').value         = a.title ?? ev?.title ?? '';
+  $('client').value        = a.client ?? ev?.extendedProps?.client ?? '';
+  $('phone').value         = a.phone  ?? ev?.extendedProps?.phone  ?? '';
+  $('email').value         = a.email  ?? ev?.extendedProps?.email  ?? '';
+  $('insuranceType').value = a.insuranceType ?? ev?.extendedProps?.insuranceType ?? '';
+  $('status').value        = (a.status ?? ev?.extendedProps?.status ?? 'pending').toLowerCase();
+
+  // 👇 aqui está o pulo do gato
+  $('date').value = dateApi || dateEv || '';
+  $('time').value = timeApi || timeEv || '00:00';
+
+  $('notes').value = a.notes ?? ev?.extendedProps?.notes ?? '';
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+
+  async function deleteAppointment(id) {
+    if (!confirm('Tem certeza que deseja excluir este compromisso?')) return;
+    try {
+      const r = await fetch(`/api/compromissos/${id}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error(await r.text());
+      fc && fc.refetchEvents();
+      await loadUpcoming();
+      alert('Compromisso excluído com sucesso!');
+    } catch (e) {
+      console.error('Erro ao excluir:', e);
+      alert('Erro ao excluir compromisso.');
+    }
+  }
+
+  async function saveAppointment() {
+    const payload = {
+      title:  $('title').value.trim(),
+      client: $('client').value.trim(),
+      phone:  $('phone').value.trim(),
+      email:  $('email').value.trim(),
+      insuranceType: $('insuranceType').value,
+      status: $('status').value,
+      date:   $('date').value,  // YYYY-MM-DD
+      time:   $('time').value,  // HH:MM
+      notes:  $('notes').value.trim()
+    };
+    if (!payload.title || !payload.client || !payload.phone || !payload.date || !payload.time) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    try {
+      const method = (isEditing && currentEditId) ? 'PUT' : 'POST';
+      const url    = (isEditing && currentEditId) ? `/api/compromissos/${currentEditId}` : '/api/compromissos';
+      const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (!r.ok) throw new Error(await r.text());
+      fc && fc.refetchEvents();
+      await loadUpcoming();
+      closeModal();
+      alert(`Compromisso ${isEditing ? 'atualizado' : 'agendado'} com sucesso!`);
+    } catch (e) {
+      console.error('Erro ao salvar:', e);
+      alert('Erro ao salvar.');
+    }
+  }
+
+  // ====== Navegação / cabeçalho externo ======
+  function fillYearMonthSelects() {
+    if (!yearSelect || !monthSelect) return;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    yearSelect.innerHTML = '';
+    for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+    yearSelect.value = currentYear;
+    monthSelect.value = now.getMonth();
+  }
+
+  function syncUIFromCalendar(){
+    if (!fc || !monthSelect || !yearSelect) return;
+    const d = fc.getDate();
+    monthSelect.value = d.getMonth();
+    yearSelect.value = d.getFullYear();
+  }
+  function gotoYM(){
+    if (!fc) return;
+    const y = parseInt(yearSelect.value,10);
+    const m = parseInt(monthSelect.value,10);
+    fc.gotoDate(new Date(y, m, 1));
+  }
+  function prev(){ fc && fc.prev();  syncUIFromCalendar(); }
+  function next(){ fc && fc.next();  syncUIFromCalendar(); }
+  function today(){ fc && fc.today(); syncUIFromCalendar(); }
+
+  // ====== Bindings ======
+  newBtn && (newBtn.onclick = openModal);
+  cancelBtn && (cancelBtn.onclick = closeModal);
+  closeModalBtn && (closeModalBtn.onclick = closeModal);
+  saveBtn && (saveBtn.onclick = saveAppointment);
+
+  monthSelect && (monthSelect.onchange = gotoYM);
+  yearSelect  && (yearSelect.onchange  = gotoYM);
+  prevBtn && (prevBtn.onclick = prev);
+  nextBtn && (nextBtn.onclick = next);
+  todayBtn && (todayBtn.onclick = today);
+
+  // ====== Start ======
+  fillYearMonthSelects();
+  initCalendar();
+  loadUpcoming();
+});
+
+// ---------- Sidebar toggle ----------
+  const toggleBtn = document.getElementById('toggleSidebar');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('collapsed');
+  });
+
+
+    // ---- helpers seguras p/ os inputs ----
+function normalizeDateForInput(s) {
+  if (!s) return '';
+  const str = String(s).trim();
+  // DD/MM/YYYY -> YYYY-MM-DD
+  const mBR = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (mBR) return `${mBR[3]}-${mBR[2]}-${mBR[1]}`;
+  // YYYY-MM-DD(THH:MM:SS...) -> YYYY-MM-DD
+  const mISO = str.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (mISO) return mISO[1];
+  // última cartada: tenta construir Date local
+  const d = new Date(str);
+  return isNaN(d) ? '' :
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function normalizeTimeForInput(s) {
+  if (!s) return '';
+  const str = String(s).trim();
+  const m = str.match(/(\d{2}):(\d{2})/);
+  return m ? `${m[1]}:${m[2]}` : '';
+}
+
+</script>
+
+</body>
+</html>

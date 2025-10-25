@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeViana – Nova Apólice</title>
+  <link rel="stylesheet" href="{{ url_for('serve_css', filename='apolices_corretor.css') }}" />
+  <link rel="website icon" type="png" href="imagens/icones/iconecabc.png">
+  <style>
+  /* ===== Topbar: avatar + nome (igual) ===== */
+  .topbar .user-info,.topbar-right .user-info{display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px}
+  .topbar .user-info .small-avatar,.topbar .user-info .profile-avatar{
+    width:36px;height:36px;flex:0 0 36px;border-radius:50%;overflow:hidden;background:#1e7a34;color:#fff;
+    font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center
+  }
+  .topbar .user-info img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+  .topbar .user-info .user-name{white-space:nowrap;line-height:1;display:inline-block;font-weight:600;color:#111827}
+
+  /* ===== Card do formulário ===== */
+  .content-section{
+    background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px;box-shadow:0 6px 20px rgba(0,0,0,.06);
+    overflow:hidden; /* evita “vazar” borda quando algo ficar grande */
+  }
+  .content-section h2{margin:0 0 18px;color:#18763e;font-weight:800;letter-spacing:.2px}
+
+  /* ===== Grid mais compacto (cabe no card) =====
+     180 + 280 + 180 + 280 + gaps => não estoura em telas comuns   */
+  .form-apolice{
+    display:grid;
+    grid-template-columns: 180px minmax(260px,1fr) 180px minmax(260px,1fr);
+    column-gap:22px; row-gap:14px; align-items:center;
+  }
+  .form-apolice h3.section-title{grid-column:1 / -1;margin:12px 0 4px;color:#0f172a;font-size:1rem;font-weight:800}
+  .form-apolice .divider{grid-column:1 / -1;height:1px;background:#e5e7eb;margin:4px 0 10px;border-radius:9999px}
+
+  /* Labels à direita para alinhar com campos */
+  .form-apolice label{justify-self:end;color:#374151;font-weight:600;white-space:nowrap}
+
+  /* Campos (impede overflow) */
+  .form-apolice input,
+  .form-apolice select,
+  .form-apolice textarea{
+    width:100%;max-width:100%;min-width:0; /* <- chave pra não estourar coluna */
+    padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#111827;
+    font-variant-numeric:tabular-nums;transition:border-color .12s ease,box-shadow .12s ease,background .12s ease;
+    box-sizing:border-box
+  }
+  .form-apolice input::placeholder,.form-apolice textarea::placeholder{color:#9ca3af}
+  .form-apolice input:focus,.form-apolice select:focus,.form-apolice textarea:focus{
+    outline:0;border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25);background:#fcfffd
+  }
+
+  /* Date/Datetime com largura mínima realista mas segura */
+  .form-apolice input[type="date"],
+  .form-apolice input[type="datetime-local"]{min-width:260px}
+
+  /* Itens que ocupam linha toda quando preciso */
+  .full{grid-column:2 / 5}
+  .full-bleed{grid-column:1 / -1}
+
+  /* Dicas: ficam abaixo do(s) campo(s), sem quebrar o grid */
+  .form-apolice .hint{
+    grid-column:2 / -1;color:#6b7280;font-size:.9rem;margin:4px 0 10px;display:block
+  }
+
+  /* Sub-grid para AUTO */
+  #campos_auto .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  #campos_auto .grid .full{grid-column:1 / -1}
+
+  /* ===== Ações ===== */
+  .form-actions{grid-column:1 / -1;display:flex;justify-content:space-between;gap:12px;margin-top:10px}
+  .btn-salvar{
+    padding:12px 20px;border-radius:10px;border:1px solid #14532d;
+    background:linear-gradient(180deg,#1f8e49,#187d40); /* verde mais escuro */
+    color:#fff;font-weight:800;letter-spacing:.2px;cursor:pointer;
+    transition:transform .08s ease,box-shadow .15s ease,filter .15s ease;
+    box-shadow:0 6px 14px rgba(20,83,45,.24),inset 0 0 0 1px rgba(255,255,255,.16)
+  }
+  .btn-salvar:hover{filter:saturate(1.03);box-shadow:0 8px 18px rgba(20,83,45,.28);transform:translateY(-1px)}
+  .btn-salvar:active{transform:translateY(0)}
+  .btn-cancelar{
+    display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:10px;background:#f3f4f6;color:#374151;text-decoration:none;
+    border:1px solid #e5e7eb;font-weight:700;transition:background .15s ease,color .15s ease,box-shadow .15s ease
+  }
+  .btn-cancelar:hover{background:#e5e7eb;color:#111827;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+
+  /* ===== Responsivo ===== */
+  @media (max-width:1200px){
+    /* dá mais respiro antes de cair pra 1 coluna */
+    .form-apolice{grid-template-columns: 150px minmax(220px,1fr) 150px minmax(220px,1fr)}
+    .form-apolice input[type="date"],
+    .form-apolice input[type="datetime-local"]{min-width:220px}
+  }
+  @media (max-width:980px){
+    .form-apolice{grid-template-columns:1fr;row-gap:10px}
+    .form-apolice label{justify-self:start}
+    .full,.full-bleed,.form-actions{grid-column:1 / -1}
+    #campos_auto .grid{grid-template-columns:1fr}
+    .form-apolice input[type="date"],
+    .form-apolice input[type="datetime-local"]{min-width:0}
+    .form-apolice .hint{grid-column:1 / -1}
+  }
+
+  /* ====== Correção de layout: Observações ====== */
+/* rótulo vai para a 1ª coluna do grid e fica alinhado ao texto */
+.form-apolice label[for="observacoes"]{
+  grid-column: 1 / 2;
+  justify-self: end;
+  align-self: start;
+  margin-top: 6px;
+}
+
+/* textarea ocupa do campo da 2ª coluna até a última (sem vazar) */
+#observacoes{
+  grid-column: 2 / 5;
+  min-height: 120px;
+  resize: vertical;
+  max-width: 100%;
+  min-width: 0; /* importante pra não estourar a célula */
+}
+
+/* no mobile vira largura total bonitinho */
+@media (max-width: 980px){
+  .form-apolice label[for="observacoes"]{
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 0;
+  }
+  #observacoes{
+    grid-column: 1 / -1;
+  }
+}
+
+/* === Compactar o card (cole no FINAL do <style>) ======================= */
+:root{
+  /* ajuste aqui conforme seu gosto */
+  --card-max: 1080px;      /* largura máxima do card (ex.: 1040, 1080, 960) */
+  --card-pad: 20px;        /* padding interno do card */
+  --grid-label: 160px;     /* largura da coluna das labels */
+  --grid-field-min: 240px; /* mínimo da coluna dos campos */
+  --grid-gap-x: 18px;      /* espaço horizontal entre colunas */
+  --grid-gap-y: 12px;      /* espaço vertical entre linhas */
+}
+
+/* limita e centraliza o card */
+.content-section{
+  max-width: var(--card-max);
+  margin-inline: auto;            /* centraliza */
+  padding: var(--card-pad);
+  border-radius: 12px;            /* levemente menor */
+}
+
+/* deixa o grid um pouco mais compacto */
+.form-apolice{
+  grid-template-columns:
+    var(--grid-label) minmax(var(--grid-field-min),1fr)
+    var(--grid-label) minmax(var(--grid-field-min),1fr);
+  column-gap: var(--grid-gap-x);
+  row-gap: var(--grid-gap-y);
+}
+
+/* mantêm o comportamento mobile igual */
+@media (max-width:980px){
+  .content-section{ max-width: 100%; padding: 18px; }
+}
+
+
+/* ===== ÍCONES FINOS NA SIDEBAR (sem alterar HTML) ===== */
+.sidebar nav ul{margin:0;padding:0;list-style:none}
+.sidebar nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+
+.sidebar nav .icon{
+  width:22px;height:22px;flex:0 0 22px;display:inline-block;
+  font-size:0; /* oculta o emoji */
+  position:relative;
+}
+.sidebar nav .icon::before{
+  content:"";display:block;width:22px;height:22px;
+  background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+}
+
+/* 1) Dashboard (casa) */
+.sidebar nav li:nth-child(1) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5L12 3l9 7.5'/><path d='M5 22h14a1 1 0 0 0 1-1V10.5L12 4 4 10.5V21a1 1 0 0 0 1 1z'/></svg>");
+}
+
+/* 2) Clientes (duas pessoas) */
+.sidebar nav li:nth-child(2) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='3'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>");
+}
+
+/* 3) Cotações/Relatórios (linha subindo) */
+.sidebar nav li:nth-child(3) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 9 11 1 19'/><polyline points='17 6 23 6 23 12'/></svg>");
+}
+
+/* 4) Apólices (arquivo com dobra) */
+.sidebar nav li:nth-child(4) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='9' y1='13' x2='15' y2='13'/><line x1='9' y1='17' x2='13' y2='17'/></svg>");
+}
+
+/* 5) Propostas (lista/documento) */
+.sidebar nav li:nth-child(5) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='14' height='20' rx='2'/><line x1='7' y1='8' x2='13' y2='8'/><line x1='7' y1='12' x2='13' y2='12'/><line x1='7' y1='16' x2='11' y2='16'/></svg>");
+}
+
+/* 6) Sinistros (triângulo de alerta) */
+.sidebar nav li:nth-child(6) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>");
+}
+
+/* 7) Calendário */
+.sidebar nav li:nth-child(7) .icon::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+}
+
+/* Hover/ativo (opcional) */
+.sidebar nav a:hover{opacity:.95}
+.sidebar nav a.active{opacity:.9}
+
+/* Deixa o título e ícone lado a lado */
+.topbar-left h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Insere o ícone Apartment (Material Symbols Outlined) */
+.topbar-left h2::before {
+  font-family: 'Material Symbols Outlined';
+  content: "apartment";           /* <- Ícone Apartment */
+  font-size: 26px;
+  font-weight: normal;
+  line-height: 1;
+  color: #fff;                    /* branco */
+  display: inline-block;
+}
+
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <aside class="sidebar">
+      <div class="topbar-left"><h2>Area<span> Corretor</span></h2></div>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('area_corretor') }}"><span class="icon"></span> Dashboard</a></li>
+          <li><a href="{{ url_for('visualizar_clientes') }}"><span class="icon"></span> Clientes</a></li>
+          <li><a href="{{ url_for('relatorio') }}"><span class="icon"></span> Cotações</a></li>
+          <li><a href="{{ url_for('apolices') }}"><span class="icon"></span> Apólices</a></li>
+          <li><a href="{{ url_for('propostas') }}"><span class="icon"></span> Propostas</a></li>
+          <li><a href="{{ url_for('sinistros') }}"><span class="icon"></span> Sinistros</a></li>
+          <li><a href="{{ url_for('calendario') }}"><span class="icon"></span> Calendário</a></li>
+        </ul>
+      </nav>
+      <div class="bottom-section">
+  <p class="admin-title">ADMINISTRAÇÃO</p>
+  <ul>
+    <li>
+      <a href="https://wa.me/5518988076390?text=Olá%20SafeViana,%20preciso%20de%20suporte."
+         target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+        <span class="icon">❓Suporte</span>
+      </a>
+    </li>
+  </ul>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="toggleSidebar" class="hamburger">☰</button>
+        <h2>Safe<span>Viana</span></h2>
+        <div class="topbar-right">
+
+          <div class="user-info" id="userInfo">
+            <div class="profile-avatar small-avatar" title="Meu Perfil">
+              {% if corretor_foto %}
+                <img src="{{ url_for('static', filename=corretor_foto|replace('static/','')) }}" alt="Foto de Perfil">
+              {% elif session.get('corretor_foto') %}
+                <img src="{{ url_for('static', filename=session.get('corretor_foto')|replace('static/','')) }}" alt="Foto de Perfil">
+              {% else %}
+                <span class="avatar-initials">{{ (corretor_nome or '')[:2].upper() }}</span>
+              {% endif %}
+            </div>
+            <span class="user-name">{{ corretor_nome }}</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="content-section">
+        <h2>Nova Apólice</h2>
+
+        <form action="{{ url_for('salvar_apolice') }}" method="POST" class="form-apolice" id="formApolice">
+          <h3 class="section-title">Cliente & Identificação</h3>
+          <div class="divider"></div>
+
+          <label for="cliente_id">Cliente:</label>
+          <select id="cliente_id" name="cliente_id" required>
+            <option value="" disabled selected>Selecione o Cliente</option>
+            {% for cliente in clientes %}
+              <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+            {% endfor %}
+          </select>
+
+          <label for="numero_apolice">Nº da Apólice:</label>
+          <input type="text" id="numero_apolice" name="numero_apolice" maxlength="50" placeholder="Ex: 123456-2025">
+
+          <label for="numero_proposta">Nº da Proposta:</label>
+          <input type="text" id="numero_proposta" name="numero_proposta" maxlength="50" placeholder="Ex: PROP-2025-001" class="full">
+
+          <label for="tipo_apolice">Tipo de Apólice:</label>
+          <select id="tipo_apolice" name="tipo_apolice" required class="full">
+            <option value="" disabled selected>Selecione...</option>
+            <option value="Auto">Auto</option>
+            <option value="Residencial">Residencial</option>
+            <option value="Empresarial">Empresarial</option>
+            <option value="Vida">Vida</option>
+          </select>
+
+          <label for="seguradora">Seguradora:</label>
+<select id="seguradora" name="seguradora" required class="full">
+  <option value="" disabled selected>Selecione a Seguradora</option>
+  {% for seg in seguradoras %}
+    <option value="{{ seg.nome }}">{{ seg.nome }}</option>
+  {% endfor %}
+</select>
+<span class="hint">Selecione a seguradora responsável pela apólice.</span>
+
+
+          <div id="campos_auto" class="full-bleed" style="display:none; margin-top:6px;">
+            <h3 class="section-title">Dados do Veículo</h3>
+            <div class="divider"></div>
+
+            <div class="grid">
+              <div class="full">
+                <label for="veiculo">Veículo (modelo/nome):</label>
+                <input type="text" id="veiculo" name="veiculo" placeholder="Ex: Onix 1.0 Turbo Premier" />
+              </div>
+
+              <div>
+                <label for="placa">Placa:</label>
+                <input type="text" id="placa" name="placa" placeholder="ABC-1D23 ou ABC-1234" maxlength="8">
+              </div>
+
+              <div>
+                <label for="chassi">Chassi:</label>
+                <input type="text" id="chassi" name="chassi" placeholder="17 caracteres" maxlength="17">
+              </div>
+
+              <div>
+                <label for="renavam">Renavam:</label>
+                <input type="text" id="renavam" name="renavam" placeholder="11 dígitos" maxlength="11" inputmode="numeric">
+              </div>
+
+              <div>
+                <label for="cor_veiculo">Cor do Veículo:</label>
+                <input type="text" id="cor_veiculo" name="cor_veiculo" placeholder="Ex: Preto">
+              </div>
+
+              <div>
+                <label for="ano_modelo">Ano/Modelo:</label>
+                <input type="text" id="ano_modelo" name="ano_modelo" placeholder="Ex: 2021/2022" maxlength="9">
+              </div>
+            </div>
+          </div>
+
+          <h3 class="section-title">Vigência & Valores</h3>
+          <div class="divider"></div>
+
+          <label for="valor">Valor da Apólice (R$):</label>
+          <input type="text" id="valor" name="valor" placeholder="Ex: 1.500,00" inputmode="decimal">
+
+          <label for="data_inicio">Horário de Início:</label>
+          <input type="datetime-local" id="data_inicio" name="data_inicio" required>
+          <span class="hint">Escolha a data e a hora em que a apólice começa a valer.</span>
+
+          <label for="data_fim">Válido até:</label>
+          <input type="datetime-local" id="data_fim" name="data_fim" required>
+          <span class="hint">Data e hora de término da vigência.</span>
+
+          <h3 class="section-title">Financeiro</h3>
+          <div class="divider"></div>
+
+          <label for="primeiro_vencimento">1º Vencimento:</label>
+          <input type="date" id="primeiro_vencimento" name="primeiro_vencimento">
+
+          <label for="parcelas">Parcelas:</label>
+          <input type="number" id="parcelas" name="parcelas" min="1" step="1" placeholder="Ex: 12">
+
+          <label for="forma_pagamento">Forma de Pagamento:</label>
+          <select id="forma_pagamento" name="forma_pagamento" required>
+            <option value="" disabled selected>Selecione...</option>
+            {% for fp in (formas_pagamento or ['Boleto','CartaoCredito','Pix','DebitoConta','Transferencia','Dinheiro']) %}
+              <option value="{{ fp }}">{{ fp }}</option>
+            {% endfor %}
+          </select>
+          <span class="hint">Padrão sugerido: Boleto.</span>
+
+          <h3 class="section-title">Status & Observações</h3>
+          <div class="divider"></div>
+
+          <label for="status">Status:</label>
+          <select id="status" name="status" required>
+            <option value="" disabled selected>Selecione...</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+
+          <label for="observacoes" class="full-bleed">Observações:</label>
+          <textarea id="observacoes" name="observacoes" rows="3" class="full-bleed" placeholder="Opcional: anotações gerais da apólice"></textarea>
+
+          <div class="form-actions">
+            <a href="{{ url_for('apolices') }}" class="btn-cancelar">Cancelar</a>
+            <button type="submit" class="btn-salvar">Salvar Apólice</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ===== Helpers ===== */
+    const onlyDigits = (v) => (v || '').replace(/\D+/g, '');
+
+    // BRL: "1234,56" com pontos de milhar
+    function formatBRL(v){
+      const d = onlyDigits(v);
+      if(!d) return '';
+      const int = d.slice(0, d.length - 2) || '0';
+      const cents = d.slice(-2).padStart(2,'0');
+      const intFmt = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return intFmt + ',' + cents;
+    }
+    // normaliza BRL para ponto decimal antes de enviar
+    function brlToFloatString(v){
+      if(!v) return '';
+      return v.replace(/\./g,'').replace(',','.');
+    }
+
+    // Placa: upper + permite ABC-1234 ou ABC1D23
+    function formatPlaca(v){
+      const up = (v || '').toUpperCase().replace(/[^A-Z0-9-]/g,'');
+      // mantém hífen se já existir; só limita tamanho
+      return up.slice(0,8);
+    }
+    // Chassi: 17 chars alfanum (sem I/O/Q na prática – mas vamos só upper/limite)
+    function formatChassi(v){
+      return (v || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,17);
+    }
+    // Renavam: 11 dígitos
+    function formatRenavam(v){
+      return onlyDigits(v).slice(0,11);
+    }
+    // Ano/Modelo: ####/####
+    function formatAnoModelo(v){
+      const d = onlyDigits(v).slice(0,8);
+      if(d.length <= 4) return d;
+      return d.slice(0,4) + '/' + d.slice(4);
+    }
+
+    // ===== Comportamentos =====
+    const tipoApoliceSelect = document.getElementById('tipo_apolice');
+    const camposAuto = document.getElementById('campos_auto');
+    const autoIds = ['veiculo','placa','chassi','renavam','cor_veiculo','ano_modelo'];
+    const autoFields = autoIds.map(id => document.getElementById(id));
+
+    function toggleAutoFields(){
+      const isAuto = tipoApoliceSelect.value === 'Auto';
+      camposAuto.style.display = isAuto ? 'block' : 'none';
+      autoFields.forEach(el => { if(!el) return; el.disabled = !isAuto; if(!isAuto) el.value = ''; });
+    }
+    tipoApoliceSelect.addEventListener('change', toggleAutoFields);
+    toggleAutoFields();
+
+    // Máscaras
+    const $valor = document.getElementById('valor');
+    const $placa = document.getElementById('placa');
+    const $chassi = document.getElementById('chassi');
+    const $renavam = document.getElementById('renavam');
+    const $anoModelo = document.getElementById('ano_modelo');
+
+    if($valor){
+      // inicia com formatação se vier pré-preenchido
+      $valor.value = formatBRL($valor.value);
+      $valor.addEventListener('input', e => e.target.value = formatBRL(e.target.value));
+    }
+    if($placa){ $placa.addEventListener('input', e => e.target.value = formatPlaca(e.target.value)); }
+    if($chassi){ $chassi.addEventListener('input', e => e.target.value = formatChassi(e.target.value)); }
+    if($renavam){ $renavam.addEventListener('input', e => e.target.value = formatRenavam(e.target.value)); }
+    if($anoModelo){
+      $anoModelo.value = formatAnoModelo($anoModelo.value);
+      $anoModelo.addEventListener('input', e => e.target.value = formatAnoModelo(e.target.value));
+    }
+
+    // Normaliza valor (BRL -> decimal) antes de enviar ao backend
+    document.getElementById('formApolice').addEventListener('submit', () => {
+      if($valor){ $valor.value = brlToFloatString($valor.value); }
+    });
+
+    // Sidebar
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('collapsed');
+    });
+  </script>
+</body>
+</html>
